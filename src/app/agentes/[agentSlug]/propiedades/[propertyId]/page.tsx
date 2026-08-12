@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MapPin, User, BedDouble, Bath, Ruler } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -158,14 +159,15 @@ export default async function PropertyDetailPage({
             {property.description}
           </p>
 
-          <div className="mt-4 flex items-center justify-center gap-2 border-t border-slate-100 pt-4 sm:justify-start">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-              <User size={16} />
+          <div className="mt-4 flex flex-col items-center gap-2 border-t border-slate-100 pt-4">
+            <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
+              {agentProfile?.profiles?.avatar_url ? (
+                <Image src={agentProfile.profiles.avatar_url} alt={agentName} fill className="object-cover" sizes="56px" />
+              ) : (
+                <User size={22} />
+              )}
             </span>
-            <div>
-              <p className="font-display text-sm font-medium text-prussian">{agentName}</p>
-              {agentProfile?.city && <p className="text-xs text-slate-500">{agentProfile.city}</p>}
-            </div>
+            <p className="font-display text-sm font-medium text-prussian">{agentName}</p>
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
