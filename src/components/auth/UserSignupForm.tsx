@@ -10,10 +10,9 @@ import { copy } from "@/lib/copy";
 export function UserSignupForm() {
   const [state, formAction, pending] = useActionState(signUpUser, undefined);
 
-  if (state?.success) return <EmailConfirmModal />;
-
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {state?.success && <EmailConfirmModal />}
       <Input
         id="fullName"
         name="fullName"

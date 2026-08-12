@@ -11,10 +11,9 @@ import type { PlanId } from "@/lib/plans";
 export function AgentSignupForm({ plan }: { plan: PlanId }) {
   const [state, formAction, pending] = useActionState(signUpAgent, undefined);
 
-  if (state?.success) return <EmailConfirmModal />;
-
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {state?.success && <EmailConfirmModal />}
       <input type="hidden" name="plan" value={plan} />
       <Input
         id="fullName"
