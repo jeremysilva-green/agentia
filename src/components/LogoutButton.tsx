@@ -21,7 +21,7 @@ export function LogoutButton({ locale = "es" }: { locale?: Locale }) {
       className="flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
     >
       <LogOut size={16} />
-      <span className="hidden sm:inline">{dictionaries[locale].nav.logout}</span>
+      <span>{dictionaries[locale].nav.logout}</span>
     </button>
   );
 }

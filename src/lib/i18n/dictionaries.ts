@@ -40,10 +40,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     nav: {
       login: "Ingresar",
       signup: "Crear cuenta",
-      panel: "Panel del agente",
-      affiliatePanel: "Panel de afiliado",
+      panel: "Mi Panel",
+      affiliatePanel: "Mi Panel",
       profile: "Perfil",
-      logout: "Cerrar sesión",
+      logout: "Salir",
     },
     home: {
       title: "Encontrá al agente inmobiliario ideal",
