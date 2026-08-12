@@ -102,22 +102,22 @@ export function AvailabilityModal({
 
               {days[day].checked && (
                 <div className="mt-2 flex items-center gap-2 pl-6">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="text-xs text-slate-500">{copy.panel.availabilityFrom}</span>
                     <input
                       type="time"
                       value={days[day].start}
                       onChange={(e) => updateTime(day, "start", e.target.value)}
-                      className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm text-prussian outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                      className="h-9 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 text-sm text-prussian outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="text-xs text-slate-500">{copy.panel.availabilityTo}</span>
                     <input
                       type="time"
                       value={days[day].end}
                       onChange={(e) => updateTime(day, "end", e.target.value)}
-                      className="h-9 rounded-lg border border-slate-200 bg-white px-2 text-sm text-prussian outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                      className="h-9 w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 text-sm text-prussian outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
