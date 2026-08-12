@@ -98,7 +98,7 @@ export default async function PropertyDetailPage({
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-3">
       <LeadTracker propertyId={propertyId} refCode={ref} />
 
-      <div className="flex flex-col gap-6 lg:col-span-2">
+      <div className="flex flex-col gap-6 lg:col-span-2 lg:col-start-1 lg:row-start-1">
         <div className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <h1 className="font-display text-2xl font-semibold text-white">{property.title}</h1>
@@ -119,19 +119,10 @@ export default async function PropertyDetailPage({
         </div>
 
         <PropertyGallery imageUrls={imageUrls} title={property.title} />
-
-        {(property.lat || property.address) && (
-          <div className="flex flex-col gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">
-              {copy.property.location}
-            </h2>
-            <PropertyMap lat={property.lat} lng={property.lng} address={property.address} />
-          </div>
-        )}
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+      <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm sm:text-left">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{copy.property.price}</p>
           <p className="font-display text-2xl font-semibold text-prussian">
             {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(
@@ -141,7 +132,7 @@ export default async function PropertyDetailPage({
           </p>
 
           {(property.bedrooms != null || property.bathrooms != null || property.area_m2 != null) && (
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-slate-600">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600 sm:justify-start">
               {property.bedrooms != null && (
                 <span className="flex items-center gap-1.5">
                   <BedDouble size={16} className="text-slate-400" />
@@ -167,7 +158,7 @@ export default async function PropertyDetailPage({
             {property.description}
           </p>
 
-          <div className="mt-4 flex items-center gap-2 border-t border-slate-100 pt-4">
+          <div className="mt-4 flex items-center justify-center gap-2 border-t border-slate-100 pt-4 sm:justify-start">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500">
               <User size={16} />
             </span>
@@ -190,6 +181,15 @@ export default async function PropertyDetailPage({
           </div>
         </div>
       </div>
+
+      {(property.lat || property.address) && (
+        <div className="flex flex-col gap-2 lg:col-span-2 lg:col-start-1 lg:row-start-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">
+            {copy.property.location}
+          </h2>
+          <PropertyMap lat={property.lat} lng={property.lng} address={property.address} />
+        </div>
+      )}
       </div>
     </div>
   );

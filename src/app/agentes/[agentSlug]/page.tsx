@@ -54,49 +54,48 @@ export default async function AgentPortfolioPage({
     <div className="relative min-h-screen overflow-hidden bg-white">
       <InteractiveBackground />
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            {isOwner ? (
-              <AvatarUploader userId={agent.id} initialAvatarUrl={profile?.avatar_url ?? null} variant="compact" displayName={displayName} />
-            ) : (
-              <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-emerald-500 bg-slate-100">
-                {profile?.avatar_url ? (
-                  <Image src={profile.avatar_url} alt={displayName} fill className="object-cover" sizes="96px" />
-                ) : (
-                  <User className="text-slate-400" size={40} />
-                )}
-              </div>
-            )}
-            <div className="flex min-w-0 flex-col gap-1">
-              <h1 className="font-display text-lg font-semibold leading-tight text-prussian">{displayName}</h1>
-              {agent.city && (
-                <p className="flex items-center gap-1 text-xs text-slate-500">
-                  <MapPin size={12} />
-                  {agent.city}
-                </p>
+        <div className="flex items-center gap-3">
+          {isOwner ? (
+            <AvatarUploader userId={agent.id} initialAvatarUrl={profile?.avatar_url ?? null} variant="compact" displayName={displayName} />
+          ) : (
+            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-emerald-500 bg-slate-100">
+              {profile?.avatar_url ? (
+                <Image src={profile.avatar_url} alt={displayName} fill className="object-cover" sizes="96px" />
+              ) : (
+                <User className="text-slate-400" size={40} />
               )}
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <Badge tone="success" className="border-emerald-200! bg-emerald-50! text-emerald-700!">
-                  {availableCount} disponibles
-                </Badge>
-                <Badge tone="neutral">{soldCount} vendidas</Badge>
-                {milestone && (
-                  <Badge tone="success" className="bg-amber-50 text-amber-700">
-                    {milestone.label}
-                  </Badge>
-                )}
-              </div>
-              {!isOwner && <RateAgentWidget agentId={agent.id} agentSlug={agentSlug} myRating={ratingSummary.myRating} />}
-            </div>
-          </div>
-          {!isOwner && (
-            <div className="shrink-0 self-end">
-              <ClientRequestTabs agentId={agent.id} />
             </div>
           )}
+          <div className="flex min-w-0 flex-col gap-1">
+            <h1 className="font-display text-lg font-semibold leading-tight text-prussian">{displayName}</h1>
+            {agent.city && (
+              <p className="flex items-center gap-1 text-xs text-slate-500">
+                <MapPin size={12} />
+                {agent.city}
+              </p>
+            )}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <Badge tone="success" className="border-emerald-200! bg-emerald-50! text-emerald-700!">
+                {availableCount} disponibles
+              </Badge>
+              <Badge tone="neutral">{soldCount} vendidas</Badge>
+              {milestone && (
+                <Badge tone="success" className="bg-amber-50 text-amber-700">
+                  {milestone.label}
+                </Badge>
+              )}
+            </div>
+            {!isOwner && <RateAgentWidget agentId={agent.id} agentSlug={agentSlug} myRating={ratingSummary.myRating} />}
+          </div>
         </div>
 
         {agent.bio && <p className="max-w-3xl text-slate-600">{agent.bio}</p>}
+
+        {!isOwner && (
+          <div className="flex justify-center sm:justify-end">
+            <ClientRequestTabs agentId={agent.id} />
+          </div>
+        )}
 
         <PropertyFilterBar />
 
