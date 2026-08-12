@@ -3,7 +3,6 @@ import { LayoutDashboard, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getDictionary } from "@/lib/i18n/locale";
 import { LogoutButton } from "@/components/LogoutButton";
-import { LanguageToggle } from "@/components/LanguageToggle";
 import { TermsModal } from "@/components/legal/TermsModal";
 
 export async function NavBar() {
@@ -29,12 +28,12 @@ export async function NavBar() {
     <>
       {role && !termsAccepted && <TermsModal role={role === "agent" ? "agent" : "affiliate"} />}
       <header className="bg-prussian">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 sm:px-8">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-8">
           <Link href="/" className="flex items-center">
-            <span className="font-display text-5xl uppercase tracking-tight text-white">AGENTIA</span>
+            <span className="font-display text-2xl uppercase tracking-tight text-white sm:text-5xl">AGENTIA</span>
           </Link>
 
-          <nav className="flex items-center gap-4 font-display sm:gap-6">
+          <nav className="flex items-center gap-2.5 font-display sm:gap-6">
             <Link
               href="/que-es-agentia"
               className="hidden text-sm font-medium text-white/90 transition-colors hover:text-white sm:block"
@@ -46,13 +45,11 @@ export async function NavBar() {
               href="https://chat.whatsapp.com/BahpSvfmwIGLj7fSkAGijz"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-md border border-[#25D366] bg-black px-3 text-sm font-medium text-[#25D366] shadow-[0_0_8px_rgba(37,211,102,0.7),0_0_16px_rgba(37,211,102,0.4)] transition-all hover:shadow-[0_0_12px_rgba(37,211,102,0.9),0_0_28px_rgba(37,211,102,0.6)] sm:px-4"
+              className="hidden h-10 items-center justify-center gap-1.5 rounded-md border border-[#25D366] bg-black px-3 text-sm font-medium text-[#25D366] shadow-[0_0_8px_rgba(37,211,102,0.7),0_0_16px_rgba(37,211,102,0.4)] transition-all hover:shadow-[0_0_12px_rgba(37,211,102,0.9),0_0_28px_rgba(37,211,102,0.6)] sm:inline-flex sm:px-4"
             >
               <MessageCircle size={16} />
               <span className="hidden sm:inline">Comunidad WhatsApp</span>
             </a>
-
-            <LanguageToggle locale={locale} />
 
             {user && role === "agent" && (
               <Link
@@ -75,7 +72,7 @@ export async function NavBar() {
             )}
 
             {!user && (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5 sm:gap-4">
                 <Link
                   href="/ingresar"
                   className="text-sm font-medium text-white/90 transition-colors hover:text-white"
@@ -84,7 +81,7 @@ export async function NavBar() {
                 </Link>
                 <Link
                   href="/registro"
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-emerald-600 px-3 text-sm font-medium text-white transition-colors hover:bg-emerald-700 sm:h-10 sm:px-4"
                 >
                   {dict.nav.signup}
                 </Link>
