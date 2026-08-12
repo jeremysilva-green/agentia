@@ -1,0 +1,2 @@
+export const AGENT_COMMISSION_PCT = 5.5;
+export const AFFILIATE_COMMISSION_PCT = 1;
