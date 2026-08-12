@@ -13,7 +13,7 @@ export function AgentCard({ agent, dict }: { agent: AgentCardData; dict: Diction
   const milestone = getMilestone(agent.rating_avg, agent.rating_count);
 
   return (
-    <Link href={`/agentes/${agent.slug}`} className="block w-[160px] shrink-0">
+    <Link href={`/agentes/${agent.slug}`} className="block w-[calc(50%-6px)] shrink-0 sm:w-[160px]">
       <Card className="group flex h-full flex-col overflow-hidden border-emerald-500! bg-white! text-center hover:border-emerald-600!">
         <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-slate-100">
           {agent.profile.avatar_url ? (

@@ -107,22 +107,26 @@ export function FilterBar({ dict, locale }: { dict: Dictionary["home"]["filters"
         </div>
 
         <div className="flex w-full gap-2 lg:w-auto lg:shrink-0">
-          <Input
-            name="minPrice"
-            type="number"
-            min="0"
-            placeholder="Mín."
-            defaultValue={searchParams.get("minPrice") ?? ""}
-            className="bg-white! lg:w-24"
-          />
-          <Input
-            name="maxPrice"
-            type="number"
-            min="0"
-            placeholder="Máx."
-            defaultValue={searchParams.get("maxPrice") ?? ""}
-            className="bg-white! lg:w-24"
-          />
+          <div className="min-w-0 flex-1 lg:w-24 lg:flex-none">
+            <Input
+              name="minPrice"
+              type="number"
+              min="0"
+              placeholder="Mín."
+              defaultValue={searchParams.get("minPrice") ?? ""}
+              className="w-full bg-white!"
+            />
+          </div>
+          <div className="min-w-0 flex-1 lg:w-24 lg:flex-none">
+            <Input
+              name="maxPrice"
+              type="number"
+              min="0"
+              placeholder="Máx."
+              defaultValue={searchParams.get("maxPrice") ?? ""}
+              className="w-full bg-white!"
+            />
+          </div>
         </div>
 
         <div className="flex w-full gap-2 lg:w-auto lg:shrink-0">
