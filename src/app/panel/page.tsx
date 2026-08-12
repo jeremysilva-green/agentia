@@ -62,7 +62,7 @@ export default async function PanelOverviewPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">{copy.panel.overview}</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.overview}</h1>
         <div className="flex items-center gap-3">
           <SubscriptionStatusBadge status={ctx.subscription?.status} />
           <AvatarUploader userId={ctx.userId} initialAvatarUrl={ctx.avatarUrl} variant="compact" />
@@ -83,7 +83,7 @@ export default async function PanelOverviewPage() {
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Analíticas</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Analíticas</h2>
         <MonthlyReportButton />
       </div>
 

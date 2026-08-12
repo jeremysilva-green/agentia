@@ -54,7 +54,7 @@ export async function NavBar() {
             {user && role === "agent" && (
               <Link
                 href="/panel"
-                className="flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
+                className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
               >
                 <LayoutDashboard size={16} />
                 {dict.nav.panel}
@@ -64,7 +64,7 @@ export async function NavBar() {
             {user && role === "user" && (
               <Link
                 href="/panel-afiliado"
-                className="flex items-center gap-1.5 text-sm font-medium text-white/90 transition-colors hover:text-white"
+                className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
               >
                 <LayoutDashboard size={16} />
                 {dict.nav.affiliatePanel}
