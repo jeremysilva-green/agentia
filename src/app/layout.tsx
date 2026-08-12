@@ -30,7 +30,7 @@ const rubik = localFont({
 });
 
 export const metadata: Metadata = {
-  title: `${copy.brand} — Plataforma para agentes inmobiliarios`,
+  title: copy.brand,
   description: copy.home.subtitle,
 };
 

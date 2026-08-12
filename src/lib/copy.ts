@@ -2,7 +2,7 @@
 // messages/en.json for next-intl without touching component logic.
 
 export const copy = {
-  brand: "Agently",
+  brand: "Agentia",
   nav: {
     home: "Inicio",
     login: "Ingresar",
