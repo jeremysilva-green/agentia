@@ -5,7 +5,6 @@ import { getAgentContext } from "@/lib/data/panel";
 import { getAgentDashboardStats, getAgentMonthlyTrend } from "@/lib/data/dashboard";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { SubscriptionStatusBadge } from "@/components/panel/SubscriptionStatusBadge";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
 import { MonthlyReportButton } from "@/components/panel/MonthlyReportButton";
 import { AnalyticsCharts } from "@/components/panel/AnalyticsCharts";
@@ -64,7 +63,6 @@ export default async function PanelOverviewPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.overview}</h1>
         <div className="flex items-center gap-3">
-          <SubscriptionStatusBadge status={ctx.subscription?.status} />
           <AvatarUploader userId={ctx.userId} initialAvatarUrl={ctx.avatarUrl} variant="compact" />
         </div>
       </div>

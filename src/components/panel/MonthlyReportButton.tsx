@@ -42,7 +42,7 @@ export function MonthlyReportButton() {
         variant="secondary"
         onClick={handleClick}
         disabled={isPending}
-        className="border-black! bg-black! text-white! hover:bg-neutral-800!"
+        className="border-emerald-600! bg-emerald-600! text-white! hover:bg-emerald-700!"
       >
         <Download size={14} />
         {isPending ? copy.panel.downloadingMonthlyReport : copy.panel.downloadMonthlyReport}
