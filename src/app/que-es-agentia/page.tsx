@@ -47,7 +47,7 @@ export default function QueEsAgentiaPage() {
       </section>
 
       <div className="relative mx-auto max-w-3xl px-4 py-12 sm:px-6">
-        <Card className="flex flex-col gap-5 p-6 sm:p-8">
+        <Card className="flex flex-col gap-5 border-emerald-200! bg-emerald-50! p-6 sm:p-8">
           {aboutParagraphs.map((paragraph, i) => (
             <p key={i} className="font-display-light leading-relaxed text-slate-700">
               {paragraph}
@@ -58,7 +58,7 @@ export default function QueEsAgentiaPage() {
 
       <div className="relative mx-auto grid max-w-6xl gap-4 px-4 pb-16 sm:grid-cols-3 sm:px-6">
         {roles.map((role) => (
-          <Card key={role.question} className="flex flex-col gap-2 p-6">
+          <Card key={role.question} className="flex flex-col gap-2 border-emerald-200! bg-emerald-50! p-6">
             <h2 className="font-display text-lg font-semibold text-prussian">{role.question}</h2>
             <p className="font-display-light text-sm leading-relaxed text-slate-600">{role.answer}</p>
           </Card>

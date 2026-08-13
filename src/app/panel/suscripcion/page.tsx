@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { SubscriptionStatusBadge } from "@/components/panel/SubscriptionStatusBadge";
 import { PagoparCheckoutButton } from "@/components/panel/PagoparCheckoutButton";
+import { CancelSubscriptionButton } from "@/components/panel/CancelSubscriptionButton";
 import { PLANS, isPlanId } from "@/lib/plans";
 import { copy } from "@/lib/copy";
 
@@ -84,6 +85,11 @@ export default async function SuscripcionPage() {
             Tarjeta guardada: <span className="font-medium text-slate-700">{cardOnFile ? "Sí" : "No"}</span>
             {cardOnFile && ctx.agentProfile?.proveedor_tarjeta && ` (${ctx.agentProfile.proveedor_tarjeta})`}
           </p>
+          {(status === "active" || status === "trialing") && (
+            <div className="mt-2 border-t border-slate-100 pt-4">
+              <CancelSubscriptionButton />
+            </div>
+          )}
         </Card>
       )}
 

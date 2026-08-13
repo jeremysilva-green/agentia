@@ -31,7 +31,7 @@ export function AgentGrid({
 
   return (
     <div className="flex w-full flex-col items-center gap-6">
-      <div className="flex w-full flex-wrap gap-3">
+      <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {visibleAgents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} dict={dict} />
         ))}

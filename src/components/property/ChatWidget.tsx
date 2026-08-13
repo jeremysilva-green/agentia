@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
-import { MessageCircle, X, Send, User } from "lucide-react";
+import { X, Send, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
 
@@ -71,10 +71,9 @@ export function ChatWidget({
       <Button
         type="button"
         size="lg"
-        className="w-full border! border-emerald-500! bg-black! text-emerald-400! shadow-[0_0_8px_rgba(52,211,153,0.7),0_0_16px_rgba(52,211,153,0.4)]! transition-all! hover:shadow-[0_0_12px_rgba(52,211,153,0.9),0_0_28px_rgba(52,211,153,0.6)]!"
+        className="w-full bg-emerald-600! font-display text-white! hover:bg-emerald-700!"
         onClick={() => setOpen(true)}
       >
-        <MessageCircle size={18} />
         {copy.property.contactWhatsapp}
       </Button>
 
@@ -108,14 +107,14 @@ export function ChatWidget({
                 className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                   message.role === "user"
                     ? "self-end bg-prussian text-white"
-                    : "self-start bg-slate-100 text-slate-700"
+                    : "self-start bg-emerald-600 text-white"
                 }`}
               >
                 {message.text}
               </div>
             ))}
             {isPending && (
-              <div className="self-start rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-400">
+              <div className="self-start rounded-2xl bg-emerald-600 px-3 py-2 text-sm text-emerald-100">
                 {copy.chat.typing}
               </div>
             )}
