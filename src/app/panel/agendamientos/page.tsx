@@ -21,7 +21,7 @@ export default async function AgendamientosPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">{copy.panel.agendamientos}</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.agendamientos}</h1>
         <AvailabilityButton availability={availability} />
       </div>
       <AgendamientosTable rows={rows} />

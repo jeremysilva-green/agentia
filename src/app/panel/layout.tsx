@@ -24,7 +24,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
       <InteractiveBackground dotColor="rgb(255 255 255 / 0.14)" spotColor="rgb(52 211 153 / 0.9)" />
       <div className="font-display-light relative mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
         <aside className="lg:w-56 lg:shrink-0">
-          <PanelNav />
+          <PanelNav variant="agent" />
         </aside>
         <div className="min-w-0 flex-1">{children}</div>
       </div>

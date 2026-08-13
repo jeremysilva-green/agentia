@@ -34,7 +34,7 @@ export default async function EditarPropiedadPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">Editar propiedad</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Editar propiedad</h1>
         <DeletePropertyButton propertyId={propertyId} />
       </div>
 

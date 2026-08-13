@@ -11,13 +11,15 @@ import {
   MessageCircle,
   Inbox,
   CalendarClock,
+  Link2,
+  UserRound,
   Menu,
   ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 
-const navItems = [
+const agentNavItems = [
   { href: "/panel", label: copy.panel.overview, icon: Home },
   { href: "/panel/propiedades", label: copy.panel.properties, icon: Building2 },
   { href: "/panel/leads", label: copy.panel.leads, icon: Users },
@@ -27,7 +29,14 @@ const navItems = [
   { href: "/panel/suscripcion", label: copy.panel.subscription, icon: CreditCard },
 ];
 
-export function PanelNav() {
+const affiliateNavItems = [
+  { href: "/panel-afiliado", label: copy.affiliatePanel.overview, icon: Home },
+  { href: "/panel-afiliado/enlaces", label: copy.affiliatePanel.myLinks, icon: Link2 },
+  { href: "/panel-afiliado/perfil", label: copy.profile.title, icon: UserRound },
+];
+
+export function PanelNav({ variant }: { variant: "agent" | "affiliate" }) {
+  const navItems = variant === "agent" ? agentNavItems : affiliateNavItems;
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const current = navItems.find((item) => item.href === pathname);
@@ -37,7 +46,7 @@ export function PanelNav() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm font-medium text-white lg:hidden"
+        className="flex w-full items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm font-medium text-white backdrop-blur-md lg:hidden"
       >
         <span className="flex items-center gap-2">
           <Menu size={17} />
@@ -46,7 +55,14 @@ export function PanelNav() {
         <ChevronDown size={16} className={cn("transition-transform", open && "rotate-180")} />
       </button>
 
-      <nav className={cn("flex-col gap-1 lg:flex", open ? "mt-1 flex" : "hidden")}>
+      <nav
+        className={cn(
+          "flex-col gap-1 lg:flex lg:border-none lg:bg-transparent lg:p-0 lg:backdrop-blur-none",
+          open
+            ? "mt-1 flex rounded-xl border border-white/15 bg-white/10 p-1.5 backdrop-blur-md"
+            : "hidden"
+        )}
+      >
         {navItems.map((item) => (
           <Link
             key={item.href}

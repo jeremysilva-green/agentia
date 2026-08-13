@@ -37,7 +37,7 @@ export default async function PropiedadesPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">Propiedades</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Propiedades</h1>
         <Link href="/panel/propiedades/nueva">
           <Button size="sm">
             <Plus size={16} />

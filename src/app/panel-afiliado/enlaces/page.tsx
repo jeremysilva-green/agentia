@@ -19,8 +19,8 @@ export default async function AffiliateLinksPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">{copy.affiliatePanel.myLinks}</h1>
-        <p className="text-sm text-slate-500">{copy.affiliatePanel.myLinksSubtitle}</p>
+        <h1 className="font-display text-2xl font-semibold text-white">{copy.affiliatePanel.myLinks}</h1>
+        <p className="text-sm text-slate-300">{copy.affiliatePanel.myLinksSubtitle}</p>
       </div>
       <AffiliateLinksTable rows={rows} affiliateUsername={profile?.username ?? ""} />
     </div>

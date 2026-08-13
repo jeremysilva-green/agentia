@@ -15,7 +15,7 @@ export default async function LeadsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl font-semibold text-slate-900">{copy.panel.leads}</h1>
+      <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.leads}</h1>
       <LeadsTable rows={rows} />
     </div>
   );

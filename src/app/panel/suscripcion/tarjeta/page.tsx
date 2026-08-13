@@ -16,7 +16,7 @@ export default async function AgregarTarjetaPage() {
         Volver a Suscripción
       </Link>
       <div>
-        <h1 className="font-display text-2xl font-semibold text-slate-900">Guardar tarjeta</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">Guardar tarjeta</h1>
         <p className="text-sm text-slate-500">
           Guardá una tarjeta para que tus próximas renovaciones se cobren automáticamente, sin que tengas que volver
           a pagar cada mes.

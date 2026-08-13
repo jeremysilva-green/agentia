@@ -35,7 +35,7 @@ export default async function SuscripcionPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">{copy.panel.subscription}</h1>
+        <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.subscription}</h1>
         <SubscriptionStatusBadge status={status} />
       </div>
 
@@ -90,7 +90,7 @@ export default async function SuscripcionPage() {
       {(status === "past_due" || status === "pending" || status === "canceled") && (
         <div className="flex flex-col gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">
+            <h2 className="text-lg font-semibold text-white">
               {status === "pending" ? "Activá tu suscripción" : copy.panel.renewNow}
             </h2>
             <p className="text-sm text-slate-500">

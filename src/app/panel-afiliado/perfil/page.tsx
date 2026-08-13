@@ -19,8 +19,8 @@ export default async function AffiliateProfilePage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-slate-900">{copy.profile.title}</h1>
-        <p className="text-sm text-slate-500">{copy.profile.subtitle}</p>
+        <h1 className="font-display text-2xl font-semibold text-white">{copy.profile.title}</h1>
+        <p className="text-sm text-slate-300">{copy.profile.subtitle}</p>
       </div>
       <AffiliateProfileForm
         userId={user.id}
