@@ -30,13 +30,13 @@ export function Footer() {
 
   return (
     <footer className="border-t border-emerald-600/40 bg-black">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-center sm:justify-start sm:text-left">
           <a
             href="https://chat.whatsapp.com/BahpSvfmwIGLj7fSkAGijz"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm font-medium text-white/70 transition-colors hover:text-emerald-400"
+            className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
           >
             <MessageCircle size={15} />
             Comunidad WhatsApp

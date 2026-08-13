@@ -1,6 +1,7 @@
 import { getMarketplaceAgents } from "@/lib/data/marketplace";
 import { AgentCard } from "@/components/marketplace/AgentCard";
 import { FilterBar } from "@/components/marketplace/FilterBar";
+import { SearchBar } from "@/components/marketplace/SearchBar";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { HeroHeadline } from "@/components/marketplace/HeroHeadline";
 import { getDictionary } from "@/lib/i18n/locale";
@@ -15,6 +16,7 @@ export default async function HomePage({
     minPrice?: string;
     maxPrice?: string;
     propertyType?: string | string[];
+    q?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -26,6 +28,7 @@ export default async function HomePage({
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     propertyType: parsePropertyTypeParam(params.propertyType),
+    q: params.q,
   });
 
   return (
@@ -41,6 +44,10 @@ export default async function HomePage({
       </section>
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
+        <div className="relative z-30 animate-fade-in-up" style={{ animationDelay: "450ms" }}>
+          <SearchBar />
+        </div>
+
         <div className="relative z-20 animate-fade-in-up" style={{ animationDelay: "550ms" }}>
           <FilterBar dict={dict.home.filters} locale={locale} />
         </div>
