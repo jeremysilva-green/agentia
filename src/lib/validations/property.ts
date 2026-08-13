@@ -26,6 +26,12 @@ export const propertySchema = z.object({
     }),
   status: z.enum(["available", "sold", "rented", "draft"]).default("available"),
   published: z.coerce.boolean().default(true),
+  garage: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  negotiationType: z.array(z.string()).default([]),
+  negotiationDetails: z.string().optional(),
 });
 
 export type PropertyInput = z.infer<typeof propertySchema>;

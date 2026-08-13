@@ -79,19 +79,6 @@ export function FilterBar({ dict, locale }: { dict: Dictionary["home"]["filters"
         </div>
 
         <div className="w-full lg:w-auto lg:min-w-0 lg:flex-1">
-          <SingleSelectDropdown
-            name="listingType"
-            label={dict.listingType}
-            allLabel={dict.all}
-            defaultValue={searchParams.get("listingType") ?? ""}
-            options={[{ value: "sale", label: dict.sale }]}
-            showAllOption={false}
-            buttonClassName="border-emerald-500! bg-white! hover:bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/30!"
-            panelClassName="border-emerald-100! bg-emerald-50!"
-          />
-        </div>
-
-        <div className="w-full lg:w-auto lg:min-w-0 lg:flex-1">
           <MultiSelectDropdown
             name="propertyType"
             label={dict.propertyType}
@@ -112,7 +99,7 @@ export function FilterBar({ dict, locale }: { dict: Dictionary["home"]["filters"
               name="minPrice"
               type="number"
               min="0"
-              placeholder="Mín."
+              placeholder="Gs. Mín."
               defaultValue={searchParams.get("minPrice") ?? ""}
               className="w-full bg-white!"
             />
@@ -122,7 +109,7 @@ export function FilterBar({ dict, locale }: { dict: Dictionary["home"]["filters"
               name="maxPrice"
               type="number"
               min="0"
-              placeholder="Máx."
+              placeholder="Gs. Máx."
               defaultValue={searchParams.get("maxPrice") ?? ""}
               className="w-full bg-white!"
             />

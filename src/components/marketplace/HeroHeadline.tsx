@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 const PHRASES = [
-  "La plataforma de ventas más inteligente del Paraguay.",
+  "La plataforma de ventas inmobiliarias más inteligente del Paraguay.",
   "Agentes verificados con los mejores portafolios.",
   "Compartí tus enlaces de afiliado y ganá 1% de cada venta.",
 ];

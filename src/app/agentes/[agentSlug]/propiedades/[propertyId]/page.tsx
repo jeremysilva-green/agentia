@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { MapPin, User, BedDouble, Bath, Ruler } from "lucide-react";
+import { MapPin, User, BedDouble, Bath, Ruler, Car } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getPropertyForPublicView } from "@/lib/data/agentPortfolio";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
@@ -132,7 +132,7 @@ export default async function PropertyDetailPage({
             {property.listing_type === "rent" && <span className="text-sm font-normal text-slate-500"> /mes</span>}
           </p>
 
-          {(property.bedrooms != null || property.bathrooms != null || property.area_m2 != null) && (
+          {(property.bedrooms != null || property.bathrooms != null || property.area_m2 != null || property.garage) && (
             <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600 sm:justify-start">
               {property.bedrooms != null && (
                 <span className="flex items-center gap-1.5">
@@ -150,6 +150,12 @@ export default async function PropertyDetailPage({
                 <span className="flex items-center gap-1.5">
                   <Ruler size={16} className="text-slate-400" />
                   {property.area_m2} m²
+                </span>
+              )}
+              {property.garage && (
+                <span className="flex items-center gap-1.5">
+                  <Car size={16} className="text-slate-400" />
+                  Garage
                 </span>
               )}
             </div>

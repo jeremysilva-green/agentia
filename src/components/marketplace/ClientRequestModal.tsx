@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import { submitClientRequest } from "@/lib/actions/clientRequests";
 import { copy } from "@/lib/copy";
 import type { ClientRequestKind } from "@/lib/constants/clientRequests";
@@ -19,12 +20,6 @@ const PROPERTY_TYPE_OPTIONS = PROPERTY_TYPE_VALUES.map((type) => ({
   label: PROPERTY_TYPE_LABELS[type].es,
 }));
 const CITY_SELECT_OPTIONS = CITY_OPTIONS.map((city) => ({ value: city, label: city }));
-
-const NEGOTIATION_OPTIONS = [
-  { value: "precio_fijo", label: "Precio fijo, no negociable." },
-  { value: "canje_permuta", label: "Hacer canje/permuta." },
-  { value: "negociar_precio", label: "Negociar el precio." },
-];
 
 const checkboxClass = "h-3.5 w-3.5 rounded border-bone text-emerald-600 accent-emerald-600 focus-visible:outline-emerald-600";
 const fieldClass = "bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!";

@@ -69,7 +69,7 @@ export async function POST(request: Request) {
   const { data: property } = await service
     .from("properties")
     .select(
-      "id, title, description, price, currency, city, address, property_type, agent_id, agent_profiles(profiles(full_name, username, phone))"
+      "id, title, description, price, currency, city, address, property_type, bedrooms, bathrooms, area_m2, garage, negotiation_type, negotiation_details, agent_id, agent_profiles(profiles(full_name, username, phone))"
     )
     .eq("id", propertyId)
     .single();
@@ -112,6 +112,12 @@ export async function POST(request: Request) {
     availability,
     city: detail.city,
     address: detail.address,
+    bedrooms: detail.bedrooms,
+    bathrooms: detail.bathrooms,
+    areaM2: detail.area_m2,
+    garage: detail.garage,
+    negotiationType: detail.negotiation_type,
+    negotiationDetails: detail.negotiation_details,
   });
 
   const client = new Anthropic();

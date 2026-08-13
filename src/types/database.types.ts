@@ -93,6 +93,9 @@ export interface Database {
           bedrooms: number | null;
           bathrooms: number | null;
           area_m2: number | null;
+          garage: boolean;
+          negotiation_type: string[];
+          negotiation_details: string | null;
           sold_at: string | null;
           created_at: string;
           updated_at: string;
@@ -116,6 +119,9 @@ export interface Database {
           bedrooms?: number | null;
           bathrooms?: number | null;
           area_m2?: number | null;
+          garage?: boolean;
+          negotiation_type?: string[];
+          negotiation_details?: string | null;
           sold_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["properties"]["Insert"]>;

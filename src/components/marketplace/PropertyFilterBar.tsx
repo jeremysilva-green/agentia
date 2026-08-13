@@ -45,19 +45,6 @@ export function PropertyFilterBar() {
       </div>
 
       <div className="w-full sm:w-auto sm:min-w-0 sm:flex-1">
-        <SingleSelectDropdown
-          name="listingType"
-          label={copy.home.filters.listingType}
-          allLabel={copy.home.filters.all}
-          defaultValue={searchParams.get("listingType") ?? ""}
-          options={[{ value: "sale", label: copy.home.filters.sale }]}
-          showAllOption={false}
-          buttonClassName="border-emerald-500! hover:bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/30!"
-          panelClassName="border-emerald-100! bg-emerald-50!"
-        />
-      </div>
-
-      <div className="w-full sm:w-auto sm:min-w-0 sm:flex-1">
         <MultiSelectDropdown
           name="propertyType"
           label={copy.home.filters.propertyType}

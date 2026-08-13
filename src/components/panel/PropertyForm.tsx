@@ -4,10 +4,12 @@ import { useActionState, useState } from "react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { SingleSelectDropdown } from "@/components/ui/SingleSelectDropdown";
+import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { Button } from "@/components/ui/Button";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import { cn } from "@/lib/cn";
 import type { Property } from "@/types/domain";
 import type { PropertyActionState } from "@/lib/actions/properties";
@@ -34,6 +36,7 @@ export function PropertyForm({
   );
   const [price, setPrice] = useState(defaultValues?.price != null ? String(defaultValues.price) : "");
   const [withIva, setWithIva] = useState(false);
+  const [negotiationType, setNegotiationType] = useState<string[]>(defaultValues?.negotiation_type ?? []);
 
   function toggleIva(checked: boolean) {
     setWithIva(checked);
@@ -72,16 +75,9 @@ export function PropertyForm({
         className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <SingleSelectDropdown
-          name="listingType"
-          label="Categoría"
-          showAllOption={false}
-          defaultValue={defaultValues?.listing_type ?? "sale"}
-          options={[{ value: "sale", label: "Venta" }]}
-          buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-          panelClassName="border-emerald-100! bg-emerald-50!"
-        />
+      <input type="hidden" name="listingType" value={defaultValues?.listing_type ?? "sale"} />
+
+      <div className="grid gap-4 sm:grid-cols-2">
         <SingleSelectDropdown
           name="propertyType"
           label="Tipo de propiedad"
@@ -178,7 +174,7 @@ export function PropertyForm({
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         <Input
           id="bedrooms"
           name="bedrooms"
@@ -209,6 +205,18 @@ export function PropertyForm({
           defaultValue={defaultValues?.area_m2 ?? ""}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
+        <SingleSelectDropdown
+          name="garage"
+          label="Garage"
+          showAllOption={false}
+          defaultValue={defaultValues?.garage ? "true" : "false"}
+          options={[
+            { value: "false", label: "No" },
+            { value: "true", label: "Sí" },
+          ]}
+          buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
+          panelClassName="border-emerald-100! bg-emerald-50!"
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -223,6 +231,39 @@ export function PropertyForm({
         <p className="text-xs text-slate-500">
           Pegá el enlace para compartir de Google Maps — lo usamos para el mapa en la ficha de la propiedad.
         </p>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div>
+          <p className="text-sm font-semibold text-amber-900">Tipo de negociación (privado)</p>
+          <p className="text-xs text-amber-700">
+            Esta información nunca se muestra en la ficha pública de la propiedad. Solo la usa el asistente de chat
+            para responder si preguntan por permuta, canje o forma de pago — y vos, en el panel.
+          </p>
+        </div>
+        <MultiSelectDropdown
+          name="negotiationType"
+          label="Tipo de negociación"
+          allLabel="Ninguna seleccionada"
+          defaultValues={defaultValues?.negotiation_type ?? []}
+          options={NEGOTIATION_OPTIONS}
+          onChange={setNegotiationType}
+          buttonClassName="bg-white! focus:border-amber-600! focus:ring-amber-500/20!"
+          panelClassName="border-amber-100! bg-white!"
+        />
+        {negotiationType.includes("canje_permuta") && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="negotiationDetails" className="text-xs font-medium text-amber-800">
+              ¿Qué acepta en la permuta? (ej: terreno, auto, o combinación con efectivo)
+            </label>
+            <Textarea
+              id="negotiationDetails"
+              name="negotiationDetails"
+              defaultValue={defaultValues?.negotiation_details ?? ""}
+              className="bg-white! focus:border-amber-600! focus:ring-amber-500/20!"
+            />
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

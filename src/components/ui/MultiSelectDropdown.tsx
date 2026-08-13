@@ -12,6 +12,7 @@ export function MultiSelectDropdown({
   defaultValues = [],
   buttonClassName,
   panelClassName,
+  onChange,
 }: {
   name: string;
   label: string;
@@ -20,6 +21,7 @@ export function MultiSelectDropdown({
   defaultValues?: string[];
   buttonClassName?: string;
   panelClassName?: string;
+  onChange?: (values: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<string[]>(defaultValues);
@@ -64,7 +66,10 @@ export function MultiSelectDropdown({
             <input
               type="checkbox"
               checked={allSelected}
-              onChange={() => setSelected([])}
+              onChange={() => {
+                setSelected([]);
+                onChange?.([]);
+              }}
               className="h-4 w-4 rounded border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500"
             />
             {allLabel}
@@ -79,9 +84,13 @@ export function MultiSelectDropdown({
                 type="checkbox"
                 checked={selected.includes(option.value)}
                 onChange={() =>
-                  setSelected((prev) =>
-                    prev.includes(option.value) ? prev.filter((v) => v !== option.value) : [...prev, option.value]
-                  )
+                  setSelected((prev) => {
+                    const next = prev.includes(option.value)
+                      ? prev.filter((v) => v !== option.value)
+                      : [...prev, option.value];
+                    onChange?.(next);
+                    return next;
+                  })
                 }
                 className="h-4 w-4 rounded border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500"
               />

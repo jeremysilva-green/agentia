@@ -24,6 +24,9 @@ function readPropertyForm(formData: FormData) {
     bedrooms: formData.get("bedrooms") || undefined,
     bathrooms: formData.get("bathrooms") || undefined,
     areaM2: formData.get("areaM2") || undefined,
+    garage: formData.get("garage") || "false",
+    negotiationType: formData.getAll("negotiationType"),
+    negotiationDetails: formData.get("negotiationDetails") || undefined,
   });
 }
 
@@ -81,6 +84,9 @@ export async function createProperty(
       bedrooms: parsed.data.bedrooms ?? null,
       bathrooms: parsed.data.bathrooms ?? null,
       area_m2: parsed.data.areaM2 ?? null,
+      garage: parsed.data.garage,
+      negotiation_type: parsed.data.negotiationType,
+      negotiation_details: parsed.data.negotiationDetails ?? null,
       sold_at: parsed.data.status === "sold" ? new Date().toISOString() : null,
     })
     .select("id")
@@ -142,6 +148,9 @@ export async function updateProperty(
       bedrooms: parsed.data.bedrooms ?? null,
       bathrooms: parsed.data.bathrooms ?? null,
       area_m2: parsed.data.areaM2 ?? null,
+      garage: parsed.data.garage,
+      negotiation_type: parsed.data.negotiationType,
+      negotiation_details: parsed.data.negotiationDetails ?? null,
       sold_at: soldAt,
     })
     .eq("id", propertyId)

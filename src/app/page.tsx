@@ -44,12 +44,14 @@ export default async function HomePage({
       </section>
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
-        <div className="relative z-30 animate-fade-in-up" style={{ animationDelay: "450ms" }}>
-          <SearchBar />
-        </div>
+        <div className="flex flex-col gap-2">
+          <div className="relative z-30 animate-fade-in-up" style={{ animationDelay: "450ms" }}>
+            <SearchBar />
+          </div>
 
-        <div className="relative z-20 animate-fade-in-up" style={{ animationDelay: "550ms" }}>
-          <FilterBar dict={dict.home.filters} locale={locale} />
+          <div className="relative z-20 animate-fade-in-up" style={{ animationDelay: "550ms" }}>
+            <FilterBar dict={dict.home.filters} locale={locale} />
+          </div>
         </div>
 
         <div className="relative z-10 animate-fade-in-up" style={{ animationDelay: "650ms" }}>
