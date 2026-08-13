@@ -1,8 +1,9 @@
 import { getMarketplaceAgents } from "@/lib/data/marketplace";
-import { AgentCard } from "@/components/marketplace/AgentCard";
+import { AgentGrid } from "@/components/marketplace/AgentGrid";
 import { FilterBar } from "@/components/marketplace/FilterBar";
 import { SearchBar } from "@/components/marketplace/SearchBar";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
+import { BackToTopButton } from "@/components/BackToTopButton";
 import { HeroHeadline } from "@/components/marketplace/HeroHeadline";
 import { getDictionary } from "@/lib/i18n/locale";
 import { parsePropertyTypeParam } from "@/lib/constants/propertyTypes";
@@ -32,7 +33,7 @@ export default async function HomePage({
   });
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-neutral-900">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-neutral-900">
       <InteractiveBackground dotColor="rgb(255 255 255 / 0.14)" spotColor="rgb(52 211 153 / 0.9)" />
 
       <section className="relative overflow-hidden border-b border-slate-200 bg-white px-4 py-16 sm:px-6 sm:py-24">
@@ -44,7 +45,7 @@ export default async function HomePage({
       </section>
 
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
-        <div className="flex flex-col gap-2">
+        <div className="sticky top-0 z-40 flex flex-col gap-2 bg-neutral-900 py-3">
           <div className="relative z-30 animate-fade-in-up" style={{ animationDelay: "450ms" }}>
             <SearchBar />
           </div>
@@ -55,19 +56,11 @@ export default async function HomePage({
         </div>
 
         <div className="relative z-10 animate-fade-in-up" style={{ animationDelay: "650ms" }}>
-          {agents.length === 0 ? (
-            <p className="w-full rounded-2xl border border-dashed border-slate-300 bg-snow p-10 text-center text-sm text-slate-500">
-              {dict.home.empty}
-            </p>
-          ) : (
-            <div className="flex w-full flex-wrap gap-3">
-              {agents.map((agent) => (
-                <AgentCard key={agent.id} agent={agent} dict={dict.home.agentCard} />
-              ))}
-            </div>
-          )}
+          <AgentGrid key={JSON.stringify(params)} agents={agents} dict={dict.home.agentCard} emptyMessage={dict.home.empty} />
         </div>
       </div>
+
+      <BackToTopButton />
     </div>
   );
 }
