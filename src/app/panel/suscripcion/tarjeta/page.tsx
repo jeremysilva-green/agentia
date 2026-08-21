@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getAgentContext } from "@/lib/data/panel";
 import { Card } from "@/components/ui/Card";
-import { PagoparCardForm } from "@/components/panel/PagoparCardForm";
+import { BancardCardForm } from "@/components/panel/BancardCardForm";
 
 export default async function AgregarTarjetaPage() {
   const ctx = await getAgentContext();
@@ -23,7 +23,7 @@ export default async function AgregarTarjetaPage() {
         </p>
       </div>
       <Card className="p-6 sm:p-8">
-        <PagoparCardForm />
+        <BancardCardForm />
       </Card>
     </div>
   );

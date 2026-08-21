@@ -13,7 +13,7 @@ export function AffiliateFinancePanel({
 }) {
   const stats = [
     { label: "Comisión del mes", value: formatMoney(summary.commissionThisMonth, summary.currency) },
-    { label: "Pendiente de pago", value: formatMoney(summary.pendingPayment, summary.currency) },
+    { label: "Pendiente de cobro", value: formatMoney(summary.pendingPayment, summary.currency) },
     { label: "Ventas cerradas", value: String(summary.closedSalesCount) },
     { label: "Clics en tus enlaces", value: String(summary.linkClicks) },
   ];

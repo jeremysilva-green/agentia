@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { UserSignupForm } from "@/components/auth/UserSignupForm";
 import { copy } from "@/lib/copy";
@@ -13,9 +12,9 @@ export default function RegistroUsuarioPage() {
         <h1 className="font-display text-center text-2xl font-semibold text-white">
           {copy.auth.asUser}
         </h1>
-        <Card className="border-emerald-200! bg-emerald-50! p-6 sm:p-8">
+        <div className="rounded-2xl border border-emerald-500/40 bg-black/30 p-6 backdrop-blur-md sm:p-8">
           <UserSignupForm />
-        </Card>
+        </div>
         <p className="font-display-light text-center text-sm text-white/70">
           {copy.auth.hasAccount}{" "}
           <Link href="/ingresar" className="font-medium text-emerald-400 hover:underline">

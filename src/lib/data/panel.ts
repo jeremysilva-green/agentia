@@ -17,8 +17,14 @@ export async function getAgentContext() {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
+    supabase.from("profiles").select("avatar_url, full_name").eq("id", user.id).single(),
   ]);
 
-  return { userId: user.id, agentProfile, subscription, avatarUrl: profile?.avatar_url ?? null };
+  return {
+    userId: user.id,
+    agentProfile,
+    subscription,
+    avatarUrl: profile?.avatar_url ?? null,
+    fullName: profile?.full_name ?? null,
+  };
 }

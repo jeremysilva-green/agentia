@@ -26,12 +26,13 @@ export function DownloadPromoCardButton({ propertyId }: { propertyId: string }) 
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+        title={isPending ? copy.affiliatePanel.downloadingImage : copy.affiliatePanel.downloadImage}
+        aria-label={isPending ? copy.affiliatePanel.downloadingImage : copy.affiliatePanel.downloadImage}
+        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60"
       >
-        <Download size={11} />
-        {isPending ? copy.affiliatePanel.downloadingImage : copy.affiliatePanel.downloadImage}
+        <Download size={13} />
       </button>
-      {error && <p className="text-[11px] text-red-600">Error al descargar</p>}
+      {error && <p className="text-[11px] whitespace-nowrap text-red-600">Error al descargar</p>}
     </div>
   );
 }

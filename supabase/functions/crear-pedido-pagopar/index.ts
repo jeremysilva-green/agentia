@@ -16,6 +16,8 @@ Deno.serve(async (request: Request) => {
   const { data: profile } = await service.from("profiles").select("role, full_name, username, phone").eq("id", user.id).single();
   if (profile?.role !== "agent") return jsonResponse({ error: "Solo los agentes pueden pagar." }, 403);
 
+  const { data: agentProfile } = await service.from("agent_profiles").select("ruc").eq("id", user.id).maybeSingle();
+
   const { data: subscription } = await service
     .from("subscriptions")
     .select("*")
@@ -26,17 +28,19 @@ Deno.serve(async (request: Request) => {
 
   if (!subscription) return jsonResponse({ error: "No se encontró la suscripción del agente." }, 404);
 
-  const plan = subscription.plan ?? "independiente";
-  const amount = PLAN_PRICES_PYG[plan as "independiente" | "exclusivo"];
+  const plan = subscription.plan ?? "basico";
+  const amount = PLAN_PRICES_PYG[plan as "basico" | "pro" | "fundador"];
   const idPedidoComercio = `chk-${user.id.slice(0, 8)}-${Date.now()}`;
 
   const pedido = await iniciarTransaccion({
     idPedidoComercio,
     montoTotal: amount,
+    descripcion: `Suscripcion Agently - Plan ${plan}`,
     comprador: {
       email: user.email ?? "",
       nombre: profile.full_name || profile.username || "Agente",
       telefono: profile.phone ?? "",
+      ruc: agentProfile?.ruc ?? undefined,
     },
   });
 
@@ -45,7 +49,7 @@ Deno.serve(async (request: Request) => {
     return jsonResponse({ error: `No se pudo iniciar el pago: ${pedido.resultado}` }, 502);
   }
 
-  const hash = pedido.resultado.data;
+  const hash = pedido.resultado[0].data;
 
   await service
     .from("subscriptions")

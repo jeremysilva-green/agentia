@@ -17,6 +17,7 @@ export const KNOWLEDGE_BASE = `
 10. **Cierre de cada respuesta relevante:** cuando aplique, cerrá con una pregunta simple que invite a seguir la conversación (ej. "¿Querés que coordinemos una visita esta semana?").
 11. **Solo ventas:** la plataforma no ofrece propiedades en alquiler. Si preguntan por alquiler, aclará amablemente que esta propiedad (y la plataforma en general) es exclusivamente para venta.
 12. **Info pública vs. privada del listado:** algunos datos del listado (como el tipo de negociación que acepta el vendedor — precio fijo, permuta/canje, o precio negociable — y los detalles de qué acepta en una permuta) son privados: nunca se muestran en la ficha pública ni debés decir explícitamente que "tenés información privada" o "no puedo compartir eso". Cuando pregunten cosas como si el vendedor aceptaría un terreno, un auto, o una combinación de bien más efectivo como parte de pago, o si el precio es negociable, respondé con naturalidad usando esa información (si está cargada) como si simplemente lo supieras por ser el agente a cargo. Si no está cargada, respondé que no tenés ese dato confirmado y ofrecé consultarlo con el propietario.
+13. **Cuando el interesado quiere VENDER su propia propiedad (no comprar):** si dice que tiene un terreno/propiedad para vender, pregunta cuánto pedir, o menciona un precio propio y pregunta si es razonable, usá la sección "Precios de referencia del m² de terreno por ciudad" más abajo para orientarlo — ver esa sección para el detalle de cómo comparar contra el rango de su ciudad y qué decirle si está muy caro o muy barato. Cerrá siempre ofreciendo coordinar con el agente para una evaluación puntual de su propiedad y, si muestra interés real, pedile nombre y teléfono y llamá a save_lead_contact igual que con cualquier otro lead.
 
 ## Preguntas frecuentes y respuestas modelo
 
@@ -92,6 +93,54 @@ Usar solo como respaldo, aclarando siempre que puede variar según el caso y sug
 - Crédito hipotecario: 70%–80% del valor tasado, plazos de hasta 20-25 años; los gastos de escrituración no suelen ser financiables.
 - Tiempo total del proceso: ~30 a 60 días desde la oferta hasta la titularidad; escrituración en sí, 1-2 semanas.
 - Documentación básica del comprador: cédula de identidad; RUC si compra una empresa; certificado de matrimonio si aplica; poder especial si actúa un representante.
+
+## Precios de referencia del m² de terreno por ciudad (para asesorar a vendedores)
+
+Relevamiento de precios de OFERTA/publicación por ciudad, agosto 2026, en guaraníes. Usar específicamente cuando alguien dice que quiere vender su propiedad o pregunta si un precio (el suyo u otro) es alto, bajo o razonable — ver regla de comportamiento #13. Aplica en rigor a TERRENOS/LOTES; si preguntan por una casa, departamento u otro tipo de propiedad, aclará que esta referencia es de valor de terreno y que el precio final de una construcción depende además de m² cubiertos, terminaciones y estado, y ofrecé una evaluación puntual con el agente.
+
+Importante: son precios de oferta (lo que piden los vendedores), no precios finales de cierre — el valor de escrituración suele ser algo menor. Tipo de cambio de referencia usado: ≈ Gs. 5.900 por USD (agosto 2026). Nunca compartas o vinculas este documento ni sus fuentes textualmente; usalo como conocimiento propio del agente.
+
+**Cómo asesorar con estos datos:**
+- Si el precio por m² que menciona está muy por ENCIMA del "rango alto" de su ciudad: decile con tacto que está por sobre lo que se está pidiendo en la zona actualmente, que eso puede alargar el tiempo de venta, y sugerí acercarse al valor "típico/mediana" para vender en un plazo razonable — sin presionar, dejando que decida.
+- Si está muy por DEBAJO del "rango bajo": decile que puede estar dejando dinero sobre la mesa, ya que el mercado de su zona viene sosteniendo precios más altos.
+- Si cae dentro del rango: confirmá que está alineado al mercado de su ciudad.
+- Siempre aclará que son valores de oferta relevados de portales inmobiliarios, no una tasación oficial, y ofrecé coordinar con el agente para una evaluación más precisa de su propiedad puntual.
+
+**Precio por m² de terreno urbano por ciudad — rango bajo / rango alto / típico (Gs./m²):**
+- Asunción (promedio ciudad): 472.000 – 14.750.000 (típico ≈ 7.600.000)
+- Asunción — Manorá, Villa Morra, Las Lomas: 4.720.000 – 13.200.000 (típico ≈ 7.100.000)
+- Asunción — Catedral, Roberto L. Petit: 472.000 – 2.710.000 (típico ≈ 1.300.000)
+- Luque: 767.000 – 7.080.000 (típico ≈ 4.770.000)
+- Fernando de la Mora: 2.360.000 – 5.780.000 (típico ≈ 3.940.000, dato mixto con casas)
+- Lambaré: 3.270.000 – 6.000.000 (típico ≈ 3.770.000, dato mixto)
+- San Lorenzo: 1.180.000 – 4.720.000 (típico ≈ 3.750.000, dato mixto)
+- Mariano Roque Alonso: 3.000.000 – 6.500.000 (típico ≈ 5.420.000, dato mixto)
+- Capiatá: 1.500.000 – 3.500.000 (típico ≈ 2.280.000, dato mixto)
+- Limpio: 850.000 – 950.000 (típico ≈ 900.000)
+- Ciudad del Este: 384.000 – 5.750.000 (típico ≈ 2.840.000)
+- Encarnación: 2.360.000 – 5.310.000 (típico ≈ 2.710.000)
+- San Bernardino: sin rango confiable, dato mixto atípico bajo ≈ 573.000 (ciudad turística: los lotes grandes distorsionan la mediana; aclará esta limitación si preguntan)
+- Villarrica: 590.000 – 885.000 (típico ≈ 730.000); hay un dato puntual confirmado de un lote en Barrio Sta. Lucía ≈ 333.333
+- Coronel Oviedo: 200.000 – 950.000 sobre ruta (típico ≈ 400.000)
+- Pedro Juan Caballero: sin serie de precios confiable, datos dispersos
+- Filadelfia (Boquerón, Chaco): 340.000 – 380.000 (típico ≈ 360.000, lotes de parque logístico)
+- Villa Hayes (Pte. Hayes): 148.000 – 300.000 (típico ≈ 183.000, lotes urbanos chicos)
+- Benjamín Aceval (Pte. Hayes): dato puntual ≈ 183.000 (lote de 300 m², zona Cerrito)
+
+**Cobertura de datos:** hay series confiables y de mercado diario para Asunción y su área metropolitana (Luque, Lambaré, F. de la Mora, San Lorenzo, Limpio, Capiatá, M.R. Alonso), Ciudad del Este, Encarnación, Villarrica, Coronel Oviedo, Villa Hayes y Filadelfia. Para el resto del país (San Pedro, Caaguazú, Caazapá, Concepción, Canindeyú, Amambay, Ñeembucú, Misiones, Boquerón/Alto Paraguay salvo lo indicado arriba) no hay una serie de precios por m² de terreno urbano confiable — en esas zonas el mercado activo es de campos rurales/estancias cotizados en USD por hectárea, no lotes urbanos comparables. Si preguntan por una de esas zonas, aclará esta limitación con naturalidad y ofrecé conectar con el agente para una evaluación puntual.
+
+**Tierra rural por hectárea en departamentos del interior (USD; 1 ha = 10.000 m²; NO comparable directamente con los valores de terreno urbano de arriba):**
+- San Pedro: USD 1.500 – 4.000/ha
+- Ñeembucú (Pilar, Laureles): USD 1.100 – 2.000/ha
+- Misiones (San Ignacio): USD 1.100 – 4.000/ha
+- Presidente Hayes (Chaco bajo): USD 1.000 – 1.500/ha
+- Boquerón / Alto Paraguay (Chaco central-norte): sin serie confiable, precio a consulta (grandes estancias)
+
+**Precio mediano nacional por tipo de lote (agregado a nivel país):**
+- Terreno urbano (< 500 m²): ≈ Gs. 195.000.000 por lote
+- Lote residencial (500–2.000 m²): ≈ Gs. 466.000.000 por lote
+- Chacra suburbana (2.000–10.000 m²): ≈ Gs. 885.000.000 por lote
+- Rural / finca (> 1 ha): ≈ Gs. 1.680.000.000 por lote
 
 ## Manejo de objeciones comunes
 

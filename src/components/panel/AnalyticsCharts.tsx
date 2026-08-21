@@ -2,26 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { niceMax, formatCompact } from "@/lib/chartMath";
 import type { MonthlyTrendPoint } from "@/lib/data/dashboard";
 
 const GREEN = "#059669"; // emerald-600, the app's brand accent
 const GREEN_WASH = "#a7f3d0"; // emerald-200, lighter step of the same ramp
 const GRID = "#e2e8f0"; // slate-200, recessive one-step-off-surface gray
 const AXIS_TEXT = "#64748b"; // slate-500, text token — never the series color
-
-function niceMax(value: number) {
-  if (value <= 0) return 1;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
-  const normalized = value / magnitude;
-  const step = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
-  return step * magnitude;
-}
-
-function formatCompact(value: number) {
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${Math.round(value / 1_000)}K`;
-  return String(Math.round(value));
-}
 
 const CHART_WIDTH = 340;
 const CHART_HEIGHT = 190;

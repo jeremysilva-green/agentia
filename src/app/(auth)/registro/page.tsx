@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { Briefcase, User } from "lucide-react";
-import { Card } from "@/components/ui/Card";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { copy } from "@/lib/copy";
-import { PLANS } from "@/lib/plans";
-
-function formatGs(amount: number) {
-  return `Gs. ${amount.toLocaleString("es-PY")}`;
-}
 
 export default function RegistroPage() {
   return (
@@ -22,29 +16,26 @@ export default function RegistroPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Link href="/registro/agente?tipo=independiente">
-            <Card className="flex h-full flex-col items-center gap-3 border-emerald-200! bg-emerald-50! p-6 text-center transition-shadow hover:shadow-md">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+          <Link href="/registro/agente">
+            <div className="flex h-full flex-col items-center gap-3 rounded-2xl border border-emerald-500/40 bg-black/30 p-6 text-center backdrop-blur-md transition-transform duration-300 ease-out hover:scale-[1.03]">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <Briefcase size={22} />
               </span>
-              <h2 className="font-display text-lg font-semibold text-prussian">{copy.auth.asAgentIndependent}</h2>
-              <p className="font-display-light text-sm text-slate-600">{copy.auth.asAgentIndependentDesc}</p>
-              <p className="font-display-light mt-auto text-base font-semibold text-prussian">
-                {formatGs(PLANS.independiente.price)}
-                <span className="text-sm font-normal text-slate-600">{copy.auth.perMonth}</span>
-              </p>
-            </Card>
+              <h2 className="font-display text-lg font-semibold text-white">{copy.auth.asAgentIndependent}</h2>
+              <p className="font-display-light text-sm text-white/60">{copy.auth.asAgentIndependentDesc}</p>
+              <p className="font-display-light mt-auto text-base font-semibold text-emerald-400">{copy.auth.free}</p>
+            </div>
           </Link>
 
           <Link href="/registro/usuario">
-            <Card className="flex h-full flex-col items-center gap-3 border-emerald-200! bg-emerald-50! p-6 text-center transition-shadow hover:shadow-md">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <div className="flex h-full flex-col items-center gap-3 rounded-2xl border border-emerald-500/40 bg-black/30 p-6 text-center backdrop-blur-md transition-transform duration-300 ease-out hover:scale-[1.03]">
+              <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
                 <User size={22} />
               </span>
-              <h2 className="font-display text-lg font-semibold text-prussian">{copy.auth.asUser}</h2>
-              <p className="font-display-light text-sm text-slate-600">{copy.auth.asUserDesc}</p>
-              <p className="font-display-light mt-auto text-base font-semibold text-prussian">{copy.auth.free}</p>
-            </Card>
+              <h2 className="font-display text-lg font-semibold text-white">{copy.auth.asUser}</h2>
+              <p className="font-display-light text-sm text-white/60">{copy.auth.asUserDesc}</p>
+              <p className="font-display-light mt-auto text-base font-semibold text-emerald-400">{copy.auth.free}</p>
+            </div>
           </Link>
         </div>
 

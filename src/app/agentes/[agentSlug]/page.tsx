@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
 import { ClientRequestTabs } from "@/components/marketplace/ClientRequestTabs";
 import { RateAgentWidget } from "@/components/property/RateAgentWidget";
+import { PortfolioTracker } from "@/components/property/PortfolioTracker";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { parsePropertyTypeParam } from "@/lib/constants/propertyTypes";
 
@@ -18,7 +19,13 @@ export default async function AgentPortfolioPage({
   searchParams,
 }: {
   params: Promise<{ agentSlug: string }>;
-  searchParams: Promise<{ city?: string; listingType?: string; propertyType?: string | string[] }>;
+  searchParams: Promise<{
+    city?: string;
+    listingType?: string;
+    propertyType?: string | string[];
+    minPrice?: string;
+    maxPrice?: string;
+  }>;
 }) {
   const { agentSlug } = await params;
   const filters = await searchParams;
@@ -35,6 +42,8 @@ export default async function AgentPortfolioPage({
       city: filters.city || undefined,
       listingType: filters.listingType === "rent" || filters.listingType === "sale" ? filters.listingType : undefined,
       propertyType: parsePropertyTypeParam(filters.propertyType),
+      minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
+      maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
     }),
     getAgentRatingSummary(agent.id),
   ]);
@@ -53,6 +62,7 @@ export default async function AgentPortfolioPage({
   return (
     <div className="relative min-h-screen overflow-hidden bg-white">
       <InteractiveBackground />
+      <PortfolioTracker agentId={agent.id} />
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
         <div className="flex items-center gap-3">
           {isOwner ? (

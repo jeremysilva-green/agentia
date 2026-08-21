@@ -14,6 +14,7 @@ export function SingleSelectDropdown({
   buttonClassName,
   panelClassName,
   onChange,
+  error,
 }: {
   name: string;
   label: string;
@@ -24,6 +25,7 @@ export function SingleSelectDropdown({
   buttonClassName?: string;
   panelClassName?: string;
   onChange?: (value: string) => void;
+  error?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(defaultValue);
@@ -54,12 +56,14 @@ export function SingleSelectDropdown({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-snow px-3 text-sm font-medium text-slate-700 outline-none transition-colors hover:bg-bone/30 focus:border-white focus:ring-2 focus:ring-white/40",
+          error && "border-red-400 focus:border-red-500 focus:ring-red-100",
           buttonClassName
         )}
       >
         <span className="truncate">{current ? `${label}: ${current.label}` : label}</span>
         <ChevronDown size={16} className={cn("shrink-0 text-slate-400 transition-transform", open && "rotate-180")} />
       </button>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
 
       {open && (
         <div

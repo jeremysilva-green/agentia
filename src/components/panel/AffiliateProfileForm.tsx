@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState, type ChangeEvent } from "react";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -19,6 +19,9 @@ export function AffiliateProfileForm({
   phone: string | null;
 }) {
   const [state, formAction, pending] = useActionState(updateAffiliateProfile, undefined);
+  const [values, setValues] = useState({ alias: alias ?? "", phone: phone ?? "" });
+  const setField = (name: keyof typeof values) => (e: ChangeEvent<HTMLInputElement>) =>
+    setValues((prev) => ({ ...prev, [name]: e.target.value }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,7 +35,9 @@ export function AffiliateProfileForm({
           id="alias"
           name="alias"
           label={copy.profile.alias}
-          defaultValue={alias ?? ""}
+          value={values.alias}
+          onChange={setField("alias")}
+          error={state?.fieldErrors?.alias}
           className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
 
@@ -41,11 +46,13 @@ export function AffiliateProfileForm({
           name="phone"
           type="tel"
           label={copy.profile.phone}
-          defaultValue={phone ?? ""}
+          value={values.phone}
+          onChange={setField("phone")}
+          error={state?.fieldErrors?.phone}
           className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
 
-        {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state?.error && !state.fieldErrors && <p className="text-sm text-red-600">{state.error}</p>}
         {state?.success && <p className="text-sm text-emerald-600">{copy.profile.saved}</p>}
 
         <Button type="submit" size="md" className="self-start" disabled={pending}>

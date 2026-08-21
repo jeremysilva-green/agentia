@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { PanelNav } from "@/components/panel/PanelNav";
+import { getPanelNotifications } from "@/lib/data/panelNotifications";
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -19,12 +20,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
 
   if (profile?.role !== "agent") redirect("/");
 
+  const notifications = await getPanelNotifications(user.id);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-neutral-900">
       <InteractiveBackground dotColor="rgb(255 255 255 / 0.14)" spotColor="rgb(52 211 153 / 0.9)" />
       <div className="font-display-light relative mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
         <aside className="lg:w-56 lg:shrink-0">
-          <PanelNav variant="agent" />
+          <PanelNav variant="agent" notifications={notifications} />
         </aside>
         <div className="min-w-0 flex-1">{children}</div>
       </div>

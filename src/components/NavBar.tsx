@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { LayoutDashboard, MessageCircle } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getDictionary } from "@/lib/i18n/locale";
 import { LogoutButton } from "@/components/LogoutButton";
 import { TermsModal } from "@/components/legal/TermsModal";
+import { NavMenu } from "@/components/NavMenu";
 
 export async function NavBar() {
   const supabase = await createClient();
@@ -33,23 +34,13 @@ export async function NavBar() {
             <span className="font-display text-2xl uppercase tracking-tight text-white sm:text-5xl">AGENTIA</span>
           </Link>
 
-          <nav className="flex items-center gap-2.5 font-display sm:gap-6">
+          <nav className="flex items-center gap-2.5 font-display print:hidden sm:gap-6">
             <Link
-              href="/que-es-agentia"
-              className="hidden text-sm font-medium text-white/90 transition-colors hover:text-white sm:block"
+              href="/inicio"
+              className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
             >
-              ¿Qué es Agentia?
+              Inicio
             </Link>
-
-            <a
-              href="https://chat.whatsapp.com/BahpSvfmwIGLj7fSkAGijz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden h-10 items-center justify-center gap-1.5 rounded-md border border-[#25D366] bg-black px-3 text-sm font-medium text-[#25D366] shadow-[0_0_8px_rgba(37,211,102,0.7),0_0_16px_rgba(37,211,102,0.4)] transition-all hover:shadow-[0_0_12px_rgba(37,211,102,0.9),0_0_28px_rgba(37,211,102,0.6)] sm:inline-flex sm:px-4"
-            >
-              <MessageCircle size={16} />
-              <span className="hidden sm:inline">Comunidad WhatsApp</span>
-            </a>
 
             {user && role === "agent" && (
               <Link
@@ -89,6 +80,8 @@ export async function NavBar() {
             )}
 
             {user && <LogoutButton locale={locale} />}
+
+            <NavMenu />
           </nav>
         </div>
       </header>

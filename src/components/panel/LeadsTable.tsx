@@ -1,12 +1,28 @@
+import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { LeadStatusSelect } from "@/components/panel/LeadStatusSelect";
 import { CloseDealButton } from "@/components/panel/CloseDealButton";
 import { MarkPaidButton } from "@/components/panel/MarkPaidButton";
-import { getPublicStorageUrl } from "@/lib/storage";
 import { copy } from "@/lib/copy";
 import type { LeadPipelineRow } from "@/types/domain";
 
-export function LeadsTable({ rows }: { rows: LeadPipelineRow[] }) {
+const AFFILIATE_PAYMENT_WINDOW_DAYS = 180;
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("es-PY", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+// Counts down from the moment the deal closed (commission_confirmed_at) so
+// the agent has a visible reminder of how long they have left to pay out
+// the affiliate's commission.
+function daysRemainingToPay(commissionConfirmedAt: string) {
+  const deadline = new Date(commissionConfirmedAt);
+  deadline.setDate(deadline.getDate() + AFFILIATE_PAYMENT_WINDOW_DAYS);
+  const msRemaining = deadline.getTime() - Date.now();
+  return Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
+}
+
+export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug: string }) {
   if (rows.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
@@ -22,11 +38,11 @@ export function LeadsTable({ rows }: { rows: LeadPipelineRow[] }) {
           <tr>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.buyer}</th>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.properties}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.date}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.traffic}</th>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.referralCode}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.referredBy}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.protectedUntil}</th>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.status}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.report}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.agreement}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -36,18 +52,27 @@ export function LeadsTable({ rows }: { rows: LeadPipelineRow[] }) {
                 <p className="font-medium text-slate-900">{row.buyer_name}</p>
                 <p className="text-slate-500">{row.buyer_phone}</p>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-900">{row.property_title}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-500">{row.referral_code}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-slate-900">
+                <span className="inline-flex items-center gap-1.5">
+                  {row.property_title}
+                  {row.property_id && (
+                    <a
+                      href={`/agentes/${agentSlug}/propiedades/${row.property_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 transition-colors hover:text-emerald-600"
+                      title="Ver propiedad"
+                    >
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </span>
+              </td>
+              <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(row.referral_date)}</td>
               <td className="whitespace-nowrap px-4 py-3 text-slate-700">
-                {row.affiliate_username ? `@${row.affiliate_username}` : copy.panel.directTraffic}
+                {row.affiliate_link_id ? copy.panel.trafficAffiliate : copy.panel.trafficOrganic}
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-500">
-                {new Date(row.protected_until).toLocaleDateString("es-PY", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </td>
+              <td className="whitespace-nowrap px-4 py-3 text-slate-500">{row.referral_code}</td>
               <td className="whitespace-nowrap px-4 py-3">
                 <LeadStatusSelect leadId={row.id} status={row.status} hasAffiliate={Boolean(row.affiliate_link_id)} />
               </td>
@@ -59,25 +84,18 @@ export function LeadsTable({ rows }: { rows: LeadPipelineRow[] }) {
                     currency={row.property_currency}
                   />
                 )}
-                {row.commission_confirmed_at && row.report_path && (
-                  <div className="flex flex-col items-start gap-1.5">
-                    <div className="flex items-center gap-2">
-                      <Badge tone="success">{copy.panel.statusCerrado}</Badge>
-                      <a
-                        href={getPublicStorageUrl("deal-reports", row.report_path)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-medium text-emerald-700 hover:underline"
-                      >
-                        {copy.panel.downloadReport}
-                      </a>
-                    </div>
-                    {row.affiliate_link_id &&
-                      (row.commission_paid_at ? (
-                        <Badge tone="success">Comisión pagada</Badge>
-                      ) : (
+                {row.commission_confirmed_at && row.affiliate_link_id && (
+                  <div className="flex flex-col items-start gap-1">
+                    {row.commission_paid_at ? (
+                      <Badge tone="success">{copy.panel.commissionPaid}</Badge>
+                    ) : (
+                      <>
+                        <span className="text-[11px] font-medium text-amber-700">
+                          {copy.panel.payAffiliateDaysRemaining(daysRemainingToPay(row.commission_confirmed_at))}
+                        </span>
                         <MarkPaidButton leadId={row.id} />
-                      ))}
+                      </>
+                    )}
                   </div>
                 )}
               </td>

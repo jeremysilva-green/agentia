@@ -20,7 +20,7 @@ export async function updateLeadStatus(leadId: string, status: LeadStatus): Prom
 
   const { data: lead } = await supabase
     .from("leads")
-    .select("id, agent_id, affiliate_link_id")
+    .select("id, agent_id, affiliate_link_id, property_id")
     .eq("id", leadId)
     .single();
   if (!lead || lead.agent_id !== user.id) return { error: "No se encontró el lead." };
@@ -31,6 +31,20 @@ export async function updateLeadStatus(leadId: string, status: LeadStatus): Prom
   const service = createServiceClient();
   const { error } = await service.from("leads").update({ status }).eq("id", leadId);
   if (error) return { error: "No se pudo actualizar el estado." };
+
+  // Marking a lead sold means the property itself is sold — flip its status
+  // too so it stops showing as available and any affiliates who promoted it
+  // (even via a different, non-winning lead) see it in their "Avisos" tab.
+  // Leads sourced from a Cliente Vendedor/Comprador submission have no
+  // property yet, so there's nothing to sync in that case.
+  if (status === "sold" && lead.property_id) {
+    await service
+      .from("properties")
+      .update({ status: "sold", sold_at: new Date().toISOString() })
+      .eq("id", lead.property_id);
+    revalidatePath("/panel/propiedades");
+    revalidatePath("/");
+  }
 
   revalidatePath("/panel/leads");
   revalidatePath("/panel-afiliado");

@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CreditCard } from "lucide-react";
+import { CreditCard, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { getAgentContext } from "@/lib/data/panel";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { SubscriptionStatusBadge } from "@/components/panel/SubscriptionStatusBadge";
 import { PagoparCheckoutButton } from "@/components/panel/PagoparCheckoutButton";
 import { CancelSubscriptionButton } from "@/components/panel/CancelSubscriptionButton";
-import { PLANS, isPlanId } from "@/lib/plans";
+import { PricingPlans } from "@/components/panel/PricingPlans";
+import { PLANS, isPlanId, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
 import { copy } from "@/lib/copy";
 
 function daysUntil(isoDate: string) {
@@ -20,12 +22,19 @@ export default async function SuscripcionPage() {
   if (!ctx) redirect("/ingresar");
 
   const supabase = await createClient();
-  const { data: payments } = await supabase
-    .from("payments")
-    .select("*")
-    .eq("subscription_id", ctx.subscription?.id ?? "")
-    .order("created_at", { ascending: false })
-    .limit(10);
+  const service = createServiceClient();
+  const [{ data: payments }, { count: fundadorCount }] = await Promise.all([
+    supabase
+      .from("payments")
+      .select("*")
+      .eq("subscription_id", ctx.subscription?.id ?? "")
+      .order("created_at", { ascending: false })
+      .limit(10),
+    // Sitewide count, so this needs the service client — RLS scopes the
+    // request-scoped client's subscription reads to the agent's own row.
+    service.from("subscriptions").select("id", { count: "exact", head: true }).eq("plan", "fundador"),
+  ]);
+  const fundadorSeatsRemaining = Math.max(0, FUNDADOR_SEAT_LIMIT - (fundadorCount ?? 0));
 
   const status = ctx.subscription?.status;
   const currentPlan = ctx.subscription?.plan && isPlanId(ctx.subscription.plan) ? ctx.subscription.plan : null;
@@ -64,29 +73,30 @@ export default async function SuscripcionPage() {
       )}
 
       {currentPlan && (
-        <Card className="flex flex-col gap-2 border-emerald-100! bg-emerald-50! p-6 sm:p-8">
-          <p className="text-sm text-slate-500">Plan actual</p>
-          <p className="text-2xl font-semibold text-slate-900">
+        <Card className="flex flex-col gap-2 border-emerald-500/40! bg-black/30! p-6 backdrop-blur-md sm:p-8">
+          <p className="text-sm text-slate-300">Plan actual</p>
+          <p className="text-2xl font-semibold text-white">
             {PLANS[currentPlan].name}
-            <span className="ml-2 text-base font-normal text-slate-500">
-              {new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG" }).format(
-                PLANS[currentPlan].price
-              )}
-              /mes
+            <span className="ml-2 text-base font-normal text-slate-300">
+              {PLANS[currentPlan].price === 0
+                ? "Gratis"
+                : `${new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG" }).format(
+                    PLANS[currentPlan].price
+                  )}/mes`}
             </span>
           </p>
           {ctx.subscription?.period_end && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-300">
               {status === "active" ? "Próximo cobro" : status === "trialing" ? "Fin de la prueba" : "Venció el"}{" "}
               {new Date(ctx.subscription.period_end).toLocaleDateString("es-PY")}
             </p>
           )}
-          <p className="text-sm text-slate-500">
-            Tarjeta guardada: <span className="font-medium text-slate-700">{cardOnFile ? "Sí" : "No"}</span>
+          <p className="text-sm text-slate-300">
+            Tarjeta guardada: <span className="font-medium text-slate-100">{cardOnFile ? "Sí" : "No"}</span>
             {cardOnFile && ctx.agentProfile?.proveedor_tarjeta && ` (${ctx.agentProfile.proveedor_tarjeta})`}
           </p>
           {(status === "active" || status === "trialing") && (
-            <div className="mt-2 border-t border-slate-100 pt-4">
+            <div className="mt-2 border-t border-white/10 pt-4">
               <CancelSubscriptionButton />
             </div>
           )}
@@ -106,17 +116,11 @@ export default async function SuscripcionPage() {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <PagoparCheckoutButton label="Pagar ahora" />
-            <Link href="/panel/suscripcion/tarjeta">
-              <Button type="button" size="lg" variant="secondary">
-                <CreditCard size={16} />
-                Guardar tarjeta
-              </Button>
-            </Link>
           </div>
         </div>
       )}
 
-      {status === "active" && !cardOnFile && (
+      {status === "active" && !cardOnFile && currentPlan !== "basico" && (
         <Card className="flex flex-wrap items-center justify-between gap-3 border-sky-100! bg-sky-50! p-4">
           <p className="text-sm text-slate-600">Guardá una tarjeta para que tus próximas renovaciones sean automáticas.</p>
           <Link href="/panel/suscripcion/tarjeta">
@@ -128,40 +132,50 @@ export default async function SuscripcionPage() {
         </Card>
       )}
 
+      <div className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Planes</h2>
+        <PricingPlans currentPlan={currentPlan} fundadorSeatsRemaining={fundadorSeatsRemaining} />
+      </div>
+
       {payments && payments.length > 0 && (
-        <Card className="overflow-hidden border-emerald-100! bg-emerald-50!">
-          <div className="border-b border-emerald-100 px-5 py-3">
-            <h2 className="text-sm font-semibold text-slate-700">Historial de pagos</h2>
-          </div>
-          <div className="divide-y divide-emerald-100">
-            {payments.map((payment) => (
-              <div key={payment.id} className="flex items-center justify-between px-5 py-3 text-sm">
-                <span className="text-slate-500">
-                  {new Date(payment.created_at).toLocaleDateString("es-PY")}
-                </span>
-                <span className="text-slate-500">{payment.plan ? PLANS[payment.plan].name : "—"}</span>
-                <span className="text-slate-700">
-                  {new Intl.NumberFormat("es-PY", { style: "currency", currency: payment.currency }).format(
-                    payment.amount
-                  )}
-                </span>
-                <span
-                  className={
-                    payment.status === "approved"
-                      ? "font-medium text-emerald-600"
-                      : payment.status === "rejected" || payment.status === "error"
-                        ? "font-medium text-red-600"
-                        : "font-medium text-amber-600"
-                  }
-                >
-                  {payment.status === "approved" && "Aprobado"}
-                  {payment.status === "rejected" && "Rechazado"}
-                  {payment.status === "error" && "Error"}
-                  {payment.status === "initiated" && "Pendiente"}
-                </span>
-              </div>
-            ))}
-          </div>
+        <Card className="overflow-hidden border-emerald-500/40! bg-black/30! backdrop-blur-md">
+          <details className="group">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-5 py-3 text-sm font-semibold text-white [&::-webkit-details-marker]:hidden">
+              <span>
+                Historial de pagos <span className="text-slate-400">({payments.length})</span>
+              </span>
+              <ChevronDown size={16} className="shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="max-h-72 divide-y divide-white/10 overflow-y-auto border-t border-white/10">
+              {payments.map((payment) => (
+                <div key={payment.id} className="flex items-center justify-between px-5 py-3 text-sm">
+                  <span className="text-slate-400">
+                    {new Date(payment.created_at).toLocaleDateString("es-PY")}
+                  </span>
+                  <span className="text-slate-400">{payment.plan ? PLANS[payment.plan].name : "—"}</span>
+                  <span className="text-slate-200">
+                    {new Intl.NumberFormat("es-PY", { style: "currency", currency: payment.currency }).format(
+                      payment.amount
+                    )}
+                  </span>
+                  <span
+                    className={
+                      payment.status === "approved"
+                        ? "font-medium text-emerald-400"
+                        : payment.status === "rejected" || payment.status === "error"
+                          ? "font-medium text-red-400"
+                          : "font-medium text-amber-400"
+                    }
+                  >
+                    {payment.status === "approved" && "Aprobado"}
+                    {payment.status === "rejected" && "Rechazado"}
+                    {payment.status === "error" && "Error"}
+                    {payment.status === "initiated" && "Pendiente"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </details>
         </Card>
       )}
     </div>

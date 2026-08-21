@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Building2, CheckCircle2, Users, Wallet } from "lucide-react";
+import { Building2, CheckCircle2, Users, Wallet, Lock, Pencil } from "lucide-react";
 import { getAgentContext } from "@/lib/data/panel";
 import { getAgentDashboardStats, getAgentMonthlyTrend } from "@/lib/data/dashboard";
 import { Card } from "@/components/ui/Card";
@@ -25,6 +25,7 @@ export default async function PanelOverviewPage() {
     getAgentMonthlyTrend(ctx.userId),
   ]);
   const isActive = ctx.agentProfile?.is_active ?? false;
+  const hasAdvancedStats = ctx.subscription?.plan !== "basico";
 
   const statCards = [
     {
@@ -62,8 +63,21 @@ export default async function PanelOverviewPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.overview}</h1>
-        <div className="flex items-center gap-3">
-          <AvatarUploader userId={ctx.userId} initialAvatarUrl={ctx.avatarUrl} variant="compact" />
+        <div className="flex items-start gap-3">
+          <div className="pt-1 text-right">
+            <p className="font-display text-sm font-semibold text-white">{ctx.fullName ?? "Agente"}</p>
+            {ctx.agentProfile?.ruc && <p className="text-xs text-slate-300">RUC: {ctx.agentProfile.ruc}</p>}
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <AvatarUploader userId={ctx.userId} initialAvatarUrl={ctx.avatarUrl} variant="compact" />
+            <Link
+              href="/panel/perfil"
+              className="flex items-center gap-1 text-xs font-medium text-white/70 hover:text-white"
+            >
+              <Pencil size={11} />
+              {copy.panel.editProfile}
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -82,7 +96,7 @@ export default async function PanelOverviewPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Analíticas</h2>
-        <MonthlyReportButton />
+        {hasAdvancedStats && <MonthlyReportButton />}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -100,7 +114,24 @@ export default async function PanelOverviewPage() {
         ))}
       </div>
 
-      <AnalyticsCharts data={monthlyTrend} />
+      {hasAdvancedStats ? (
+        <AnalyticsCharts data={monthlyTrend} />
+      ) : (
+        <Card className="flex flex-col items-center gap-2 border-emerald-100! bg-emerald-50! p-8 text-center">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-500">
+            <Lock size={18} />
+          </span>
+          <p className="text-sm font-medium text-slate-700">Las estadísticas avanzadas son parte del plan Pro</p>
+          <p className="text-xs text-slate-500">
+            Interacciones, ventas y balance de ingreso mes a mes, más el reporte descargable.
+          </p>
+          <Link href="/panel/suscripcion">
+            <Button size="sm" className="mt-1 bg-emerald-600! text-white! hover:bg-emerald-700!">
+              Ver plan Pro
+            </Button>
+          </Link>
+        </Card>
+      )}
     </div>
   );
 }

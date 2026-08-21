@@ -84,3 +84,107 @@ export async function createSingleBuy(params: SingleBuyParams): Promise<{ proces
 export function buildBancardPaymentUrl(processId: string) {
   return `${ENVIRONMENT_URL}/payment/single_buy?process_id=${encodeURIComponent(processId)}`;
 }
+
+// ---------------------------------------------------------------------------
+// Card tokenization / recurring charges ("Zimple"-style token purchases).
+//
+// UNVERIFIED — Bancard's public docs cover "Compra Simple" (single_buy) in
+// full, but the token-registration endpoint/field names below are Bancard's
+// direct-tokenization product as best understood without access to their
+// merchant developer portal (comercios.bancard.com.py) or real credentials.
+// Confirm every endpoint path and field name here against Bancard's actual
+// docs before taking a real card. The Bancard.Cards.createForm widget itself
+// (loaded client-side from bancard-checkout-2.1.0.js) is Bancard's own and
+// already proven working in this codebase via the Pagopar-mediated flow —
+// only the request that generates the process_id fed into it, and the
+// charge-with-token call, are new/unverified here.
+// ---------------------------------------------------------------------------
+
+export function buildCardTokenRequestToken(shopProcessId: number) {
+  const privateKey = requireEnv("BANCARD_PRIVATE_KEY");
+  return md5(`${privateKey}${shopProcessId}new-card`);
+}
+
+type CardTokenResponse = { status: "success"; process_id: string } | { status: "error"; messages?: unknown };
+
+/** Requests a process_id to feed into the Bancard.Cards.createForm widget. */
+export async function createCardTokenRequest(params: {
+  shopProcessId: number;
+  returnUrl: string;
+}): Promise<{ processId: string }> {
+  const publicKey = requireEnv("BANCARD_PUBLIC_KEY");
+  const token = buildCardTokenRequestToken(params.shopProcessId);
+
+  const response = await fetch(`${ENVIRONMENT_URL}/vpos/api/0.3/cards/new`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      public_key: publicKey,
+      operation: {
+        token,
+        shop_process_id: params.shopProcessId,
+        return_url: params.returnUrl,
+      },
+    }),
+  });
+
+  const data = (await response.json()) as CardTokenResponse;
+  if (data.status !== "success" || !data.process_id) {
+    throw new Error("Bancard rechazó la solicitud de catastro de tarjeta");
+  }
+
+  return { processId: data.process_id };
+}
+
+export function buildAliasChargeToken(shopProcessId: number, amount: string, currency: string) {
+  const privateKey = requireEnv("BANCARD_PRIVATE_KEY");
+  return md5(`${privateKey}${shopProcessId}${amount}${currency}`);
+}
+
+type AliasChargeResponse =
+  | { status: "success"; confirmation: { response: "S" | "N"; response_code: string; authorization_number?: string; ticket_number?: string } }
+  | { status: "error"; messages?: unknown };
+
+/**
+ * Charges a previously tokenized card directly (no redirect/hosted form) —
+ * used for recurring subscription renewals. UNVERIFIED: assumes single_buy
+ * accepts an alias_token in place of driving the user through the hosted
+ * payment page, and returns the charge result synchronously rather than via
+ * the async confirm webhook used for the first, card-entry purchase.
+ */
+export async function chargeWithAliasToken(params: {
+  shopProcessId: number;
+  amount: number;
+  currency?: string;
+  aliasToken: string;
+  description: string;
+}): Promise<{ approved: boolean; raw: unknown }> {
+  const publicKey = requireEnv("BANCARD_PUBLIC_KEY");
+  const currency = params.currency ?? "PYG";
+  const amount = formatAmount(params.amount);
+  const token = buildAliasChargeToken(params.shopProcessId, amount, currency);
+
+  const response = await fetch(`${ENVIRONMENT_URL}/vpos/api/0.3/single_buy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      public_key: publicKey,
+      operation: {
+        token,
+        shop_process_id: params.shopProcessId,
+        amount,
+        currency,
+        description: params.description.slice(0, 100),
+        alias_token: params.aliasToken,
+      },
+    }),
+  });
+
+  const data = (await response.json()) as AliasChargeResponse;
+  if (data.status !== "success") {
+    return { approved: false, raw: data };
+  }
+
+  const approved = data.confirmation.response === "S" && data.confirmation.response_code === "00";
+  return { approved, raw: data };
+}

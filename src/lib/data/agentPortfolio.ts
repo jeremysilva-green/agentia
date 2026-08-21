@@ -16,7 +16,13 @@ export async function getAgentBySlug(slug: string) {
 
 export async function getAgentProperties(
   agentId: string,
-  filters: { city?: string; listingType?: "rent" | "sale"; propertyType?: PropertyType[] }
+  filters: {
+    city?: string;
+    listingType?: "rent" | "sale";
+    propertyType?: PropertyType[];
+    minPrice?: number;
+    maxPrice?: number;
+  }
 ) {
   const supabase = await createClient();
   let query = supabase
@@ -31,6 +37,8 @@ export async function getAgentProperties(
   if (filters.propertyType && filters.propertyType.length > 0) {
     query = query.in("property_type", filters.propertyType);
   }
+  if (filters.minPrice != null) query = query.gte("price", filters.minPrice);
+  if (filters.maxPrice != null) query = query.lte("price", filters.maxPrice);
 
   const { data } = await query;
   return data ?? [];

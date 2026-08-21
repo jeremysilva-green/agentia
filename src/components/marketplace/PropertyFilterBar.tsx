@@ -4,6 +4,7 @@ import { FormEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { SingleSelectDropdown } from "@/components/ui/SingleSelectDropdown";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
@@ -57,6 +58,29 @@ export function PropertyFilterBar() {
           buttonClassName="border-emerald-500! hover:bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/30!"
           panelClassName="border-emerald-100! bg-emerald-50!"
         />
+      </div>
+
+      <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
+        <div className="min-w-0 flex-1 sm:w-24 sm:flex-none">
+          <Input
+            name="minPrice"
+            type="number"
+            min="0"
+            placeholder="Gs. Mín."
+            defaultValue={searchParams.get("minPrice") ?? ""}
+            className="w-full bg-white!"
+          />
+        </div>
+        <div className="min-w-0 flex-1 sm:w-24 sm:flex-none">
+          <Input
+            name="maxPrice"
+            type="number"
+            min="0"
+            placeholder="Gs. Máx."
+            defaultValue={searchParams.get("maxPrice") ?? ""}
+            className="w-full bg-white!"
+          />
+        </div>
       </div>
 
       <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">

@@ -5,8 +5,43 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { propertySchema } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
+import { fieldErrorsFrom } from "@/lib/formErrors";
 
-export type PropertyActionState = { error?: string } | undefined;
+export type PropertyActionState = { error?: string; fieldErrors?: Record<string, string> } | undefined;
+
+const BASICO_PROPERTY_LIMIT = 3;
+
+// Only Básico agents are capped — Pro/Fundador are unlimited. "Activas"
+// means status="available"; drafts and sold properties don't count against
+// the limit, matching the plan copy ("Hasta 3 propiedades activas").
+async function checkPropertyLimit(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  agentId: string,
+  excludePropertyId?: string
+): Promise<string | null> {
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("plan")
+    .eq("agent_id", agentId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if ((subscription?.plan ?? "basico") !== "basico") return null;
+
+  let query = supabase
+    .from("properties")
+    .select("id", { count: "exact", head: true })
+    .eq("agent_id", agentId)
+    .eq("status", "available");
+  if (excludePropertyId) query = query.neq("id", excludePropertyId);
+
+  const { count } = await query;
+  if ((count ?? 0) >= BASICO_PROPERTY_LIMIT) {
+    return "Alcanzaste el límite de 3 propiedades activas del plan Básico. Actualizá a Pro para publicar sin límites.";
+  }
+  return null;
+}
 
 function readPropertyForm(formData: FormData) {
   return propertySchema.safeParse({
@@ -16,6 +51,7 @@ function readPropertyForm(formData: FormData) {
     propertyType: formData.get("propertyType") || undefined,
     price: formData.get("price"),
     currency: formData.get("currency") || undefined,
+    priceIncludesIva: formData.get("priceIncludesIva") === "on",
     city: formData.get("city"),
     address: formData.get("address") || undefined,
     mapsUrl: formData.get("mapsUrl") || undefined,
@@ -58,7 +94,12 @@ export async function createProperty(
 
   const parsed = readPropertyForm(formData);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
+  }
+
+  if (parsed.data.status === "available") {
+    const limitError = await checkPropertyLimit(supabase, user.id);
+    if (limitError) return { error: limitError };
   }
 
   const map = await resolveMapCoordinates(parsed.data.mapsUrl);
@@ -74,6 +115,7 @@ export async function createProperty(
       property_type: parsed.data.propertyType ?? null,
       price: parsed.data.price,
       currency: parsed.data.currency,
+      price_includes_iva: parsed.data.priceIncludesIva,
       city: parsed.data.city,
       address: parsed.data.address ?? null,
       lat: map.lat,
@@ -111,7 +153,12 @@ export async function updateProperty(
 
   const parsed = readPropertyForm(formData);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
+  }
+
+  if (parsed.data.status === "available") {
+    const limitError = await checkPropertyLimit(supabase, user.id, propertyId);
+    if (limitError) return { error: limitError };
   }
 
   const map = await resolveMapCoordinates(parsed.data.mapsUrl);
@@ -138,6 +185,7 @@ export async function updateProperty(
       property_type: parsed.data.propertyType ?? null,
       price: parsed.data.price,
       currency: parsed.data.currency,
+      price_includes_iva: parsed.data.priceIncludesIva,
       city: parsed.data.city,
       address: parsed.data.address ?? null,
       lat: map.lat,

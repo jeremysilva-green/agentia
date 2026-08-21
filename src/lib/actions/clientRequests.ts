@@ -5,10 +5,14 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { vendedorRequestSchema, compradorRequestSchema } from "@/lib/validations/clientRequests";
 import { PROPERTY_TYPE_LABELS, type PropertyType } from "@/lib/constants/propertyTypes";
+import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
+import { fieldErrorsFrom } from "@/lib/formErrors";
 import type { ClientRequestKind } from "@/lib/constants/clientRequests";
 import type { ClientRequest } from "@/types/domain";
 
-export type ClientRequestActionState = { error?: string; success?: boolean } | undefined;
+export type ClientRequestActionState =
+  | { error?: string; fieldErrors?: Record<string, string>; success?: boolean }
+  | undefined;
 
 export async function submitClientRequest(
   agentId: string,
@@ -35,40 +39,77 @@ export async function submitClientRequest(
   };
 
   if (kind === "vendedor") {
-    const parsed = vendedorRequestSchema.safeParse({ ...raw, price: formData.get("price") });
-    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
-
-    const { error } = await service.from("client_requests").insert({
-      agent_id: agentId,
-      kind: "vendedor",
-      full_name: parsed.data.fullName,
-      phone: parsed.data.phone,
-      property_type: parsed.data.propertyType,
-      city: parsed.data.city,
-      description: parsed.data.description,
-      price: parsed.data.price,
+    const parsed = vendedorRequestSchema.safeParse({
+      ...raw,
+      price: formData.get("price"),
+      currency: formData.get("currency") || undefined,
+      priceIncludesIva: formData.get("priceIncludesIva") === "on",
+      bedrooms: formData.get("bedrooms") || undefined,
+      bathrooms: formData.get("bathrooms") || undefined,
+      areaM2: formData.get("areaM2") || undefined,
+      garage: formData.get("garage") || "false",
+      mapsUrl: formData.get("mapsUrl") || undefined,
+      negotiationType: formData.getAll("negotiationOptions"),
+      negotiationDetails: formData.get("negotiationDetails") || undefined,
     });
-    if (error) return { error: "No se pudo enviar la solicitud. Intentá de nuevo." };
+    if (!parsed.success)
+      return {
+        error: parsed.error.issues[0]?.message ?? "Datos inválidos",
+        fieldErrors: fieldErrorsFrom(parsed.error),
+      };
+
+    const { data: request, error } = await service
+      .from("client_requests")
+      .insert({
+        agent_id: agentId,
+        kind: "vendedor",
+        full_name: parsed.data.fullName,
+        phone: parsed.data.phone,
+        property_type: parsed.data.propertyType,
+        city: parsed.data.city,
+        description: parsed.data.description,
+        price: parsed.data.price,
+        currency: parsed.data.currency,
+        price_includes_iva: parsed.data.priceIncludesIva,
+        bedrooms: parsed.data.bedrooms ?? null,
+        bathrooms: parsed.data.bathrooms ?? null,
+        area_m2: parsed.data.areaM2 ?? null,
+        garage: parsed.data.garage,
+        maps_url: parsed.data.mapsUrl ?? null,
+        negotiation_type: parsed.data.negotiationType,
+        negotiation_details: parsed.data.negotiationDetails ?? null,
+      })
+      .select("id")
+      .single();
+    if (error || !request) return { error: "No se pudo enviar la solicitud. Intentá de nuevo." };
   } else {
     const parsed = compradorRequestSchema.safeParse({
       ...raw,
       priceMin: formData.get("priceMin"),
       priceMax: formData.get("priceMax"),
     });
-    if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
+    if (!parsed.success)
+      return {
+        error: parsed.error.issues[0]?.message ?? "Datos inválidos",
+        fieldErrors: fieldErrorsFrom(parsed.error),
+      };
 
-    const { error } = await service.from("client_requests").insert({
-      agent_id: agentId,
-      kind: "comprador",
-      full_name: parsed.data.fullName,
-      phone: parsed.data.phone,
-      property_type: parsed.data.propertyType,
-      city: parsed.data.city,
-      description: parsed.data.description,
-      price_min: parsed.data.priceMin,
-      price_max: parsed.data.priceMax,
-    });
-    if (error) return { error: "No se pudo enviar la solicitud. Intentá de nuevo." };
+    const { data: request, error } = await service
+      .from("client_requests")
+      .insert({
+        agent_id: agentId,
+        kind: "comprador",
+        full_name: parsed.data.fullName,
+        phone: parsed.data.phone,
+        property_type: parsed.data.propertyType,
+        city: parsed.data.city,
+        description: parsed.data.description,
+        price_min: parsed.data.priceMin,
+        price_max: parsed.data.priceMax,
+      })
+      .select("id")
+      .single();
+    if (error || !request) return { error: "No se pudo enviar la solicitud. Intentá de nuevo." };
   }
 
   return { success: true };
@@ -108,6 +149,7 @@ export async function approveClientRequest(
     const propertyType = request.property_type as PropertyType | null;
     const typeLabel = propertyType ? PROPERTY_TYPE_LABELS[propertyType].es : "Propiedad";
     const title = `${typeLabel} en ${request.city}`;
+    const coordinates = request.maps_url ? await extractLatLngFromMapsUrl(request.maps_url) : null;
 
     const { data: property, error: propertyError } = await service
       .from("properties")
@@ -118,8 +160,18 @@ export async function approveClientRequest(
         listing_type: "sale",
         property_type: propertyType,
         price: request.price ?? 0,
-        currency: "PYG",
+        currency: request.currency,
+        price_includes_iva: request.price_includes_iva,
         city: request.city,
+        bedrooms: request.bedrooms,
+        bathrooms: request.bathrooms,
+        area_m2: request.area_m2,
+        garage: request.garage,
+        maps_url: request.maps_url,
+        lat: coordinates?.lat ?? null,
+        lng: coordinates?.lng ?? null,
+        negotiation_type: request.negotiation_type,
+        negotiation_details: request.negotiation_details,
         status: "draft",
         published: false,
       })

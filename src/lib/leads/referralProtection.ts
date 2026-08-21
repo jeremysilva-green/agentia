@@ -2,7 +2,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export const REFERRAL_PROTECTION_DAYS = 180;
 
-function generateReferralCode() {
+export function generateReferralCode() {
   return `REF-${crypto.randomUUID().replace(/-/g, "").slice(0, 6).toUpperCase()}`;
 }
 

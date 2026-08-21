@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { isPlanId, type PlanId } from "@/lib/plans";
 
 export const usernameSchema = z
   .string()
@@ -19,7 +18,10 @@ export const agentSignupSchema = z.object({
   fullName: z.string().min(2, "Ingresá tu nombre completo"),
   phone: z.string().min(6, "Ingresá un teléfono de contacto"),
   city: z.string().min(2, "Ingresá tu ciudad"),
-  plan: z.custom<PlanId>(isPlanId, "Elegí un plan válido"),
+  ruc: z
+    .string()
+    .min(5, "Ingresá un RUC válido")
+    .regex(/^[\d.-]+$/, "El RUC solo puede tener números, puntos y guiones"),
 });
 
 export const userSignupSchema = z.object({

@@ -38,12 +38,14 @@ export default async function PropiedadesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold text-white">Propiedades</h1>
-        <Link href="/panel/propiedades/nueva">
-          <Button size="sm">
-            <Plus size={16} />
-            Nueva propiedad
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/panel/propiedades/nueva">
+            <Button size="sm" className="bg-emerald-600! hover:bg-emerald-700!">
+              <Plus size={16} />
+              Nueva propiedad
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {(!properties || properties.length === 0) && (
@@ -78,7 +80,9 @@ export default async function PropiedadesPage() {
                     className={
                       property.status === "available"
                         ? "border-emerald-200! bg-emerald-100! text-emerald-700!"
-                        : undefined
+                        : property.status === "sold"
+                          ? "border-red-200! bg-red-100! text-red-700!"
+                          : undefined
                     }
                   >
                     {statusLabel[property.status]}

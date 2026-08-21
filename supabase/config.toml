@@ -385,6 +385,17 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Called server-to-server by Pagopar's own systems (webhook confirmation,
+# cron-triggered renewal) — neither carries a Supabase session JWT, so the
+# default JWT check would reject every real call with 401 before our code
+# ever runs. Each function authenticates itself instead (webhook payload
+# shape / CRON_SHARED_SECRET header).
+[functions.pagopar-webhook]
+verify_jwt = false
+
+[functions.pagopar-cobro-mensual]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

@@ -13,6 +13,7 @@ export const propertySchema = z.object({
   propertyType: z.enum(PROPERTY_TYPE_VALUES).optional(),
   price: z.coerce.number().positive("El precio debe ser mayor a 0"),
   currency: z.enum(["PYG", "USD"]).default("PYG"),
+  priceIncludesIva: z.coerce.boolean().default(false),
   city: z.string().min(2, "Ingresá la ciudad"),
   address: z.string().optional(),
   bedrooms: optionalNonNegativeInt,

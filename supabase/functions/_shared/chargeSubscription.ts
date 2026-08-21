@@ -31,8 +31,8 @@ export async function chargeSubscription(
     return { success: false, error: "El agente no tiene una tarjeta catastrada." };
   }
 
-  const plan = subscription.plan ?? "independiente";
-  const amount = PLAN_PRICES_PYG[plan as "independiente" | "exclusivo"];
+  const plan = subscription.plan ?? "basico";
+  const amount = PLAN_PRICES_PYG[plan as "basico" | "pro" | "fundador"];
   const profile = (agentProfile as unknown as { profiles: { full_name: string | null; username: string; phone: string | null } | null }).profiles;
   const identificador = agentProfile.pagopar_identificador;
   const idPedidoComercio = `renov-${agentId.slice(0, 8)}-${Date.now()}`;
@@ -40,10 +40,12 @@ export async function chargeSubscription(
   const pedido = await iniciarTransaccion({
     idPedidoComercio,
     montoTotal: amount,
+    descripcion: `Renovacion Agently - Plan ${plan}`,
     comprador: {
       email: authUser.data.user?.email ?? "",
       nombre: profile?.full_name || profile?.username || "Agente",
       telefono: profile?.phone ?? "",
+      ruc: agentProfile.ruc ?? undefined,
     },
   });
 
@@ -61,7 +63,7 @@ export async function chargeSubscription(
     return { success: false, error: `No se pudo iniciar la transacción: ${pedido.resultado}` };
   }
 
-  const hashPedido = pedido.resultado.data;
+  const hashPedido = pedido.resultado[0].data;
 
   await service
     .from("subscriptions")

@@ -68,6 +68,7 @@ export function CloseDealButton({
                 min="0"
                 value={price}
                 onChange={(e) => setPrice(Number(e.target.value))}
+                placeholder="sin puntos ni comas"
               />
               <div className="rounded-xl bg-emerald-50 p-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">

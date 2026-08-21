@@ -17,10 +17,11 @@ export function CopyLinkButton({ url }: { url: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+      title={copied ? copy.affiliatePanel.linkCopied : copy.affiliatePanel.copyLink}
+      aria-label={copied ? copy.affiliatePanel.linkCopied : copy.affiliatePanel.copyLink}
+      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50"
     >
-      {copied ? <Check size={11} /> : <Copy size={11} />}
-      {copied ? copy.affiliatePanel.linkCopied : copy.affiliatePanel.copyLink}
+      {copied ? <Check size={13} /> : <Copy size={13} />}
     </button>
   );
 }

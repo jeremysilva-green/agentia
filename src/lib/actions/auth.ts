@@ -4,8 +4,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { agentSignupSchema, loginSchema, userSignupSchema } from "@/lib/validations/auth";
+import { fieldErrorsFrom } from "@/lib/formErrors";
 
-export type ActionState = { error?: string; success?: boolean } | undefined;
+export type ActionState = { error?: string; fieldErrors?: Record<string, string>; success?: boolean } | undefined;
 
 function firstIssueMessage(issues: { message: string }[]) {
   return issues[0]?.message ?? "Datos inválidos";
@@ -19,14 +20,14 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
     fullName: formData.get("fullName"),
     phone: formData.get("phone"),
     city: formData.get("city"),
-    plan: formData.get("plan"),
+    ruc: formData.get("ruc"),
   });
 
   if (!parsed.success) {
-    return { error: firstIssueMessage(parsed.error.issues) };
+    return { error: firstIssueMessage(parsed.error.issues), fieldErrors: fieldErrorsFrom(parsed.error) };
   }
 
-  const { email, password, username, fullName, phone, city, plan } = parsed.data;
+  const { email, password, username, fullName, phone, city, ruc } = parsed.data;
   const supabase = await createClient();
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -55,27 +56,24 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
     };
   }
 
-  // 15-day free trial: full access (including public listing) starts right
-  // away, no payment required up front.
+  // Agents start free on Básico: full access (including public listing)
+  // right away, no card and no trial clock — they can stay on this plan
+  // indefinitely or upgrade to Pro/Fundador anytime from the panel.
   const { error: agentProfileError } = await service.from("agent_profiles").insert({
     id: data.user.id,
     slug: username,
     city,
+    ruc,
     is_active: true,
   });
   if (agentProfileError) {
     return { error: "No se pudo completar el registro. Intentá de nuevo." };
   }
 
-  const trialEndsAt = new Date();
-  trialEndsAt.setDate(trialEndsAt.getDate() + 15);
-
   const { error: subscriptionError } = await service.from("subscriptions").insert({
     agent_id: data.user.id,
-    status: "trialing",
-    plan,
-    trial_ends_at: trialEndsAt.toISOString(),
-    period_end: trialEndsAt.toISOString().slice(0, 10),
+    status: "active",
+    plan: "basico",
   });
   if (subscriptionError) {
     return { error: "No se pudo completar el registro. Intentá de nuevo." };
@@ -93,7 +91,7 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
   });
 
   if (!parsed.success) {
-    return { error: firstIssueMessage(parsed.error.issues) };
+    return { error: firstIssueMessage(parsed.error.issues), fieldErrors: fieldErrorsFrom(parsed.error) };
   }
 
   const { email, password, username, fullName } = parsed.data;
@@ -133,7 +131,7 @@ export async function login(_prevState: ActionState, formData: FormData): Promis
   });
 
   if (!parsed.success) {
-    return { error: firstIssueMessage(parsed.error.issues) };
+    return { error: firstIssueMessage(parsed.error.issues), fieldErrors: fieldErrorsFrom(parsed.error) };
   }
 
   const supabase = await createClient();

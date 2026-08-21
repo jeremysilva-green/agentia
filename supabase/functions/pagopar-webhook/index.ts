@@ -1,14 +1,16 @@
 // Standard-checkout webhook ("URL de respuesta" in the Pagopar panel).
-// Deploy with `supabase functions deploy pagopar-webhook --no-verify-jwt`
-// since Pagopar calls this directly — there is no user session/JWT here.
+// verify_jwt=false is set for this function in supabase/config.toml since
+// Pagopar calls this directly — there is no user session/JWT here.
 //
-// NOT FULLY CONFIRMED: neither PDF you gave me includes the exact JSON body
-// Pagopar posts to the standard-checkout webhook — only that it "notifica el
-// resultado del pago" and that the token must be validated as
-// sha1(token_privado + hash_pedido). The body-parsing below accepts a few
-// plausible shapes (top-level or nested under `resultado`); confirm the real
-// shape against an actual Pagopar test webhook call (or their support) and
-// adjust the field paths before relying on this in production.
+// Real shape confirmed via Pagopar's own "Simular pago del último pedido"
+// tool (shows both the exact payload they send and the exact response they
+// expect back): the body is `{ respuesta: true, resultado: [ {...} ] }` —
+// `resultado` is an ARRAY (matching iniciar-transaccion's response shape),
+// not a flat object. The token-verify formula (sha1(privado + hash_pedido))
+// was already correct — the bug was purely that the old code read
+// `body.resultado?.token` on an array, which is always undefined, so every
+// real webhook call silently bailed out before even reaching verification.
+// The expected response is the bare `resultado` array, no wrapper.
 //
 // Also unconfirmed (flagged in the plan): whether `pagar` (recurring debit)
 // also fires this same webhook. chargeSubscription() in _shared already
@@ -18,34 +20,33 @@
 import { createAdminClient, jsonResponse } from "../_shared/supabaseAdmin.ts";
 import { buildWebhookVerifyToken } from "../_shared/pagopar.ts";
 
-type WebhookBody = {
+type WebhookItem = {
   token?: string;
   hash_pedido?: string;
   pagado?: boolean;
-  resultado?: {
-    token?: string;
-    hash_pedido?: string;
-    pagado?: boolean;
-  };
+  [key: string]: unknown;
+};
+
+type WebhookBody = {
+  respuesta?: boolean;
+  resultado?: WebhookItem[];
 };
 
 Deno.serve(async (request: Request) => {
   const body = (await request.json().catch(() => null)) as WebhookBody | null;
-  if (!body) return jsonResponse({ status: "ignored" });
+  const item = body?.resultado?.[0];
 
-  const token = body.token ?? body.resultado?.token;
-  const hashPedido = body.hash_pedido ?? body.resultado?.hash_pedido;
-  const pagado = body.pagado ?? body.resultado?.pagado ?? false;
-
-  if (!token || !hashPedido) {
+  if (!item?.token || !item?.hash_pedido) {
     console.error("[pagopar-webhook] missing token/hash_pedido in payload", body);
-    return jsonResponse(body ?? { status: "ignored" });
+    return jsonResponse(body?.resultado ?? { status: "ignored" });
   }
+
+  const { token, hash_pedido: hashPedido, pagado } = item;
 
   const expectedToken = await buildWebhookVerifyToken(hashPedido);
   if (expectedToken !== token) {
     console.warn("[pagopar-webhook] token mismatch — possible spoofed call", { hashPedido });
-    return jsonResponse(body); // ack with 200 so Pagopar doesn't retry, but no DB write
+    return jsonResponse(body.resultado); // ack with 200 so Pagopar doesn't retry, but no DB write
   }
 
   const service = createAdminClient();
@@ -60,14 +61,14 @@ Deno.serve(async (request: Request) => {
 
   if (!payment) {
     console.warn("[pagopar-webhook] no matching payment for hash_pedido", hashPedido);
-    return jsonResponse(body);
+    return jsonResponse(body.resultado);
   }
 
   await service
     .from("payments")
     .update({
       status: pagado ? "approved" : "rejected",
-      raw_response: body as unknown as never,
+      raw_response: item as unknown as never,
     })
     .eq("id", payment.id);
 
@@ -88,5 +89,5 @@ Deno.serve(async (request: Request) => {
     await service.from("agent_profiles").update({ is_active: true }).eq("id", subscription.agent_id);
   }
 
-  return jsonResponse(body);
+  return jsonResponse(body.resultado);
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { SingleSelectDropdown } from "@/components/ui/SingleSelectDropdown";
@@ -35,8 +35,24 @@ export function PropertyForm({
     defaultValues?.currency === "USD" ? "USD" : "PYG"
   );
   const [price, setPrice] = useState(defaultValues?.price != null ? String(defaultValues.price) : "");
-  const [withIva, setWithIva] = useState(false);
+  const [withIva, setWithIva] = useState(defaultValues?.price_includes_iva ?? false);
   const [negotiationType, setNegotiationType] = useState<string[]>(defaultValues?.negotiation_type ?? []);
+  // React resets uncontrolled <form> fields after every action call — even
+  // when the action returns a validation error rather than throwing — so
+  // text fields are controlled here to survive a failed submit.
+  const [values, setValues] = useState<Record<string, string>>({
+    title: defaultValues?.title ?? "",
+    description: defaultValues?.description ?? "",
+    address: defaultValues?.address ?? "",
+    bedrooms: defaultValues?.bedrooms != null ? String(defaultValues.bedrooms) : "",
+    bathrooms: defaultValues?.bathrooms != null ? String(defaultValues.bathrooms) : "",
+    areaM2: defaultValues?.area_m2 != null ? String(defaultValues.area_m2) : "",
+    mapsUrl: defaultValues?.maps_url ?? "",
+    negotiationDetails: defaultValues?.negotiation_details ?? "",
+  });
+  const setField = (name: string) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setValues((prev) => ({ ...prev, [name]: e.target.value }));
+  const fieldError = (name: string) => state?.fieldErrors?.[name];
 
   function toggleIva(checked: boolean) {
     setWithIva(checked);
@@ -61,7 +77,9 @@ export function PropertyForm({
         name="title"
         label="Título"
         required
-        defaultValue={defaultValues?.title}
+        value={values.title}
+        onChange={setField("title")}
+        error={fieldError("title")}
         placeholder="Casa 3 dormitorios en Villa Morra"
         className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
       />
@@ -70,7 +88,9 @@ export function PropertyForm({
         name="description"
         label="Descripción"
         required
-        defaultValue={defaultValues?.description}
+        value={values.description}
+        onChange={setField("description")}
+        error={fieldError("description")}
         placeholder="Contale al comprador por qué esta propiedad es especial..."
         className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
       />
@@ -99,6 +119,7 @@ export function PropertyForm({
               <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600">
                 <input
                   type="checkbox"
+                  name="priceIncludesIva"
                   checked={withIva}
                   onChange={(e) => toggleIva(e.target.checked)}
                   className="h-3.5 w-3.5 rounded border-slate-300 text-emerald-600 accent-emerald-600 focus:ring-emerald-500"
@@ -132,6 +153,7 @@ export function PropertyForm({
             required
             value={price}
             onChange={(e) => setPrice(e.target.value)}
+            placeholder="sin puntos ni comas"
             className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
           />
           <div className="flex flex-col gap-1 pt-1 text-xs text-slate-500">
@@ -169,7 +191,9 @@ export function PropertyForm({
           id="address"
           name="address"
           label="Dirección"
-          defaultValue={defaultValues?.address ?? ""}
+          value={values.address}
+          onChange={setField("address")}
+          error={fieldError("address")}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
       </div>
@@ -182,7 +206,9 @@ export function PropertyForm({
           min="0"
           step="1"
           label="Habitaciones"
-          defaultValue={defaultValues?.bedrooms ?? ""}
+          value={values.bedrooms}
+          onChange={setField("bedrooms")}
+          error={fieldError("bedrooms")}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
         <Input
@@ -192,7 +218,9 @@ export function PropertyForm({
           min="0"
           step="1"
           label="Baños"
-          defaultValue={defaultValues?.bathrooms ?? ""}
+          value={values.bathrooms}
+          onChange={setField("bathrooms")}
+          error={fieldError("bathrooms")}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
         <Input
@@ -202,7 +230,9 @@ export function PropertyForm({
           min="0"
           step="0.01"
           label="M²"
-          defaultValue={defaultValues?.area_m2 ?? ""}
+          value={values.areaM2}
+          onChange={setField("areaM2")}
+          error={fieldError("areaM2")}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
         <SingleSelectDropdown
@@ -225,7 +255,9 @@ export function PropertyForm({
           name="mapsUrl"
           label="Enlace de Google Maps"
           placeholder="https://maps.app.goo.gl/..."
-          defaultValue={defaultValues?.maps_url ?? ""}
+          value={values.mapsUrl}
+          onChange={setField("mapsUrl")}
+          error={fieldError("mapsUrl")}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
         <p className="text-xs text-slate-500">
@@ -259,7 +291,8 @@ export function PropertyForm({
             <Textarea
               id="negotiationDetails"
               name="negotiationDetails"
-              defaultValue={defaultValues?.negotiation_details ?? ""}
+              value={values.negotiationDetails}
+              onChange={setField("negotiationDetails")}
               className="bg-white! focus:border-amber-600! focus:ring-amber-500/20!"
             />
           </div>
@@ -291,7 +324,7 @@ export function PropertyForm({
         </label>
       </div>
 
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && !state.fieldErrors && <p className="text-sm text-red-600">{state.error}</p>}
 
       <Button
         type="submit"

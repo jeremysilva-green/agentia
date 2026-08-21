@@ -11,12 +11,15 @@ export default async function LeadsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/ingresar");
 
-  const rows = await getAgentLeadPipeline(user.id);
+  const [rows, { data: agentProfile }] = await Promise.all([
+    getAgentLeadPipeline(user.id),
+    supabase.from("agent_profiles").select("slug").eq("id", user.id).single(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.leads}</h1>
-      <LeadsTable rows={rows} />
+      <LeadsTable rows={rows} agentSlug={agentProfile?.slug ?? ""} />
     </div>
   );
 }

@@ -87,7 +87,7 @@ function buildDotBackground(width: number, height: number) {
   const radius = 1.6;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><pattern id="dots" x="0" y="0" width="${spacing}" height="${spacing}" patternUnits="userSpaceOnUse"><circle cx="${
     spacing / 2
-  }" cy="${spacing / 2}" r="${radius}" fill="rgba(100,116,139,0.35)" /></pattern></defs><rect width="100%" height="100%" fill="#fafafa" /><rect width="100%" height="100%" fill="url(#dots)" /></svg>`;
+  }" cy="${spacing / 2}" r="${radius}" fill="rgba(22,163,74,0.45)" /></pattern></defs><rect width="100%" height="100%" fill="#12100e" /><rect width="100%" height="100%" fill="url(#dots)" /></svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
@@ -219,7 +219,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                 display: "flex",
                 fontFamily: "ClashSemibold",
                 fontSize: px(46),
-                color: "#0f172a",
+                color: "#ffffff",
                 letterSpacing: -1,
                 textTransform: "uppercase",
               }}

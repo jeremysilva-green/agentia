@@ -36,7 +36,7 @@ export function ClientRequestActions({ requestId }: { requestId: string }) {
         <Button
           type="button"
           size="sm"
-          variant="secondary"
+          variant="danger"
           className="whitespace-nowrap text-xs"
           disabled={isPending}
           onClick={() => handle("reject")}

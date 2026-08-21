@@ -64,6 +64,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Faltan datos requeridos." }, { status: 400 });
   }
 
+  // TEMP TEST BYPASS — lets you exercise real lead capture (and affiliate
+  // attribution via `ref`) without a working ANTHROPIC_API_KEY. Type your
+  // name and phone together in one message, in any order/punctuation (e.g.
+  // "Juan Perez 0981234567", "Juan Perez, 0981234567", "0981234567 - Juan
+  // Perez") and it saves the lead directly, skipping Claude entirely.
+  // Remove this block once the real key is wired up.
+  const testPhoneMatch = userMessage.match(/\+?\d[\d\s-]{5,}\d/);
+  if (testPhoneMatch) {
+    const testPhone = testPhoneMatch[0].trim();
+    const testName = userMessage
+      .replace(testPhoneMatch[0], "")
+      .replace(/^[\s,.\-–]+|[\s,.\-–]+$/g, "")
+      .trim();
+
+    if (testName) {
+      const result = await upsertLeadFromChatClick({
+        propertyId,
+        buyerName: testName,
+        buyerPhone: testPhone,
+        ref,
+      });
+      if ("leadId" in result) {
+        return NextResponse.json({
+          reply: `[TEST] Lead guardado — ${testName} (código ${result.referralCode}, ref=${ref ?? "ninguno"}).`,
+        });
+      }
+      return NextResponse.json({ reply: `[TEST] Error al guardar el lead: ${result.error}` });
+    }
+  }
+
   const service = createServiceClient();
 
   const { data: property } = await service
