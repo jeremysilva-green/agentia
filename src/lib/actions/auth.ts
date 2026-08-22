@@ -79,6 +79,15 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
     return { error: "No se pudo completar el registro. Intentá de nuevo." };
   }
 
+  // Confirmation email always goes out (Supabase sends it regardless), but
+  // don't make the agent wait for it — if signUp() already returned a
+  // session (project has "Confirm email" off), drop them straight into
+  // their panel instead of showing the "go check your email" modal. Falls
+  // back to the modal if a session wasn't issued (confirmation required).
+  if (data.session) {
+    redirect("/panel");
+  }
+
   return { success: true };
 }
 
@@ -119,6 +128,12 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
         ? "Ese nombre de usuario ya está en uso."
         : "No se pudo completar el registro. Intentá de nuevo.",
     };
+  }
+
+  // Same reasoning as signUpAgent: don't block on email confirmation if
+  // Supabase already issued a session.
+  if (data.session) {
+    redirect("/panel-afiliado");
   }
 
   return { success: true };

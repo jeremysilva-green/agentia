@@ -12,17 +12,35 @@ export function InteractiveBackground({
   const spotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleMove(e: MouseEvent) {
+    let frame = 0;
+    let lastEvent: MouseEvent | null = null;
+
+    function applyPosition() {
+      frame = 0;
       const el = spotRef.current;
-      if (!el) return;
+      if (!el || !lastEvent) return;
       const rect = el.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const x = ((lastEvent.clientX - rect.left) / rect.width) * 100;
+      const y = ((lastEvent.clientY - rect.top) / rect.height) * 100;
       el.style.setProperty("--spot-x", `${x}%`);
       el.style.setProperty("--spot-y", `${y}%`);
     }
+
+    // Raw mousemove can fire 60-120+ times/sec — writing a style property on
+    // every single one (rather than once per paint) is what caused a visible
+    // flicker through semi-transparent overlays (e.g. modals) stacked above
+    // this background. Coalescing to one update per animation frame fixes
+    // that with no visible difference in how the glow tracks the cursor.
+    function handleMove(e: MouseEvent) {
+      lastEvent = e;
+      if (!frame) frame = requestAnimationFrame(applyPosition);
+    }
+
     window.addEventListener("mousemove", handleMove);
-    return () => window.removeEventListener("mousemove", handleMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (

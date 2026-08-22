@@ -31,7 +31,14 @@ export function TermsModal({ role }: { role: "agent" | "affiliate" }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:items-center">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:items-center"
+      // See EmailConfirmModal.tsx for why: isolates this overlay onto its
+      // own GPU layer so the animated InteractiveBackground underneath
+      // doesn't force it to recomposite (and visibly flicker) on every
+      // mouse move.
+      style={{ transform: "translateZ(0)" }}
+    >
       <div className="my-8 max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:my-0 sm:p-6">
         {role === "agent" ? <AgentTermsContent date={date} /> : <AffiliateTermsContent date={date} />}
 

@@ -5,7 +5,14 @@ import { copy } from "@/lib/copy";
 
 export function EmailConfirmModal() {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      // Promotes this overlay to its own GPU compositing layer. Without it,
+      // the InteractiveBackground layer underneath (which repaints on every
+      // mouse move) forces this semi-transparent overlay to keep
+      // recompositing too, producing a visible flicker while the mouse moves.
+      style={{ transform: "translateZ(0)" }}
+    >
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
         <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
           <Mail size={22} />
