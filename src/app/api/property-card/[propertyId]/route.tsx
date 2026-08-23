@@ -91,6 +91,29 @@ function buildDotBackground(width: number, height: number) {
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
 
+// Fetches an image server-side and converts it to a data URI, instead of
+// handing next/og's ImageResponse a raw remote URL to fetch+decode
+// internally — that path has no error handling at all, so any transient
+// failure (network blip, slow storage propagation right after upload, an
+// unusually large or malformed file) 500s the entire route. Pre-fetching
+// here lets a failure degrade gracefully to the existing placeholder UI
+// instead of taking down the whole image response.
+async function fetchImageAsDataUri(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error("[property-card] image fetch failed", url, response.status);
+      return null;
+    }
+    const contentType = response.headers.get("content-type") ?? "image/png";
+    const buffer = await response.arrayBuffer();
+    return `data:${contentType};base64,${Buffer.from(buffer).toString("base64")}`;
+  } catch (err) {
+    console.error("[property-card] image fetch threw", url, err);
+    return null;
+  }
+}
+
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   available: { bg: "#ecfdf5", color: "#047857", label: "Disponible" },
   sold: { bg: "#f1f5f9", color: "#475569", label: "Vendida" },
@@ -113,10 +136,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
     return new Response("No encontrado", { status: 404 });
   }
 
-  const [semiboldFont, lightFont, logoBytes] = await Promise.all([
+  const cover = [...(property.property_images ?? [])].sort((a, b) => a.position - b.position)[0];
+  const coverUrl = cover ? getPublicStorageUrl("property-photos", cover.storage_path) : null;
+  const agentAvatarUrl =
+    (
+      property as typeof property & {
+        agent_profiles: { profiles: { avatar_url: string | null } | null } | null;
+      }
+    ).agent_profiles?.profiles?.avatar_url ?? null;
+
+  const [semiboldFont, lightFont, logoBytes, coverDataUri, agentAvatarDataUri] = await Promise.all([
     readFile(join(process.cwd(), "font", "ClashDisplay-Semibold.otf")),
     readFile(join(process.cwd(), "font", "ClashDisplay-Light.otf")),
     readFile(join(process.cwd(), "assets", "agentia_00000.png")),
+    coverUrl ? fetchImageAsDataUri(coverUrl) : Promise.resolve(null),
+    agentAvatarUrl ? fetchImageAsDataUri(agentAvatarUrl) : Promise.resolve(null),
   ]);
   const logoDataUri = `data:image/png;base64,${logoBytes.toString("base64")}`;
 
@@ -126,8 +160,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
   const scale = width / BASE_WIDTH;
   const px = (value: number) => Math.round(value * scale);
 
-  const cover = [...(property.property_images ?? [])].sort((a, b) => a.position - b.position)[0];
-  const coverUrl = cover ? getPublicStorageUrl("property-photos", cover.storage_path) : null;
   const status = STATUS_STYLES[property.status] ?? STATUS_STYLES.available;
   const price = new Intl.NumberFormat("es-PY", {
     style: "currency",
@@ -139,13 +171,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
     property.description.length > DESCRIPTION_LIMIT
       ? `${property.description.slice(0, DESCRIPTION_LIMIT).trim()}…`
       : property.description;
-
-  const agentAvatarUrl =
-    (
-      property as typeof property & {
-        agent_profiles: { profiles: { avatar_url: string | null } | null } | null;
-      }
-    ).agent_profiles?.profiles?.avatar_url ?? null;
 
   const dotBgUri = buildDotBackground(width, height);
 
@@ -201,10 +226,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                 justifyContent: "center",
               }}
             >
-              {agentAvatarUrl ? (
+              {agentAvatarDataUri ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={agentAvatarUrl}
+                  src={agentAvatarDataUri}
                   width={px(70)}
                   height={px(70)}
                   style={{ objectFit: "cover", width: "100%", height: "100%", borderRadius: 999 }}
@@ -251,10 +276,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                 display: "flex",
               }}
             >
-              {coverUrl ? (
+              {coverDataUri ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={coverUrl}
+                  src={coverDataUri}
                   width={width}
                   height={imageHeight}
                   style={{ objectFit: "cover", width: "100%", height: "100%" }}

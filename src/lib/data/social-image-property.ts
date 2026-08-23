@@ -63,8 +63,17 @@ export async function getPropertyForSocialCard(
   if (!imageResponse.ok) {
     throw new Error(`Could not fetch cover image for property ${propertyId}`);
   }
+  // Was hardcoded to "image/jpeg" regardless of the real file — every
+  // property photo is actually a PNG (per PropertyPhotoManager's upload
+  // path), so this mislabeled every cover photo. Satori picks its decoder
+  // (parseJPEG vs parsePNG) off the data URI's declared MIME type rather
+  // than sniffing the actual bytes, so a PNG labeled as JPEG got parsed by
+  // the JPEG decoder and immediately threw "Offset is outside the bounds
+  // of the DataView" — confirmed by reproducing this exact error locally
+  // with the real file. Use the real content-type from the fetch response.
+  const contentType = imageResponse.headers.get("content-type") ?? "image/png";
   const imageBuffer = await imageResponse.arrayBuffer();
-  const imageDataUri = `data:image/jpeg;base64,${Buffer.from(imageBuffer).toString("base64")}`;
+  const imageDataUri = `data:${contentType};base64,${Buffer.from(imageBuffer).toString("base64")}`;
 
   const listingType: ListingType = property.listing_type === "rent" ? "rent" : "sale";
 
