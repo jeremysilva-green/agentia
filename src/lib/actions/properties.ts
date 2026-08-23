@@ -10,6 +10,17 @@ import { fieldErrorsFrom } from "@/lib/formErrors";
 
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
 
+// Prefers an explicitly-set NEXT_PUBLIC_SITE_URL (needed once a real custom
+// domain exists, since that's never Vercel's auto-assigned one), then falls
+// back to VERCEL_URL — a system env var Vercel injects automatically on
+// every deployment with that deployment's real URL, no config needed. Only
+// falls back to localhost when neither is present (local dev).
+function getSiteUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
 // Queues an Instagram post for a property save (create or update) by
 // inserting a row into `generation_requests` and notifying Make.com.
 // `generation_requests` has RLS enabled with no policies, so this needs the
@@ -32,8 +43,7 @@ async function queueInstagramPost(propertyId: string, agentId: string) {
       return;
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-    const propertyLink = `${siteUrl}/agentes/${agentProfile.slug}/propiedades/${propertyId}`;
+    const propertyLink = `${getSiteUrl()}/agentes/${agentProfile.slug}/propiedades/${propertyId}`;
 
     const { data: row, error: insertError } = await service
       .from("generation_requests")
