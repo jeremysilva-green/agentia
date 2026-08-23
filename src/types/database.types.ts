@@ -845,6 +845,28 @@ export interface Database {
           },
         ];
       };
+      generation_requests: {
+        Row: {
+          id: number;
+          property_link: string;
+          status: string | null;
+          caption: string | null;
+          image_url: string | null;
+          created_at: string | null;
+          debug_response: string | null;
+        };
+        Insert: {
+          id?: number;
+          property_link: string;
+          status?: string | null;
+          caption?: string | null;
+          image_url?: string | null;
+          created_at?: string | null;
+          debug_response?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["generation_requests"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {

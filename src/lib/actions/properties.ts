@@ -3,9 +3,72 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { propertySchema } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
 import { fieldErrorsFrom } from "@/lib/formErrors";
+
+const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
+
+// Queues an Instagram post for a property save (create or update) by
+// inserting a row into `generation_requests` and notifying Make.com.
+// `generation_requests` has RLS enabled with no policies, so this needs the
+// service-role client — the regular session-scoped client used elsewhere in
+// this file can't write to it at all. Never throws: a failure here (missing
+// slug, DB error, webhook unreachable) is logged but must never block the
+// property save itself, so every step is wrapped and swallowed internally.
+async function queueInstagramPost(propertyId: string, agentId: string) {
+  try {
+    const service = createServiceClient();
+
+    const { data: agentProfile } = await service
+      .from("agent_profiles")
+      .select("slug")
+      .eq("id", agentId)
+      .single();
+
+    if (!agentProfile?.slug) {
+      console.error("[queueInstagramPost] no agent slug found for agent", agentId);
+      return;
+    }
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+    const propertyLink = `${siteUrl}/agentes/${agentProfile.slug}/propiedades/${propertyId}`;
+
+    const { data: row, error: insertError } = await service
+      .from("generation_requests")
+      .insert({ property_link: propertyLink, status: "pending" })
+      .select("id, property_link, status")
+      .single();
+
+    if (insertError || !row) {
+      console.error("[queueInstagramPost] failed to insert generation_requests row", insertError);
+      return;
+    }
+
+    const secret = process.env.MAKE_INSTAGRAM_WEBHOOK_SECRET;
+    if (!secret) {
+      console.error("[queueInstagramPost] MAKE_INSTAGRAM_WEBHOOK_SECRET is not set — skipping webhook call");
+      return;
+    }
+
+    const response = await fetch(MAKE_INSTAGRAM_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-webhook-secret": secret },
+      body: JSON.stringify({
+        type: "INSERT",
+        table: "generation_requests",
+        record: { id: row.id, property_link: row.property_link, status: row.status },
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("[queueInstagramPost] Make.com webhook returned", response.status, await response.text());
+    }
+  } catch (err) {
+    console.error("[queueInstagramPost] unexpected failure", err);
+  }
+}
 
 export type PropertyActionState = { error?: string; fieldErrors?: Record<string, string> } | undefined;
 
@@ -136,6 +199,8 @@ export async function createProperty(
 
   if (error || !data) return { error: "No se pudo crear la propiedad. Intentá de nuevo." };
 
+  await queueInstagramPost(data.id, user.id);
+
   revalidatePath("/panel/propiedades");
   redirect(`/panel/propiedades/${data.id}/editar`);
 }
@@ -205,6 +270,8 @@ export async function updateProperty(
     .eq("agent_id", user.id);
 
   if (error) return { error: "No se pudo guardar los cambios." };
+
+  await queueInstagramPost(propertyId, user.id);
 
   revalidatePath("/panel/propiedades");
   revalidatePath(`/panel/propiedades/${propertyId}/editar`);
