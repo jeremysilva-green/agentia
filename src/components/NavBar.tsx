@@ -36,10 +36,10 @@ export async function NavBar() {
 
           <nav className="flex items-center gap-2.5 font-display print:hidden sm:gap-6">
             <Link
-              href="/inicio"
-              className="text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+              href="/agentes"
+              className="hidden text-sm font-medium text-white/90 transition-colors hover:text-white sm:block"
             >
-              Inicio
+              Buscar propiedades
             </Link>
 
             {user && role === "agent" && (

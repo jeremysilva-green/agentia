@@ -31,7 +31,10 @@ const rubik = localFont({
 
 export const metadata: Metadata = {
   title: copy.brand,
-  description: copy.home.subtitle,
+  // Doubles as the "/" landing page's description — /agentes (the
+  // marketplace, formerly at "/") has its own route-level metadata override.
+  description:
+    "Tu portafolio, tu CRM, tu asistente de IA y tu propia red de afiliados vendiendo por vos — todo en un solo lugar.",
 };
 
 export default function RootLayout({
