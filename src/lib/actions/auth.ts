@@ -79,12 +79,14 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
     return { error: "No se pudo completar el registro. Intentá de nuevo." };
   }
 
-  // Confirmation email always goes out (Supabase sends it regardless), but
-  // don't make the agent wait for it — if signUp() already returned a
-  // session (project has "Confirm email" off), drop them straight into
-  // their panel instead of showing the "go check your email" modal. Falls
-  // back to the modal if a session wasn't issued (confirmation required).
-  if (data.session) {
+  // Supabase's "Confirm signup" email still goes out as usual (it's been
+  // re-worded in the dashboard to read as a welcome/"activate your account"
+  // email, not a blocking gate) — but the agent doesn't have to wait for it:
+  // confirm the account server-side immediately and sign them straight in.
+  // Clicking the email link is now optional, not required for access.
+  await service.auth.admin.updateUserById(data.user.id, { email_confirm: true });
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (!signInError) {
     redirect("/panel");
   }
 
@@ -130,9 +132,11 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
     };
   }
 
-  // Same reasoning as signUpAgent: don't block on email confirmation if
-  // Supabase already issued a session.
-  if (data.session) {
+  // Same reasoning as signUpAgent: confirm + sign in immediately server-side
+  // so the affiliate doesn't have to wait on the welcome email.
+  await service.auth.admin.updateUserById(data.user.id, { email_confirm: true });
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (!signInError) {
     redirect("/panel-afiliado");
   }
 

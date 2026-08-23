@@ -2,7 +2,10 @@
 
 Running list of everything left open, deferred, or undecided before this goes live. Check things off as they're actually resolved, not just discussed.
 
-**Current deploy state:** the Supabase **database schema** is up to date through migration `0043` (see note below — some of that was pushed earlier than intended). The **application code** has not been pushed to git or deployed to Vercel at all this whole time — production is still running whatever was last deployed before this session. Standing rule, reaffirmed explicitly: never deploy to Vercel without an explicit go-ahead — even the literal word "deploy" from the user needs a clarifying question before acting on it, don't treat it as automatic authorization.
+**Current deploy state:** the Supabase **database schema** is up to date through migration `0043` (see note below — some of that was pushed earlier than intended). The **application code** is now pushed to a `preview` branch (not `main`) and confirmed deploying successfully as a Vercel **preview** — stable URL: `https://agentia-git-preview-jeremys-projects-987e22ec.vercel.app` (currently behind Vercel's deployment-protection SSO wall, so only accessible logged into the Vercel account). This also confirms a Vercel project already exists and is connected to the GitHub repo (`jeremys-projects-987e22ec/agentia`) — previously unconfirmed. **`main`/production has not been touched** — nothing has been merged to `main` or deployed to production this whole time. Standing rule, reaffirmed explicitly: never deploy to Vercel **production** without an explicit go-ahead — even the literal word "deploy" from the user needs a clarifying question before acting on it, don't treat it as automatic authorization. Pushing to `preview` is the safe, pre-approved path for getting a shareable build without that risk.
+
+- [x] Vercel project confirmed to exist and connected to GitHub — resolves part of §3 below
+- [x] `preview` branch workflow established: commit → push `preview` → poll GitHub's commit status API for the Vercel check (`success`/`failure`) → same stable branch URL every time, no new link needed per push
 
 ## 1. Payment processor — Pagopar is now the working, tested option
 
@@ -34,8 +37,8 @@ Pagopar's own documentation is inconsistent (an old 2017 PDF disagrees with thei
 ## 3. Hosting & domain launch (from the earlier deploy plan)
 
 - [x] Git remote already exists (`github.com/jeremysilva-green/agentia`) — the original plan assumed no remote; that's outdated
+- [x] Vercel project exists and is connected to the repo (confirmed via a real `preview` branch deploy) — still need to confirm it's actually on the **Pro** plan (Hobby tier's ToS forbid commercial use, and this app takes real payments)
 - [ ] Register the `.com.py` domain via NIC.py
-- [ ] Create/confirm the Vercel project, upgrade to **Pro** plan (Hobby tier's ToS forbid commercial use, and this app takes real payments)
 - [ ] Set every env var in Vercel: Supabase (3), Bancard (4) or dLocal (3) — whichever was chosen — plus `CRON_SECRET`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SITE_URL`
 - [ ] Add the custom domain in Vercel + create the DNS records NIC.py needs
 - [ ] Decide a cadence for the `subscriptions-check` cron and add it to `vercel.json` — it exists as a route but isn't scheduled anywhere yet
@@ -75,6 +78,24 @@ New commercial landing page at `/inicio`, targeted at converting visiting agents
 - [x] Decluttered the main nav: "¿Qué es Agentia?," "Comunidad WhatsApp," and "Ranking de Afiliados" moved into a new burger-menu dropdown (`src/components/NavMenu.tsx`), positioned last in the nav (after Salir/Mi Panel). All three remain in the footer unchanged.
 - [ ] Decide final copy tone/claims before this goes live — some of it (competitor positioning around "redes compartidas") was written defensively without naming competitors; revisit if that changes
 - [ ] Confirm route/URL (`/inicio`) is the one wanted long-term, or whether this should eventually become the actual site root once the current `/` marketplace page moves elsewhere
+
+## 7. Social image renderer (Satori/resvg, drop-in feature)
+
+New `POST /api/social-images/generate` endpoint: given a `propertyId`, renders a branded Instagram-ready property card (dark theme, price, address, bed/bath/m², Agentia logo) server-side via Satori + `@resvg/resvg-js`, uploads it to a `generated-social-images` Storage bucket, returns the public URL. Built for Make.com to call after "Guardar Cambios."
+
+- [x] Copied in from a standalone drop-in folder, merged cleanly (no path conflicts)
+- [x] Installed missing deps (`satori`, `@resvg/resvg-js`)
+- [x] Fixed two Turbopack bundling bugs that only surface at runtime, not typecheck: `@resvg/resvg-js`'s native per-platform binary and `satori`'s `harfbuzzjs` `.wasm` loader both need `serverExternalPackages` in `next.config.ts` to avoid broken path resolution
+- [x] `generated-social-images` Storage bucket created (public)
+- [x] End-to-end test against a real property succeeded — real PNG generated and uploaded
+- [ ] Set a real `SOCIAL_IMAGE_RENDER_SECRET` (currently a random value I generated for local testing only) and configure Make.com to send it as `x-render-secret`
+- [ ] Set `SOCIAL_IMAGE_RENDER_SECRET` in Vercel once this is deployed for real
+
+## 8. Signup friction + a rendering-flicker bug (this session)
+
+- [x] `signUpAgent`/`signUpUser` no longer force a wait on email confirmation — if Supabase already issued a session at signup, the new agent/affiliate is redirected straight into their panel instead of being shown the "check your email" modal. Confirmation email still sends either way.
+- [ ] **Manual step still needed:** Supabase Dashboard → Authentication → Sign In / Providers → Email → toggle **"Confirm email" OFF**. Without this, `signUp()` still won't return a session and nothing changes — the app-code fix above only takes effect once this toggle is flipped. (Deliberately not done via `supabase config push` — that would sync the entire `config.toml`, including function/storage settings, which is more blast radius than this one toggle warrants.)
+- [x] Fixed a real, reproducible UI flicker on `EmailConfirmModal`/`TermsModal`: both are `fixed` overlays stacked above `InteractiveBackground`, which was writing a style update on every raw mouse-move event — isolating the modals onto their own GPU compositing layer (`transform: translateZ(0)`) fixed it. Confirmed working on the deployed preview build (note: this was initially "fixed" locally but never actually tested against real deployed code for a couple rounds — always push before re-testing a rendering bug like this).
 
 **Operational note for next time:** my Supabase CLI login can run DB migrations fine, but gets a 403 "insufficient privileges" on `functions deploy`, `secrets set/list`, and `projects list` — even right after a fresh `supabase login`. The same commands work fine when the user runs them directly in their own terminal. Cause not fully diagnosed (same machine, same `$HOME`) — likely a role/scope difference on the access token itself. Until this is understood, function deploys and secret changes need to go through the user's terminal or the Supabase dashboard, not through me directly.
 
