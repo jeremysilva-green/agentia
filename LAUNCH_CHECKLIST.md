@@ -98,9 +98,13 @@ New `POST /api/social-images/generate` endpoint: given a `propertyId`, renders a
 - [ ] **Custom "Gracias por registrarte..." email copy still blocked**: Supabase's dashboard template editor is read-only until **custom SMTP is connected** — their built-in mailer only sends the generic default template, can't be edited. Needs a real SMTP provider (Resend recommended — already hinted at via an existing TODO comment elsewhere in the codebase) connected in Supabase Dashboard → Authentication → Emails before the subject/body can be customized. **User explicitly deferred this** ("just wait, I'll come back to that later") — don't proceed without them raising it again.
 - [x] Fixed a real, reproducible UI flicker on `EmailConfirmModal`/`TermsModal`: both are `fixed` overlays stacked above `InteractiveBackground`, which was writing a style update on every raw mouse-move event — isolating the modals onto their own GPU compositing layer (`transform: translateZ(0)`) fixed it. Confirmed working on the deployed preview build (note: this was initially "fixed" locally but never actually tested against real deployed code for a couple rounds — always push before re-testing a rendering bug like this).
 
-## 9. Automated Instagram posting on property save
+## 9. Automated Instagram posting on property save — ✅ confirmed working end-to-end on preview
 
 Every successful property save (create *and* update) now queues an Instagram post: inserts a `pending` row into `generation_requests` with the property's public URL, then POSTs to a Make.com webhook to kick off image/caption generation downstream. Shared helper `queueInstagramPost(propertyId, agentId)` in `src/lib/actions/properties.ts`, called from both `createProperty` and `updateProperty` right after their DB write succeeds — wrapped so any failure here (missing agent slug, DB error, webhook unreachable) is logged but never blocks the actual property save.
+
+**⚠️ REMINDER: this whole flow currently only exists on the `preview` branch/deployment. Before real launch, it needs to actually be merged/deployed to `main`/production** — the `generation_requests` table + `MAKE_INSTAGRAM_WEBHOOK_SECRET` exist on the real (shared) Supabase project already, but the *application code* calling them is preview-only until `main` gets this. Don't forget this when doing the final pre-launch deploy.
+
+- [x] **User-confirmed working end-to-end on the deployed preview** — full real flow tested (property save → `generation_requests` row → Make.com webhook → Instagram post generation) and confirmed working correctly.
 
 - [x] `generation_requests` has RLS enabled with **no policies** — the insert uses the service-role client, not the regular session-scoped one
 - [x] `MAKE_INSTAGRAM_WEBHOOK_SECRET` set in both `.env.local` and Vercel

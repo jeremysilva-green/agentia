@@ -11,6 +11,12 @@ function serviceClient() {
   );
 }
 
+const TITLE_LIMIT = 60;
+
+function truncateTitle(title: string): string {
+  return title.length > TITLE_LIMIT ? `${title.slice(0, TITLE_LIMIT).trim()}…` : title;
+}
+
 function formatPrice(price: number, currency: string, includesIva: boolean): string {
   const formatted = new Intl.NumberFormat("es-PY").format(price);
   const symbol = currency === "USD" ? "$" : currency === "PYG" ? "₲" : `${currency} `;
@@ -35,7 +41,7 @@ export async function getPropertyForSocialCard(
     .from("properties")
     .select(
       `
-      id, price, currency, price_includes_iva,
+      id, title, price, currency, price_includes_iva,
       city, address, listing_type,
       bedrooms, bathrooms, area_m2,
       property_images ( storage_path, position )
@@ -78,6 +84,7 @@ export async function getPropertyForSocialCard(
   const listingType: ListingType = property.listing_type === "rent" ? "rent" : "sale";
 
   return {
+    title: truncateTitle(property.title),
     price: formatPrice(property.price, property.currency, property.price_includes_iva),
     address: [property.address, property.city].filter(Boolean).join(", "),
     listingType,

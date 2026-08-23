@@ -1,6 +1,7 @@
 export type ListingType = "sale" | "rent";
 
 export interface PropertySocialCardProps {
+  title: string; // e.g. "Vendo Terreno en Villa Hayes"
   price: string; // pre-formatted, e.g. "$685,000" or "₲ 4.500.000.000"
   address: string; // e.g. "142 Willow Grove Lane, Austin TX"
   listingType: ListingType;

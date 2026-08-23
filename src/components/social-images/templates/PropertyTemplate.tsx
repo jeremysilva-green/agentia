@@ -54,7 +54,7 @@ export interface PropertyTemplateProps extends PropertySocialCardProps {
 }
 
 export function PropertyTemplate(props: PropertyTemplateProps) {
-  const { width, height, price, address, listingType, bedrooms, bathrooms, areaM2, imageDataUri } = props;
+  const { width, height, title, price, address, listingType, bedrooms, bathrooms, areaM2, imageDataUri } = props;
 
   const photoHeight = Math.round(height * 0.61); // matches reference image's proportions at 1080x1350
   const dotGrid = buildDotGridDataUri(width, height, 26, 1.6, COLORS.green, 0.35);
@@ -125,23 +125,44 @@ export function PropertyTemplate(props: PropertyTemplateProps) {
         {LISTING_TAG_LABEL[listingType]}
       </div>
 
-      {/* Price — Clash Display Semibold per brand spec */}
-      <div
-        style={{
-          display: "flex",
-          marginTop: 22,
-          color: COLORS.paper,
-          fontSize: 76,
-          fontWeight: 600,
-          fontFamily: "Clash Display",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        {price}
-      </div>
+      {/* Headline/price/address grouped into their own flex-column context —
+          Satori's layout engine miscomputes vertical spacing for a text
+          sibling two levels below another top-level sibling (reproduced:
+          price and address overlapped only when a headline preceded price
+          as a third top-level sibling, regardless of the headline's own
+          font/size — isolating this group in its own container avoids it). */}
+      <div style={{ display: "flex", flexDirection: "column", marginTop: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            color: COLORS.paper,
+            fontSize: 40,
+            fontWeight: 600,
+            fontFamily: "Clash Display",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {title}
+        </div>
 
-      {/* Address */}
-      <div style={{ display: "flex", marginTop: 10, color: COLORS.statText, fontSize: 30 }}>{address}</div>
+        {/* Price — Clash Display Semibold per brand spec */}
+        <div
+          style={{
+            display: "flex",
+            marginTop: 22,
+            color: COLORS.paper,
+            fontSize: 76,
+            fontWeight: 600,
+            fontFamily: "Clash Display",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {price}
+        </div>
+
+        {/* Address */}
+        <div style={{ display: "flex", marginTop: 10, color: COLORS.statText, fontSize: 30 }}>{address}</div>
+      </div>
 
       {/* Bottom row: stats (left) + watermark logo (right) */}
       <div style={{ display: "flex", marginTop: 32, justifyContent: "space-between", alignItems: "center" }}>
