@@ -13,6 +13,7 @@ import { LeadTracker } from "@/components/property/LeadTracker";
 import { Badge } from "@/components/ui/Badge";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { copy } from "@/lib/copy";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 const statusLabel = {
   available: copy.property.available,
@@ -30,7 +31,7 @@ export async function generateMetadata({
   const property = await getPropertyForPublicView(propertyId);
   if (!property) return {};
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const imageUrl = `${siteUrl}/api/property-card/${propertyId}`;
   const description = `${property.city} · ${new Intl.NumberFormat("es-PY", {
     style: "currency",
@@ -91,7 +92,7 @@ export default async function PropertyDetailPage({
     isOwner = profile?.role === "agent" && agentProfile?.id === user.id;
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const canonicalUrl = `${siteUrl}/agentes/${agentSlug}/propiedades/${propertyId}`;
   const agentPhone = agentProfile?.profiles?.phone;
   const agentName = agentProfile?.profiles?.full_name || agentProfile?.profiles?.username || "el agente";

@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { chargeRecurring } from "@/lib/dlocal";
 import { PLANS, type PlanId } from "@/lib/plans";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 // MIT recurring charge via dLocal — mirrors chargeSubscriptionBancard.
 // Reuses the network_payment_reference (+ transaction_link_id for
@@ -50,7 +51,7 @@ export async function chargeSubscriptionDlocal(
     agentProfile as unknown as { profiles: { full_name: string | null; username: string; phone: string | null } | null }
   ).profiles;
   const orderId = `renov-${agentId.slice(0, 8)}-${Date.now()}`;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   const { data: payment } = await service
     .from("payments")

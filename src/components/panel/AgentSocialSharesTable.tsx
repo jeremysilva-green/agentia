@@ -4,6 +4,7 @@ import { DownloadPromoCardButton } from "@/components/panel/DownloadPromoCardBut
 import { DeleteAgentSocialShareButton } from "@/components/panel/DeleteAgentSocialShareButton";
 import { Badge } from "@/components/ui/Badge";
 import { copy } from "@/lib/copy";
+import { getSiteUrl } from "@/lib/siteUrl";
 import type { AgentSocialShareRow } from "@/types/domain";
 
 const statusTone = {
@@ -32,7 +33,7 @@ export function AgentSocialSharesTable({ rows }: { rows: AgentSocialShareRow[] }
     );
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   return (
     <>

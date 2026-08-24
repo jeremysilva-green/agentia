@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { copy } from "@/lib/copy";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 async function getShortLink(code: string) {
   const service = createServiceClient();
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const link = await getShortLink(code);
   if (!link?.properties) return {};
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const imageUrl = `${siteUrl}/api/property-card/${link.property_id}`;
   const description = new Intl.NumberFormat("es-PY", {
     style: "currency",

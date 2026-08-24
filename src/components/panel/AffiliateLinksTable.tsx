@@ -4,6 +4,7 @@ import { DownloadPromoCardButton } from "@/components/panel/DownloadPromoCardBut
 import { DeleteAffiliateLinkButton } from "@/components/panel/DeleteAffiliateLinkButton";
 import { Badge } from "@/components/ui/Badge";
 import { copy } from "@/lib/copy";
+import { getSiteUrl } from "@/lib/siteUrl";
 import type { AffiliateLinkRow } from "@/types/domain";
 
 const statusTone = {
@@ -38,7 +39,7 @@ export function AffiliateLinksTable({
     );
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   return (
     <>

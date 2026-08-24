@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createSingleBuy, buildBancardPaymentUrl } from "@/lib/bancard";
 import { PLANS, isPlanId } from "@/lib/plans";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -64,7 +65,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No se pudo iniciar el pago" }, { status: 500 });
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   try {
     const { processId } = await createSingleBuy({

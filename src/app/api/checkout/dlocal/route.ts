@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createFirstPayment, supportsRecurring } from "@/lib/dlocal";
 import { PLANS, isPlanId } from "@/lib/plans";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 // First (CIT) card payment for a subscription — also registers the card for
 // future MIT renewals (dLocal's "SUBSCRIPTION"/"FIRST" stored-credential
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
 
   const plan = PLANS[planId];
   const orderId = `chk-${user.id.slice(0, 8)}-${Date.now()}`;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   const { data: payment, error: paymentError } = await service
     .from("payments")

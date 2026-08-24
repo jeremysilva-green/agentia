@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { copy } from "@/lib/copy";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 // Mirrors /s/[code] (the affiliate short-link resolver) but for an agent
 // sharing their own listing — resolves against agent_social_shares instead
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const share = await getAgentShare(code);
   if (!share?.properties) return {};
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
   const imageUrl = `${siteUrl}/api/property-card/${share.property_id}`;
   const description = new Intl.NumberFormat("es-PY", {
     style: "currency",

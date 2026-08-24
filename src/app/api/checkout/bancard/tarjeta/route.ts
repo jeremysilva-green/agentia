@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createCardTokenRequest } from "@/lib/bancard";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 // Initiates a direct-Bancard card tokenization request — returns a
 // process_id ("resultado") for the client to feed into Bancard's own
@@ -50,7 +51,7 @@ export async function POST() {
     return NextResponse.json({ error: "No se pudo iniciar el catastro de tarjeta" }, { status: 500 });
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   try {
     const { processId } = await createCardTokenRequest({

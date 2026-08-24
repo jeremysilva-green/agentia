@@ -7,19 +7,9 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { propertySchema } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
 import { fieldErrorsFrom } from "@/lib/formErrors";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
-
-// Prefers an explicitly-set NEXT_PUBLIC_SITE_URL (needed once a real custom
-// domain exists, since that's never Vercel's auto-assigned one), then falls
-// back to VERCEL_URL — a system env var Vercel injects automatically on
-// every deployment with that deployment's real URL, no config needed. Only
-// falls back to localhost when neither is present (local dev).
-function getSiteUrl() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
 
 // Queues an Instagram post for a property save (create or update) by
 // inserting a row into `generation_requests` and notifying Make.com.

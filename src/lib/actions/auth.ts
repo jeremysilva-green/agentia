@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { agentSignupSchema, loginSchema, userSignupSchema } from "@/lib/validations/auth";
 import { fieldErrorsFrom } from "@/lib/formErrors";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string>; success?: boolean } | undefined;
 
@@ -29,7 +30,7 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
 
   const { email, password, username, fullName, phone, city, ruc } = parsed.data;
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -107,7 +108,7 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
 
   const { email, password, username, fullName } = parsed.data;
   const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = getSiteUrl();
 
   const { data, error } = await supabase.auth.signUp({
     email,
