@@ -131,6 +131,36 @@ async function checkPropertyLimit(
   return null;
 }
 
+// Lets the panel gate the "Nueva propiedad" button itself, before the agent
+// ever reaches the creation form — mirrors checkPropertyLimit's Básico/
+// active-count logic but re-derives the caller from the session instead of
+// trusting a client-supplied agentId.
+export async function isAtPropertyLimit(): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: subscription } = await supabase
+    .from("subscriptions")
+    .select("plan")
+    .eq("agent_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if ((subscription?.plan ?? "basico") !== "basico") return false;
+
+  const { count } = await supabase
+    .from("properties")
+    .select("id", { count: "exact", head: true })
+    .eq("agent_id", user.id)
+    .eq("status", "available");
+
+  return (count ?? 0) >= BASICO_PROPERTY_LIMIT;
+}
+
 function readPropertyForm(formData: FormData) {
   return propertySchema.safeParse({
     title: formData.get("title"),

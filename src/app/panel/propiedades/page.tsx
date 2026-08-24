@@ -1,11 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { Plus, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { isAtPropertyLimit } from "@/lib/actions/properties";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
+import { NuevaPropiedadButton } from "@/components/panel/NuevaPropiedadButton";
 
 const statusLabel: Record<string, string> = {
   available: "Disponible",
@@ -28,23 +30,21 @@ export default async function PropiedadesPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/ingresar");
 
-  const { data: properties } = await supabase
-    .from("properties")
-    .select("*, property_images(id, storage_path, position)")
-    .eq("agent_id", user.id)
-    .order("created_at", { ascending: false });
+  const [{ data: properties }, atLimit] = await Promise.all([
+    supabase
+      .from("properties")
+      .select("*, property_images(id, storage_path, position)")
+      .eq("agent_id", user.id)
+      .order("created_at", { ascending: false }),
+    isAtPropertyLimit(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="font-display text-2xl font-semibold text-white">Propiedades</h1>
         <div className="flex items-center gap-2">
-          <Link href="/panel/propiedades/nueva">
-            <Button size="sm" className="bg-emerald-600! hover:bg-emerald-700!">
-              <Plus size={16} />
-              Nueva propiedad
-            </Button>
-          </Link>
+          <NuevaPropiedadButton atLimit={atLimit} />
         </div>
       </div>
 
