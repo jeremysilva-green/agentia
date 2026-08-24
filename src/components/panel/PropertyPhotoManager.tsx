@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Star, Trash2, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { notifyFirstPhotoAdded } from "@/lib/actions/properties";
 import { Button } from "@/components/ui/Button";
 import type { PropertyImage } from "@/types/domain";
 
@@ -33,7 +34,9 @@ export function PropertyPhotoManager({
     setError(null);
 
     startTransition(async () => {
+      const hadNoPhotosBefore = images.length === 0;
       let nextPosition = images.length === 0 ? 0 : Math.max(...images.map((i) => i.position)) + 1;
+      let uploadedAny = false;
 
       for (const file of Array.from(files)) {
         const ext = file.name.split(".").pop() ?? "jpg";
@@ -60,10 +63,17 @@ export function PropertyPhotoManager({
         }
 
         nextPosition += 1;
+        uploadedAny = true;
         setImages((prev) => [...prev, data]);
       }
 
       if (fileInputRef.current) fileInputRef.current.value = "";
+
+      // First real photo for this property — this is the one moment we can
+      // guarantee an image exists before notifying Make.com.
+      if (hadNoPhotosBefore && uploadedAny) {
+        await notifyFirstPhotoAdded(propertyId);
+      }
     });
   }
 

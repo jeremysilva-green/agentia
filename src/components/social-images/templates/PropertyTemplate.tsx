@@ -177,7 +177,9 @@ export function PropertyTemplate(props: PropertyTemplateProps) {
           {bathrooms != null && <Stat icon={ICON_PATHS.bath} label={`${bathrooms} ba`} />}
           {areaM2 != null && <Stat icon={ICON_PATHS.area} label={`${areaM2} m²`} />}
         </div>
-        <LogoMark size={90} color={COLORS.green} />
+        <div style={{ display: "flex", marginTop: -20 }}>
+          <LogoMark size={90} color={COLORS.green} />
+        </div>
       </div>
     </div>
   );

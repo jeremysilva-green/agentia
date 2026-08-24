@@ -80,6 +80,31 @@ async function queueInstagramPost(propertyId: string, agentId: string) {
   }
 }
 
+// Called directly from PropertyPhotoManager (a client component) right
+// after a property's first photo finishes uploading — the one point in the
+// flow where we can guarantee an image actually exists before Make.com
+// goes to render it. Exported server actions are directly callable by
+// anyone, not just from the UI that references them, so this independently
+// verifies the authenticated caller actually owns the property rather than
+// trusting a client-supplied agentId.
+export async function notifyFirstPhotoAdded(propertyId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id")
+    .eq("id", propertyId)
+    .eq("agent_id", user.id)
+    .maybeSingle();
+  if (!property) return;
+
+  await queueInstagramPost(propertyId, user.id);
+}
+
 export type PropertyActionState = { error?: string; fieldErrors?: Record<string, string> } | undefined;
 
 const BASICO_PROPERTY_LIMIT = 3;
@@ -209,8 +234,11 @@ export async function createProperty(
 
   if (error || !data) return { error: "No se pudo crear la propiedad. Intentá de nuevo." };
 
-  await queueInstagramPost(data.id, user.id);
-
+  // Instagram post is queued once the first photo is actually uploaded (see
+  // notifyFirstPhotoAdded, called from PropertyPhotoManager) — not here.
+  // A brand-new property never has photos yet at this point (they're added
+  // afterward, on the edit page this redirects to), so queuing here would
+  // hand Make.com a property with nothing to render.
   revalidatePath("/panel/propiedades");
   redirect(`/panel/propiedades/${data.id}/editar`);
 }
@@ -281,8 +309,11 @@ export async function updateProperty(
 
   if (error) return { error: "No se pudo guardar los cambios." };
 
-  await queueInstagramPost(propertyId, user.id);
-
+  // Instagram post is only queued on creation (see createProperty) — an
+  // agent typically saves again right after adding photos, which was
+  // queueing a near-identical second post for the same property within
+  // seconds of the first (confirmed via generation_requests timestamps and
+  // showing up as real duplicate drafts in Buffer).
   revalidatePath("/panel/propiedades");
   revalidatePath(`/panel/propiedades/${propertyId}/editar`);
   return undefined;
