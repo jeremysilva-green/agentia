@@ -27,6 +27,7 @@ import type { PanelSection } from "@/types/domain";
 const agentNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection }[] = [
   { href: "/panel", label: copy.panel.overview, icon: Home },
   { href: "/panel/propiedades", label: copy.panel.properties, icon: Building2 },
+  { href: "/panel/redes-sociales", label: "Redes Sociales", icon: Link2 },
   { href: "/panel/leads", label: copy.panel.leads, icon: Users, notifyKey: "leads" },
   { href: "/panel/solicitudes", label: copy.panel.solicitudes, icon: Inbox, notifyKey: "solicitudes" },
   { href: "/panel/chats", label: copy.panel.chats, icon: MessageCircle, notifyKey: "chats" },

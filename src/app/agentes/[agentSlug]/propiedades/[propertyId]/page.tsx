@@ -8,6 +8,7 @@ import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyMap } from "@/components/property/PropertyMap";
 import { ChatWidget } from "@/components/property/ChatWidget";
 import { ShareButton } from "@/components/property/ShareButton";
+import { AgentShareButton } from "@/components/property/AgentShareButton";
 import { LeadTracker } from "@/components/property/LeadTracker";
 import { Badge } from "@/components/ui/Badge";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
@@ -83,9 +84,11 @@ export default async function PropertyDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
   let isUserRole = false;
+  let isOwner = false;
   if (user) {
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
     isUserRole = profile?.role === "user";
+    isOwner = profile?.role === "agent" && agentProfile?.id === user.id;
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -186,6 +189,7 @@ export default async function PropertyDetailPage({
               />
             )}
             {isUserRole && <ShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
+            {isOwner && <AgentShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
           </div>
         </div>
       </div>

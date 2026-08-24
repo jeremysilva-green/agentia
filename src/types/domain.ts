@@ -16,6 +16,7 @@ export type PrivateAgreement = Database["public"]["Tables"]["private_agreements"
 export type AgentAvailability = Database["public"]["Tables"]["agent_availability"]["Row"];
 export type Agendamiento = Database["public"]["Tables"]["agendamientos"]["Row"];
 export type ShortLink = Database["public"]["Tables"]["short_links"]["Row"];
+export type AgentSocialShare = Database["public"]["Tables"]["agent_social_shares"]["Row"];
 export type PanelSectionView = Database["public"]["Tables"]["panel_section_views"]["Row"];
 export type PanelSection = PanelSectionView["section"];
 
@@ -63,6 +64,15 @@ export type AffiliateLinkRow = AffiliateLink & {
   view_count: number;
   lead_count: number;
   short_code: string | null;
+};
+
+export type AgentSocialShareRow = AgentSocialShare & {
+  property_title: string;
+  property_city: string;
+  property_price: number;
+  property_currency: string;
+  property_status: Property["status"];
+  property_listing_type: Property["listing_type"];
 };
 
 // A property the affiliate promoted that's now sold. Commission fields are

@@ -867,6 +867,41 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["generation_requests"]["Insert"]>;
         Relationships: [];
       };
+      agent_social_shares: {
+        Row: {
+          id: string;
+          code: string;
+          property_id: string;
+          agent_id: string;
+          click_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          property_id: string;
+          agent_id: string;
+          click_count?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["agent_social_shares"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "agent_social_shares_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "agent_social_shares_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
