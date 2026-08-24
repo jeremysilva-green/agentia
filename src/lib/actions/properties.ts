@@ -306,7 +306,7 @@ export async function updateProperty(
   // showing up as real duplicate drafts in Buffer).
   revalidatePath("/panel/propiedades");
   revalidatePath(`/panel/propiedades/${propertyId}/editar`);
-  return undefined;
+  redirect("/panel/propiedades");
 }
 
 export async function deleteProperty(propertyId: string) {
