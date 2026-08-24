@@ -92,10 +92,15 @@ export function PropertyTemplate(props: PropertyTemplateProps) {
         <div style={{ display: "flex", color: COLORS.green, fontSize: 22 }}>agentia.com.py</div>
       </div>
 
-      {/* Cover photo */}
+      {/* Cover photo — relative so the "EN VENTA" tag can overlay its
+          bottom-left corner instead of taking its own row below the photo,
+          which frees up enough vertical space to keep everything (headline,
+          price, address, stats, logo) from getting pushed past the bottom
+          of the fixed-height canvas. */}
       <div
         style={{
           display: "flex",
+          position: "relative",
           marginTop: 40,
           width: "100%",
           height: photoHeight,
@@ -104,25 +109,26 @@ export function PropertyTemplate(props: PropertyTemplateProps) {
         }}
       >
         <img src={imageDataUri} width={width - 128} height={photoHeight} style={{ objectFit: "cover" }} />
-      </div>
 
-      {/* Tag — alignSelf is required, otherwise Satori's flex defaults stretch it full-width */}
-      <div
-        style={{
-          display: "flex",
-          alignSelf: "flex-start",
-          marginTop: 36,
-          backgroundColor: COLORS.green,
-          color: COLORS.paper,
-          fontSize: 22,
-          fontWeight: 600,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          padding: "12px 20px",
-          borderRadius: 12,
-        }}
-      >
-        {LISTING_TAG_LABEL[listingType]}
+        <div
+          style={{
+            display: "flex",
+            position: "absolute",
+            left: 24,
+            bottom: 24,
+            backgroundColor: COLORS.green,
+            color: COLORS.paper,
+            fontSize: 22,
+            fontWeight: 600,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            padding: "12px 20px",
+            borderRadius: 12,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.35)",
+          }}
+        >
+          {LISTING_TAG_LABEL[listingType]}
+        </div>
       </div>
 
       {/* Headline/price/address grouped into their own flex-column context —
@@ -131,7 +137,7 @@ export function PropertyTemplate(props: PropertyTemplateProps) {
           price and address overlapped only when a headline preceded price
           as a third top-level sibling, regardless of the headline's own
           font/size — isolating this group in its own container avoids it). */}
-      <div style={{ display: "flex", flexDirection: "column", marginTop: 20 }}>
+      <div style={{ display: "flex", flexDirection: "column", marginTop: 32 }}>
         <div
           style={{
             display: "flex",
