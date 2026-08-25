@@ -1,22 +1,5 @@
 import Link from "next/link";
-import {
-  Home,
-  MessageCircle,
-  Users,
-  CalendarClock,
-  Inbox,
-  LayoutDashboard,
-  FileSignature,
-  Link2,
-  TrendingUp,
-  ShieldCheck,
-  Check,
-  X,
-  ArrowRight,
-  UserPlus,
-  Building2,
-  Sparkles,
-} from "lucide-react";
+import { Check, X, ArrowRight, UserPlus, Building2, Sparkles } from "lucide-react";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
 
@@ -39,21 +22,21 @@ const steps = [
 ];
 
 const agentFeatures = [
-  { icon: Home, title: "Portafolio propio con tu marca", description: "Tu página pública, tus propiedades, tu contacto — sin compartir vidriera." },
-  { icon: MessageCircle, title: "Asistente de IA 24/7", description: "Responde consultas de compradores en tu nombre, a toda hora." },
-  { icon: Users, title: "Captura automática de leads", description: "Cada contacto compartido en el chat aparece directo en tu panel." },
-  { icon: CalendarClock, title: "Agendamiento automático de visitas", description: "Según tu disponibilidad real, sin ida y vuelta de mensajes." },
-  { icon: Inbox, title: "CRM centralizado", description: "Leads, solicitudes y conversaciones, todo organizado en un solo panel." },
-  { icon: LayoutDashboard, title: "Vista Global con reportes PDF", description: "Todas tus métricas del mes y reportes descargables, con un clic." },
-  { icon: FileSignature, title: "Acuerdo Privado con firma digital", description: "El propietario firma la autorización de venta desde el celular." },
-  { icon: Link2, title: "Programa de afiliados propio", description: "Otros promocionan tus propiedades; pagás comisión solo si se vende." },
+  { title: "Portafolio propio con tu marca", description: "Tu página pública, tus propiedades, tu contacto — sin compartir vidriera." },
+  { title: "Asistente de IA 24/7", description: "Responde consultas de compradores en tu nombre, a toda hora." },
+  { title: "Captura automática de leads", description: "Cada contacto compartido en el chat aparece directo en tu panel." },
+  { title: "Agendamiento automático de visitas", description: "Según tu disponibilidad real, sin ida y vuelta de mensajes." },
+  { title: "CRM centralizado", description: "Leads, solicitudes y conversaciones, todo organizado en un solo panel." },
+  { title: "Vista Global con reportes PDF", description: "Todas tus métricas del mes y reportes descargables, con un clic." },
+  { title: "Acuerdo Privado con firma digital", description: "El propietario firma la autorización de venta desde el celular." },
+  { title: "Programa de afiliados propio", description: "Otros promocionan tus propiedades; pagás comisión solo si se vende." },
 ];
 
 const affiliateFeatures = [
-  { icon: Link2, title: "Ganá sin ser inmobiliaria", description: "Generá un link único por propiedad en segundos." },
-  { icon: TrendingUp, title: "Comisión del 1%", description: "Por cada venta cerrada que ayudaste a generar." },
-  { icon: LayoutDashboard, title: "Estadísticas claras", description: "Clics, leads, ventas y comisiones, en un panel simple." },
-  { icon: ShieldCheck, title: "Cero riesgo", description: "Sin stock, sin oficina, sin costos fijos." },
+  { title: "Ganá sin ser inmobiliaria", description: "Generá un link único por propiedad en segundos." },
+  { title: "Comisión del 1%", description: "Por cada venta cerrada que ayudaste a generar." },
+  { title: "Estadísticas claras", description: "Clics, leads, ventas y comisiones, en un panel simple." },
+  { title: "Cero riesgo", description: "Sin stock, sin oficina, sin costos fijos." },
 ];
 
 const painSolutions = [
@@ -147,20 +130,19 @@ export default function HomePage() {
       </section>
 
       {/* Para agentes */}
-      <section className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <div className="mb-6 flex items-center gap-2">
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 text-center sm:px-6">
+        <div className="mb-8 flex items-center justify-center gap-2">
           <Building2 size={20} className="text-emerald-400" />
           <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">Para Agentes</h2>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
           {agentFeatures.map((feature, i) => (
             <div
               key={feature.title}
-              className="animate-fade-in-up flex flex-col gap-2.5 rounded-2xl border border-emerald-500/40 bg-black/30 p-5 backdrop-blur-md transition-transform duration-300 ease-out hover:scale-[1.03]"
+              className="animate-fade-in-up flex flex-col items-center gap-1.5"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <feature.icon size={20} className="text-emerald-400" />
-              <h3 className="font-display text-sm font-semibold text-white">{feature.title}</h3>
+              <h3 className="font-display text-sm font-semibold text-emerald-400">{feature.title}</h3>
               <p className="text-sm leading-relaxed text-white/60">{feature.description}</p>
             </div>
           ))}
@@ -168,20 +150,19 @@ export default function HomePage() {
       </section>
 
       {/* Para afiliados */}
-      <section className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <div className="mb-6 flex items-center gap-2">
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 text-center sm:px-6">
+        <div className="mb-8 flex items-center justify-center gap-2">
           <UserPlus size={20} className="text-emerald-400" />
           <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">Para Afiliados</h2>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
           {affiliateFeatures.map((feature, i) => (
             <div
               key={feature.title}
-              className="animate-fade-in-up flex flex-col gap-2.5 rounded-2xl border border-emerald-500/40 bg-black/30 p-5 backdrop-blur-md transition-transform duration-300 ease-out hover:scale-[1.03]"
+              className="animate-fade-in-up flex flex-col items-center gap-1.5"
               style={{ animationDelay: `${i * 60}ms` }}
             >
-              <feature.icon size={20} className="text-emerald-400" />
-              <h3 className="font-display text-sm font-semibold text-white">{feature.title}</h3>
+              <h3 className="font-display text-sm font-semibold text-emerald-400">{feature.title}</h3>
               <p className="text-sm leading-relaxed text-white/60">{feature.description}</p>
             </div>
           ))}
