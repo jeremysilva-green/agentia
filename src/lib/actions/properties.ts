@@ -161,6 +161,53 @@ export async function isAtPropertyLimit(): Promise<boolean> {
   return (count ?? 0) >= BASICO_PROPERTY_LIMIT;
 }
 
+// Called after an agent downgrades to Básico (via cancelSubscription or
+// selectPlan) so an agent who had more than BASICO_PROPERTY_LIMIT active
+// properties on Pro/Fundador doesn't keep them all publicly visible on a
+// free plan. Never deletes anything — unpublishes the extra ones, keeping
+// the most recently created BASICO_PROPERTY_LIMIT visible; the rest can be
+// republished manually (or automatically, if that gets built later) if the
+// agent upgrades again.
+export async function enforceBasicoPropertyLimit(agentId: string): Promise<void> {
+  const service = createServiceClient();
+
+  const { data: activeProperties } = await service
+    .from("properties")
+    .select("id")
+    .eq("agent_id", agentId)
+    .eq("status", "available")
+    .eq("published", true)
+    .order("created_at", { ascending: false });
+
+  const excess = (activeProperties ?? []).slice(BASICO_PROPERTY_LIMIT);
+  if (excess.length === 0) return;
+
+  await service
+    .from("properties")
+    .update({ published: false, hidden_by_downgrade: true })
+    .in(
+      "id",
+      excess.map((p) => p.id)
+    );
+}
+
+// Counterpart to enforceBasicoPropertyLimit — called once a Pro/Fundador
+// payment is actually confirmed (Pagopar webhook, Bancard webhook, dLocal
+// checkout/webhook), so properties that were auto-hidden by a previous
+// downgrade come back automatically. Only touches rows still flagged
+// hidden_by_downgrade, so a property the agent deliberately unpublished
+// themselves (which never gets that flag, or has it cleared by an explicit
+// re-publish in updateProperty) is left alone.
+export async function restoreHiddenPropertiesOnUpgrade(agentId: string): Promise<void> {
+  const service = createServiceClient();
+
+  await service
+    .from("properties")
+    .update({ published: true, hidden_by_downgrade: false })
+    .eq("agent_id", agentId)
+    .eq("hidden_by_downgrade", true);
+}
+
 function readPropertyForm(formData: FormData) {
   return propertySchema.safeParse({
     title: formData.get("title"),
@@ -316,6 +363,10 @@ export async function updateProperty(
       maps_url: map.mapsUrl,
       status: parsed.data.status,
       published: parsed.data.published,
+      // A deliberate re-publish overrides any earlier automatic downgrade
+      // hide — otherwise a later plan upgrade would try to "restore" a
+      // property the agent already brought back themselves.
+      ...(parsed.data.published ? { hidden_by_downgrade: false } : {}),
       bedrooms: parsed.data.bedrooms ?? null,
       bathrooms: parsed.data.bathrooms ?? null,
       area_m2: parsed.data.areaM2 ?? null,

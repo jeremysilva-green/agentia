@@ -24,7 +24,7 @@ export async function generateVendorReportPdf(details: {
   const dateFmt = (date: Date) =>
     date.toLocaleDateString("es-PY", { day: "2-digit", month: "long", year: "numeric" });
 
-  line("Agently — Reporte de actividad de tu propiedad", 20, true, rgb(0.02, 0.4, 0.25));
+  line("Agentia — Reporte de actividad de tu propiedad", 20, true, rgb(0.02, 0.4, 0.25));
   y -= 8;
   line(`Propiedad: ${details.propertyTitle}`);
   line(`Ciudad: ${details.city}`);

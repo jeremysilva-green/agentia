@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { buildConfirmToken } from "@/lib/bancard";
 import { chargeSubscriptionBancard } from "@/lib/bancardSubscription";
+import { restoreHiddenPropertiesOnUpgrade } from "@/lib/actions/properties";
 import type { Json } from "@/types/database.types";
 
 type BancardConfirmOperation = {
@@ -115,6 +116,10 @@ export async function POST(request: Request) {
       .eq("id", subscription.id);
 
     await service.from("agent_profiles").update({ is_active: true }).eq("id", subscription.agent_id);
+
+    if (record.plan === "pro" || record.plan === "fundador") {
+      await restoreHiddenPropertiesOnUpgrade(subscription.agent_id);
+    }
   }
 
   return NextResponse.json({ status: "success" });

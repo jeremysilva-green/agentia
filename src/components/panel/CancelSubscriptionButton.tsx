@@ -12,7 +12,7 @@ export function CancelSubscriptionButton() {
   function handleCancel() {
     if (
       !confirm(
-        "¿Cancelar tu suscripción? Se detienen los cobros automáticos de inmediato y tu portafolio deja de estar visible públicamente. Guardamos tus datos de pago por si querés volver a suscribirte más adelante."
+        "¿Cancelar tu suscripción? Se detienen los cobros automáticos de inmediato y pasás al plan Básico: solo tus 3 propiedades activas más recientes quedan visibles públicamente. El resto se guarda (no se elimina) — podés volver a publicarlas si te suscribís de nuevo. Si más adelante te volvés a suscribir, no vas a tener que volver a cargar tu tarjeta."
       )
     ) {
       return;

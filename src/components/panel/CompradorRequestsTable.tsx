@@ -29,7 +29,7 @@ export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
       <div className="flex flex-col gap-3 sm:hidden">
         {rows.map((row) => {
           const propertyType = row.property_type as PropertyType | null;
-          const contactMessage = `Hola ${row.full_name}! Te escribo por tu búsqueda de propiedad en ${row.city} en Agently.`;
+          const contactMessage = `Hola ${row.full_name}! Te escribo por tu búsqueda de propiedad en ${row.city} en Agentia.`;
 
           return (
             <div key={row.id} className="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-white p-4 text-xs">
@@ -75,7 +75,7 @@ export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
             <tbody className="divide-y divide-emerald-100">
               {rows.map((row) => {
                 const propertyType = row.property_type as PropertyType | null;
-                const contactMessage = `Hola ${row.full_name}! Te escribo por tu búsqueda de propiedad en ${row.city} en Agently.`;
+                const contactMessage = `Hola ${row.full_name}! Te escribo por tu búsqueda de propiedad en ${row.city} en Agentia.`;
 
                 return (
                   <tr key={row.id}>

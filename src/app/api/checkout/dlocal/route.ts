@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { createFirstPayment, supportsRecurring } from "@/lib/dlocal";
 import { PLANS, isPlanId } from "@/lib/plans";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { restoreHiddenPropertiesOnUpgrade } from "@/lib/actions/properties";
 
 // First (CIT) card payment for a subscription — also registers the card for
 // future MIT renewals (dLocal's "SUBSCRIPTION"/"FIRST" stored-credential
@@ -143,6 +144,10 @@ export async function POST(request: Request) {
       .eq("id", subscription.id);
 
     await service.from("agent_profiles").update({ is_active: true }).eq("id", user.id);
+
+    if (planId === "pro" || planId === "fundador") {
+      await restoreHiddenPropertiesOnUpgrade(user.id);
+    }
 
     return NextResponse.json({ ok: true, recurringSupported });
   } catch {

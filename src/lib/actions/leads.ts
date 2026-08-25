@@ -77,7 +77,7 @@ async function generateDealReportPdf(details: {
 
   const money = (amount: number) => `${details.currency} ${amount.toLocaleString("es-PY")}`;
 
-  line("Agently — Reporte de cierre de trato", 20, true, rgb(0.02, 0.4, 0.25));
+  line("Agentia — Reporte de cierre de trato", 20, true, rgb(0.02, 0.4, 0.25));
   y -= 8;
   line(`Código de referido: ${details.referralCode}`);
   line(`Propiedad: ${details.propertyTitle}`);

@@ -102,6 +102,7 @@ export async function POST(request: Request) {
       "id, title, description, price, currency, city, address, property_type, bedrooms, bathrooms, area_m2, garage, negotiation_type, negotiation_details, agent_id, agent_profiles(profiles(full_name, username, phone))"
     )
     .eq("id", propertyId)
+    .eq("published", true)
     .single();
 
   if (!property) return NextResponse.json({ error: "Propiedad no encontrada." }, { status: 404 });

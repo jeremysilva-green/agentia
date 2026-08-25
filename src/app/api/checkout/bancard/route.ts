@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     const { processId } = await createSingleBuy({
       shopProcessId,
       amount: plan.price,
-      description: `Suscripción Agently — Plan ${plan.name}`,
+      description: `Suscripción Agentia — Plan ${plan.name}`,
       returnUrl: `${siteUrl}/panel/suscripcion?resultado=retorno`,
     });
 

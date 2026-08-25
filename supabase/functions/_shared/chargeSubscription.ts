@@ -40,7 +40,7 @@ export async function chargeSubscription(
   const pedido = await iniciarTransaccion({
     idPedidoComercio,
     montoTotal: amount,
-    descripcion: `Renovacion Agently - Plan ${plan}`,
+    descripcion: `Renovacion Agentia - Plan ${plan}`,
     comprador: {
       email: authUser.data.user?.email ?? "",
       nombre: profile?.full_name || profile?.username || "Agente",

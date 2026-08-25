@@ -95,7 +95,7 @@ export default async function SuscripcionPage() {
             Tarjeta guardada: <span className="font-medium text-slate-100">{cardOnFile ? "Sí" : "No"}</span>
             {cardOnFile && ctx.agentProfile?.proveedor_tarjeta && ` (${ctx.agentProfile.proveedor_tarjeta})`}
           </p>
-          {(status === "active" || status === "trialing") && (
+          {currentPlan !== "basico" && (status === "active" || status === "trialing") && (
             <div className="mt-2 border-t border-white/10 pt-4">
               <CancelSubscriptionButton />
             </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getPaymentStatus, supportsRecurring } from "@/lib/dlocal";
+import { restoreHiddenPropertiesOnUpgrade } from "@/lib/actions/properties";
 import type { Json } from "@/types/database.types";
 
 // Never trust the notification body's status directly for a money-moving
@@ -80,6 +81,10 @@ export async function POST(request: Request) {
     .eq("id", subscription.id);
 
   await service.from("agent_profiles").update({ is_active: true }).eq("id", subscription.agent_id);
+
+  if (record.plan === "pro" || record.plan === "fundador") {
+    await restoreHiddenPropertiesOnUpgrade(subscription.agent_id);
+  }
 
   return NextResponse.json({ status: "ok" });
 }

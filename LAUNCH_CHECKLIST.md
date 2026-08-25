@@ -139,6 +139,17 @@ The new share-link table showed `localhost:3000` in the generated URL — same r
 
 **Operational note for next time:** my Supabase CLI login can run DB migrations fine, but gets a 403 "insufficient privileges" on `functions deploy`, `secrets set/list`, and `projects list` — even right after a fresh `supabase login`. The same commands work fine when the user runs them directly in their own terminal. Cause not fully diagnosed (same machine, same `$HOME`) — likely a role/scope difference on the access token itself. Until this is understood, function deploys and secret changes need to go through the user's terminal or the Supabase dashboard, not through me directly.
 
+## 11. "Agently" → "Agentia" typo — fixed in code, needs edge function redeploy
+
+Found via a Pagopar dashboard screenshot showing a pedido description reading "Suscripcion Agently - Plan pro" — turned out to be a leftover from an earlier project name, scattered across several **user-facing** strings (not just Pagopar). Fixed in 9 files:
+
+- [x] Payment descriptions: Pagopar (`crear-pedido-pagopar/index.ts`, `_shared/chargeSubscription.ts`), Bancard (`api/checkout/bancard/route.ts`, `bancardSubscription.ts`)
+- [x] WhatsApp contact messages to sellers/buyers/affiliates (`VendedorRequestsTable.tsx`, `CompradorRequestsTable.tsx`, `AffiliateDealsTable.tsx`)
+- [x] PDF report headers (`actions/leads.ts` deal-close report, `reports/vendorReport.ts`)
+- Left as-is, not user-facing: `dlocal.ts`'s HTTP `User-Agent` header, a code comment in `pdfChrome.ts`
+- [ ] **Action needed:** redeploy the two touched Supabase edge functions before this actually takes effect — `supabase functions deploy crear-pedido-pagopar` and `pagopar-cobro-mensual`/`pagopar-confirmar-tarjeta` (both import the now-fixed `_shared/chargeSubscription.ts`). Same access gap as the operational note below — I can't run `functions deploy` myself, this needs the user's terminal.
+- Note: this only fixes *future* transactions/messages/reports — historical "Agently" entries already in Pagopar's dashboard are permanent records and won't retroactively change.
+
 ## Standing rules (not action items — just don't forget these)
 
 - Never push to Supabase or deploy to production without explicit go-ahead per migration/change, reviewed locally first

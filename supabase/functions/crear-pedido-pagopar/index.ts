@@ -35,7 +35,7 @@ Deno.serve(async (request: Request) => {
   const pedido = await iniciarTransaccion({
     idPedidoComercio,
     montoTotal: amount,
-    descripcion: `Suscripcion Agently - Plan ${plan}`,
+    descripcion: `Suscripcion Agentia - Plan ${plan}`,
     comprador: {
       email: user.email ?? "",
       nombre: profile.full_name || profile.username || "Agente",

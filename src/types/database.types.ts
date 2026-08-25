@@ -103,6 +103,7 @@ export interface Database {
           maps_url: string | null;
           status: "available" | "sold" | "rented" | "draft";
           published: boolean;
+          hidden_by_downgrade: boolean;
           bedrooms: number | null;
           bathrooms: number | null;
           area_m2: number | null;
@@ -130,6 +131,7 @@ export interface Database {
           maps_url?: string | null;
           status?: "available" | "sold" | "rented" | "draft";
           published?: boolean;
+          hidden_by_downgrade?: boolean;
           bedrooms?: number | null;
           bathrooms?: number | null;
           area_m2?: number | null;

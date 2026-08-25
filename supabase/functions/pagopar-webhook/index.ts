@@ -73,7 +73,11 @@ Deno.serve(async (request: Request) => {
     .eq("id", payment.id);
 
   if (pagado) {
-    const subscription = (payment as unknown as { subscriptions: { id: string; agent_id: string } }).subscriptions;
+    const record = payment as unknown as {
+      plan: "basico" | "pro" | "fundador" | null;
+      subscriptions: { id: string; agent_id: string };
+    };
+    const subscription = record.subscriptions;
     const periodEnd = new Date();
     periodEnd.setDate(periodEnd.getDate() + 30);
 
@@ -87,6 +91,18 @@ Deno.serve(async (request: Request) => {
       .eq("id", subscription.id);
 
     await service.from("agent_profiles").update({ is_active: true }).eq("id", subscription.agent_id);
+
+    // Mirrors restoreHiddenPropertiesOnUpgrade() in src/lib/actions/properties.ts
+    // — kept in sync by hand since this Deno function can't import that
+    // Next.js module. Un-hides properties enforceBasicoPropertyLimit()
+    // auto-hid during an earlier Pro/Fundador -> Básico downgrade.
+    if (record.plan === "pro" || record.plan === "fundador") {
+      await service
+        .from("properties")
+        .update({ published: true, hidden_by_downgrade: false })
+        .eq("agent_id", subscription.agent_id)
+        .eq("hidden_by_downgrade", true);
+    }
   }
 
   return jsonResponse(body.resultado);

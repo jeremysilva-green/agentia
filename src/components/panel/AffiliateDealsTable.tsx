@@ -43,7 +43,7 @@ export function AffiliateDealsTable({
         <tbody className="divide-y divide-slate-100">
           {deals.map((deal) => {
             const reportUrl = deal.report_path ? getPublicStorageUrl("deal-reports", deal.report_path) : null;
-            const contactMessage = `Hola ${deal.agent_name}! Soy afiliado en Agently y quería consultarte sobre "${deal.property_title}".`;
+            const contactMessage = `Hola ${deal.agent_name}! Soy afiliado en Agentia y quería consultarte sobre "${deal.property_title}".`;
             const aliasMessage = `Hola, soy ${affiliateUsername} el afiliado de tu propiedad ${deal.property_title}. Mi alias bancario es ${affiliateAlias ?? "(sin definir)"}`;
 
             return (

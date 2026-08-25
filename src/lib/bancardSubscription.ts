@@ -53,7 +53,7 @@ export async function chargeSubscriptionBancard(
     shopProcessId,
     amount,
     aliasToken: agentProfile.bancard_alias_token,
-    description: `Renovación Agently — Plan ${PLANS[plan].name}`,
+    description: `Renovación Agentia — Plan ${PLANS[plan].name}`,
   });
 
   if (payment) {
