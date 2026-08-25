@@ -239,7 +239,7 @@ export default function HomePage() {
                   <p className="text-xs font-medium text-amber-400">Cupos limitados a los primeros {FUNDADOR_SEAT_LIMIT} agentes</p>
                 )}
                 <ul className="flex flex-1 flex-col gap-1.5 text-xs">
-                  {plan.features.slice(0, 5).map((f) => (
+                  {plan.features.slice(0, planId === "basico" ? 5 : 10).map((f) => (
                     <li key={f} className="flex items-start gap-2">
                       <Check size={13} className="mt-0.5 shrink-0 text-emerald-400" />
                       <span className="text-white/70">{f}</span>
