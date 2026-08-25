@@ -39,7 +39,7 @@ export async function NavBar() {
               href="/agentes"
               className="hidden text-sm font-medium text-white/90 transition-colors hover:text-white sm:block"
             >
-              Buscar propiedades
+              Portal
             </Link>
 
             {user && role === "agent" && (

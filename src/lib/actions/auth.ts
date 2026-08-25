@@ -88,7 +88,7 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
   await service.auth.admin.updateUserById(data.user.id, { email_confirm: true });
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
   if (!signInError) {
-    redirect("/panel");
+    redirect("/agentes");
   }
 
   return { success: true };

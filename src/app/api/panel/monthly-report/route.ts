@@ -286,7 +286,7 @@ export async function GET() {
   return new Response(new Uint8Array(pdfBytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="agently-reporte-${stats.monthStart.getFullYear()}-${String(stats.monthStart.getMonth() + 1).padStart(2, "0")}.pdf"`,
+      "Content-Disposition": `attachment; filename="agentia-reporte-${stats.monthStart.getFullYear()}-${String(stats.monthStart.getMonth() + 1).padStart(2, "0")}.pdf"`,
     },
   });
 }

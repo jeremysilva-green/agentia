@@ -17,7 +17,7 @@ export function VistaGlobalReportButton() {
         if (!response.ok) throw new Error();
 
         const disposition = response.headers.get("Content-Disposition") ?? "";
-        const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "agently-vista-global.pdf";
+        const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "agentia-vista-global.pdf";
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);

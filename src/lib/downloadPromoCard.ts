@@ -19,7 +19,7 @@ export async function downloadPromoCard(propertyId: string) {
   const url = URL.createObjectURL(jpegBlob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `agently-${propertyId}.jpg`;
+  a.download = `agentia-${propertyId}.jpg`;
   document.body.appendChild(a);
   a.click();
   a.remove();

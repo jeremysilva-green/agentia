@@ -17,7 +17,7 @@ export function ArrReportButton({ eligible, daysRemaining }: { eligible: boolean
         if (!response.ok) throw new Error();
 
         const disposition = response.headers.get("Content-Disposition") ?? "";
-        const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "agently-reporte-arr.pdf";
+        const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "agentia-reporte-arr.pdf";
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);

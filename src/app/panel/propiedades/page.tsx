@@ -103,7 +103,7 @@ export default async function PropiedadesPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="w-full border-slate-300! bg-slate-200! text-black! hover:bg-slate-300!"
+                    className="w-full bg-emerald-600! text-white! hover:bg-emerald-700!"
                   >
                     <Pencil size={14} />
                     Editar

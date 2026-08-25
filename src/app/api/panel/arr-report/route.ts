@@ -72,7 +72,7 @@ export async function GET() {
   return new Response(new Uint8Array(pdfBytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="agently-reporte-arr-${stats.rangeEnd.getFullYear()}.pdf"`,
+      "Content-Disposition": `attachment; filename="agentia-reporte-arr-${stats.rangeEnd.getFullYear()}.pdf"`,
     },
   });
 }

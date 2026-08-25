@@ -17,7 +17,7 @@ export function MonthlyReportButton() {
         if (!response.ok) throw new Error();
 
         const disposition = response.headers.get("Content-Disposition") ?? "";
-        const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "agently-reporte-mensual.pdf";
+        const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? "agentia-reporte-mensual.pdf";
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
