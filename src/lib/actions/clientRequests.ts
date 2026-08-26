@@ -212,3 +212,29 @@ export async function rejectClientRequest(
   revalidatePath("/panel/solicitudes");
   return { success: true };
 }
+
+// Unlike reject, this works regardless of status (pending/approved/rejected)
+// — the agent just wants the row gone from their list, not to change its
+// review outcome. Doesn't touch resulting_property_id's property if one was
+// already created from an approved request.
+export async function deleteClientRequest(requestId: string): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Sesión expirada. Volvé a ingresar." };
+
+  const { data: request } = await supabase
+    .from("client_requests")
+    .select("id, agent_id")
+    .eq("id", requestId)
+    .single();
+  if (!request || request.agent_id !== user.id) return { error: "No se encontró la solicitud." };
+
+  const service = createServiceClient();
+  const { error } = await service.from("client_requests").delete().eq("id", requestId);
+  if (error) return { error: "No se pudo eliminar la solicitud." };
+
+  revalidatePath("/panel/solicitudes");
+  return { success: true };
+}

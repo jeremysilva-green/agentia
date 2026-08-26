@@ -10,11 +10,17 @@ export function AvatarUploader({
   initialAvatarUrl,
   variant = "panel",
   displayName,
+  target = "avatar",
+  pathPrefix = "",
+  errorMessage = "No se pudo guardar la foto de perfil.",
 }: {
   userId: string;
   initialAvatarUrl: string | null;
   variant?: "panel" | "compact";
   displayName?: string;
+  target?: "avatar" | "logo";
+  pathPrefix?: string;
+  errorMessage?: string;
 }) {
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [isPending, startTransition] = useTransition();
@@ -28,7 +34,7 @@ export function AvatarUploader({
 
     startTransition(async () => {
       const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/${pathPrefix}${crypto.randomUUID()}.${ext}`;
 
       const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, {
         upsert: true,
@@ -40,13 +46,13 @@ export function AvatarUploader({
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
 
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: data.publicUrl })
-        .eq("id", userId);
+      const { error: updateError } =
+        target === "logo"
+          ? await supabase.from("agent_profiles").update({ logo_url: data.publicUrl }).eq("id", userId)
+          : await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", userId);
 
       if (updateError) {
-        setError("No se pudo guardar la foto de perfil.");
+        setError(errorMessage);
         return;
       }
 

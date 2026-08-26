@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, MessageCircle, Info, Trophy } from "lucide-react";
+import { Menu, MessageCircle, Info, Trophy, LayoutDashboard } from "lucide-react";
 
-export function NavMenu() {
+export function NavMenu({ panelLink }: { panelLink: { href: string; label: string } | null }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +29,16 @@ export function NavMenu() {
 
       {open && (
         <div className="absolute right-0 top-full z-20 mt-2 w-56 rounded-xl border border-emerald-500/40 bg-black/95 p-1.5 shadow-lg backdrop-blur-md">
+          {panelLink && (
+            <Link
+              href={panelLink.href}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-white/5 sm:hidden"
+            >
+              <LayoutDashboard size={16} />
+              {panelLink.label}
+            </Link>
+          )}
           <Link
             href="/que-es-agentia"
             onClick={() => setOpen(false)}

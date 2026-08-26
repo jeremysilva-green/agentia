@@ -13,6 +13,15 @@ function firstIssueMessage(issues: { message: string }[]) {
   return issues[0]?.message ?? "Datos inválidos";
 }
 
+// Supabase Auth's own rate-limit throttle on signUp() returns this exact
+// English message (e.g. after a double form submit) — translate it instead
+// of leaking raw English into an otherwise all-Spanish app.
+function translateAuthError(message: string): string {
+  const match = message.match(/you can only request this after (\d+) seconds/i);
+  if (match) return `Por seguridad, podés intentarlo de nuevo en ${match[1]} segundos.`;
+  return message;
+}
+
 export async function signUpAgent(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = agentSignupSchema.safeParse({
     email: formData.get("email"),
@@ -37,7 +46,7 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
     password,
     options: { emailRedirectTo: `${siteUrl}/auth/callback` },
   });
-  if (error) return { error: error.message };
+  if (error) return { error: translateAuthError(error.message) };
   if (!data.user) return { error: "No se pudo crear la cuenta. Intentá de nuevo." };
 
   const service = createServiceClient();
@@ -115,7 +124,7 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
     password,
     options: { emailRedirectTo: `${siteUrl}/auth/callback` },
   });
-  if (error) return { error: error.message };
+  if (error) return { error: translateAuthError(error.message) };
   if (!data.user) return { error: "No se pudo crear la cuenta. Intentá de nuevo." };
 
   const service = createServiceClient();
@@ -138,7 +147,7 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
   await service.auth.admin.updateUserById(data.user.id, { email_confirm: true });
   const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
   if (!signInError) {
-    redirect("/panel-afiliado");
+    redirect("/agentes");
   }
 
   return { success: true };

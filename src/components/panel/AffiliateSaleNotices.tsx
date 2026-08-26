@@ -32,6 +32,9 @@ export function AffiliateSaleNotices({
       {notices.map((notice) => {
         const hasTrackedCommission = !notice.commission_is_estimate;
         const reportUrl = notice.report_path ? getPublicStorageUrl("deal-reports", notice.report_path) : null;
+        const agreementUrl = notice.commission_agreement_path
+          ? getPublicStorageUrl("commission-agreements", notice.commission_agreement_path)
+          : null;
         const aliasMessage = `Hola, soy ${affiliateUsername} el afiliado de tu propiedad ${notice.property_title}. Mi alias bancario es ${affiliateAlias ?? "(sin definir)"}`;
         const contactMessage = `Hola ${notice.agent_name}! Soy afiliado en Agentia y vi que cerraste la venta de "${notice.property_title}". Quería consultarte sobre mi comisión.`;
 
@@ -77,6 +80,17 @@ export function AffiliateSaleNotices({
                 >
                   <Download size={12} />
                   {copy.panel.downloadReport}
+                </a>
+              )}
+              {agreementUrl && (
+                <a
+                  href={agreementUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-700 hover:bg-emerald-100"
+                >
+                  <Download size={12} />
+                  {copy.panel.downloadAgreement}
                 </a>
               )}
               {!notice.commission_paid_at && notice.agent_phone && (

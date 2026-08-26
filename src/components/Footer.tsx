@@ -55,7 +55,7 @@ export function Footer() {
 
         <div className="flex items-center gap-4">
           <a
-            href="https://instagram.com"
+            href="https://www.instagram.com/agentia.py?igsi=ZDA2eDRhaDlldzc1"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram"

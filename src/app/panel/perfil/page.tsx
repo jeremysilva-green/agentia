@@ -12,7 +12,7 @@ export default async function AgentProfilePage() {
 
   const [{ data: profile }, { data: agentProfile }] = await Promise.all([
     supabase.from("profiles").select("full_name, phone, avatar_url").eq("id", user.id).single(),
-    supabase.from("agent_profiles").select("city, ruc").eq("id", user.id).single(),
+    supabase.from("agent_profiles").select("city, ruc, brand_name, logo_url").eq("id", user.id).single(),
   ]);
 
   return (
@@ -28,6 +28,8 @@ export default async function AgentProfilePage() {
         phone={profile?.phone ?? null}
         city={agentProfile?.city ?? null}
         ruc={agentProfile?.ruc ?? null}
+        brandName={agentProfile?.brand_name ?? null}
+        logoUrl={agentProfile?.logo_url ?? null}
       />
     </div>
   );

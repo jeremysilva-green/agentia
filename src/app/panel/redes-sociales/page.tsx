@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAgentSocialSharesForAgent } from "@/lib/data/agentSocialShares";
 import { AgentSocialSharesTable } from "@/components/panel/AgentSocialSharesTable";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 export default async function RedesSocialesPage() {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export default async function RedesSocialesPage() {
           Enlaces cortos e imágenes promocionales que generaste para compartir tus propiedades.
         </p>
       </div>
-      <AgentSocialSharesTable rows={rows} />
+      <AgentSocialSharesTable rows={rows} siteUrl={getSiteUrl()} />
     </div>
   );
 }

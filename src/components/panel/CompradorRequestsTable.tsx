@@ -1,5 +1,9 @@
+"use client";
+
 import { MessageCircle } from "lucide-react";
 import { ViewClientRequestModal } from "@/components/panel/ViewClientRequestModal";
+import { DeleteClientRequestButton } from "@/components/panel/DeleteClientRequestButton";
+import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { PROPERTY_TYPE_LABELS, type PropertyType } from "@/lib/constants/propertyTypes";
 import { copy } from "@/lib/copy";
@@ -14,15 +18,7 @@ function priceRange(row: ClientRequest) {
     : "—";
 }
 
-export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        {copy.panel.solicitudesCompradorEmpty}
-      </div>
-    );
-  }
-
+function CompradorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
   return (
     <>
       {/* Mobile: stacked cards */}
@@ -44,17 +40,20 @@ export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
                 <p className="text-slate-500">{priceRange(row)}</p>
               </div>
 
-              <div className="flex items-center gap-2">
-                <a
-                  href={buildWhatsAppUrl(row.phone, contactMessage)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-fit items-center gap-1 rounded-md bg-[#25D366] px-2 py-1 text-[11px] font-medium text-white hover:bg-[#1fb855]"
-                >
-                  <MessageCircle size={11} />
-                  {copy.panel.solicitudesContactWhatsapp}
-                </a>
-                <ViewClientRequestModal row={row} />
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <a
+                    href={buildWhatsAppUrl(row.phone, contactMessage)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex w-fit items-center gap-1 rounded-md bg-[#25D366] px-2 py-1 text-[11px] font-medium text-white hover:bg-[#1fb855]"
+                  >
+                    <MessageCircle size={11} />
+                    {copy.panel.solicitudesContactWhatsapp}
+                  </a>
+                  <ViewClientRequestModal row={row} />
+                </div>
+                <DeleteClientRequestButton requestId={row.id} />
               </div>
             </div>
           );
@@ -67,9 +66,10 @@ export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
           <table className="w-full table-fixed text-left text-xs">
             <thead className="sticky top-0 z-10 bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
               <tr>
-                <th className={`${th} w-[30%]`}>{copy.panel.solicitudesContact}</th>
-                <th className={`${th} w-[30%]`}>{copy.panel.solicitudesType}</th>
-                <th className={`${th} w-[40%]`}>{copy.panel.solicitudesViewRequest}</th>
+                <th className={`${th} w-[28%]`}>{copy.panel.solicitudesContact}</th>
+                <th className={`${th} w-[28%]`}>{copy.panel.solicitudesType}</th>
+                <th className={`${th} w-[36%]`}>{copy.panel.solicitudesViewRequest}</th>
+                <th className={`${th} w-[8%]`} />
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-100">
@@ -100,6 +100,9 @@ export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
                     <td className={td}>
                       <ViewClientRequestModal row={row} />
                     </td>
+                    <td className={td}>
+                      <DeleteClientRequestButton requestId={row.id} />
+                    </td>
                   </tr>
                 );
               })}
@@ -108,5 +111,23 @@ export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
         </div>
       </div>
     </>
+  );
+}
+
+export function CompradorRequestsTable({ rows }: { rows: ClientRequest[] }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        {copy.panel.solicitudesCompradorEmpty}
+      </div>
+    );
+  }
+
+  return (
+    <MonthYearAccordion
+      rows={rows}
+      getDate={(r) => r.created_at}
+      renderGroup={(monthRows) => <CompradorRequestsForMonth rows={monthRows} />}
+    />
   );
 }

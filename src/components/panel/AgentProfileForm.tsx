@@ -14,6 +14,8 @@ export function AgentProfileForm({
   phone,
   city,
   ruc,
+  brandName,
+  logoUrl,
 }: {
   userId: string;
   avatarUrl: string | null;
@@ -21,6 +23,8 @@ export function AgentProfileForm({
   phone: string | null;
   city: string | null;
   ruc: string | null;
+  brandName: string | null;
+  logoUrl: string | null;
 }) {
   const [state, formAction, pending] = useActionState(updateAgentProfile, undefined);
   // Controlled so a failed save doesn't revert an in-progress edit back to
@@ -31,15 +35,30 @@ export function AgentProfileForm({
     phone: phone ?? "",
     city: city ?? "",
     ruc: ruc ?? "",
+    brandName: brandName ?? "",
   });
   const setField = (name: keyof typeof values) => (e: ChangeEvent<HTMLInputElement>) =>
     setValues((prev) => ({ ...prev, [name]: e.target.value }));
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">{copy.profile.photo}</p>
-        <AvatarUploader userId={userId} initialAvatarUrl={avatarUrl} displayName={fullName ?? undefined} />
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:gap-8">
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">{copy.profile.photo}</p>
+          <AvatarUploader userId={userId} initialAvatarUrl={avatarUrl} displayName={fullName ?? undefined} />
+        </div>
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">{copy.profile.logo}</p>
+          <AvatarUploader
+            userId={userId}
+            initialAvatarUrl={logoUrl}
+            variant="compact"
+            displayName={brandName || fullName || undefined}
+            target="logo"
+            pathPrefix="logo-"
+            errorMessage="No se pudo guardar el logo."
+          />
+        </div>
       </div>
 
       <form action={formAction} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5">
@@ -86,6 +105,17 @@ export function AgentProfileForm({
           error={state?.fieldErrors?.ruc}
           required
           placeholder="80012345-6"
+          className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+        />
+
+        <Input
+          id="brandName"
+          name="brandName"
+          label={copy.profile.brandName}
+          value={values.brandName}
+          onChange={setField("brandName")}
+          error={state?.fieldErrors?.brandName}
+          placeholder="Ej: Inmobiliaria del Este"
           className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
 

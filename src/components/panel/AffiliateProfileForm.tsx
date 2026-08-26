@@ -12,14 +12,16 @@ export function AffiliateProfileForm({
   avatarUrl,
   alias,
   phone,
+  ci,
 }: {
   userId: string;
   avatarUrl: string | null;
   alias: string | null;
   phone: string | null;
+  ci: string | null;
 }) {
   const [state, formAction, pending] = useActionState(updateAffiliateProfile, undefined);
-  const [values, setValues] = useState({ alias: alias ?? "", phone: phone ?? "" });
+  const [values, setValues] = useState({ alias: alias ?? "", phone: phone ?? "", ci: ci ?? "" });
   const setField = (name: keyof typeof values) => (e: ChangeEvent<HTMLInputElement>) =>
     setValues((prev) => ({ ...prev, [name]: e.target.value }));
 
@@ -51,6 +53,20 @@ export function AffiliateProfileForm({
           error={state?.fieldErrors?.phone}
           className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
+
+        <Input
+          id="ci"
+          name="ci"
+          label={copy.profile.ci}
+          value={values.ci}
+          onChange={setField("ci")}
+          error={state?.fieldErrors?.ci}
+          placeholder="1234567"
+          className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+        />
+        <p className="-mt-2 text-xs text-slate-500">
+          Necesario para generar el acuerdo de comisión cuando un agente cierre una venta que referiste.
+        </p>
 
         {state?.error && !state.fieldErrors && <p className="text-sm text-red-600">{state.error}</p>}
         {state?.success && <p className="text-sm text-emerald-600">{copy.profile.saved}</p>}

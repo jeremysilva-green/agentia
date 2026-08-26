@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { MessageCircle, Download } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { ClientRequestActions } from "@/components/panel/ClientRequestActions";
+import { DeleteClientRequestButton } from "@/components/panel/DeleteClientRequestButton";
+import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { getPublicStorageUrl } from "@/lib/storage";
 import { PROPERTY_TYPE_LABELS, type PropertyType } from "@/lib/constants/propertyTypes";
@@ -64,15 +68,7 @@ function Actions({ row }: { row: ClientRequest }) {
   );
 }
 
-export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        {copy.panel.solicitudesVendedorEmpty}
-      </div>
-    );
-  }
-
+function VendedorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
   return (
     <>
       {/* Mobile: stacked cards */}
@@ -111,7 +107,10 @@ export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
                 {copy.panel.solicitudesContactWhatsapp}
               </a>
 
-              <Actions row={row} />
+              <div className="flex items-start justify-between gap-2">
+                <Actions row={row} />
+                <DeleteClientRequestButton requestId={row.id} />
+              </div>
             </div>
           );
         })}
@@ -123,10 +122,11 @@ export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
           <table className="w-full table-fixed text-left text-xs">
             <thead className="sticky top-0 z-10 bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
               <tr>
-                <th className={`${th} w-[26%]`}>{copy.panel.solicitudesContact}</th>
-                <th className={`${th} w-[22%]`}>{copy.panel.solicitudesType}</th>
-                <th className={`${th} w-[14%]`}>{copy.panel.status}</th>
-                <th className={`${th} w-[38%]`}>{copy.panel.solicitudesActions}</th>
+                <th className={`${th} w-[25%]`}>{copy.panel.solicitudesContact}</th>
+                <th className={`${th} w-[21%]`}>{copy.panel.solicitudesType}</th>
+                <th className={`${th} w-[13%]`}>{copy.panel.status}</th>
+                <th className={`${th} w-[35%]`}>{copy.panel.solicitudesActions}</th>
+                <th className={`${th} w-[6%]`} />
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-100">
@@ -164,6 +164,9 @@ export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
                     <td className={td}>
                       <Actions row={row} />
                     </td>
+                    <td className={td}>
+                      <DeleteClientRequestButton requestId={row.id} />
+                    </td>
                   </tr>
                 );
               })}
@@ -172,5 +175,23 @@ export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
         </div>
       </div>
     </>
+  );
+}
+
+export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        {copy.panel.solicitudesVendedorEmpty}
+      </div>
+    );
+  }
+
+  return (
+    <MonthYearAccordion
+      rows={rows}
+      getDate={(r) => r.created_at}
+      renderGroup={(monthRows) => <VendedorRequestsForMonth rows={monthRows} />}
+    />
   );
 }

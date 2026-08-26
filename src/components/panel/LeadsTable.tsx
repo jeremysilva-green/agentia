@@ -1,8 +1,12 @@
+"use client";
+
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { LeadStatusSelect } from "@/components/panel/LeadStatusSelect";
 import { CloseDealButton } from "@/components/panel/CloseDealButton";
 import { MarkPaidButton } from "@/components/panel/MarkPaidButton";
+import { CommissionAgreementModal } from "@/components/panel/CommissionAgreementModal";
+import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { copy } from "@/lib/copy";
 import type { LeadPipelineRow } from "@/types/domain";
 
@@ -22,19 +26,12 @@ function daysRemainingToPay(commissionConfirmedAt: string) {
   return Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
 }
 
-export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug: string }) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        {copy.panel.leadsEmpty}
-      </div>
-    );
-  }
-
+function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug: string }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-      <table className="w-full min-w-[980px] text-left text-xs">
-        <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+    <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+      <div className="max-h-[480px] overflow-auto">
+        <table className="w-full min-w-[980px] text-left text-xs">
+          <thead className="sticky top-0 z-10 bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
           <tr>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.buyer}</th>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.properties}</th>
@@ -45,7 +42,7 @@ export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agent
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.agreement}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-emerald-100">
           {rows.map((row) => (
             <tr key={row.id}>
               <td className="whitespace-nowrap px-4 py-3">
@@ -84,14 +81,20 @@ export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agent
                     currency={row.property_currency}
                   />
                 )}
-                {row.commission_confirmed_at && row.affiliate_link_id && (
+                {row.commission_confirmed_at && row.affiliate_link_id && !row.commission_agreement_accepted_at && (
+                  <>
+                    <span className="text-[11px] font-medium text-amber-700">Falta aceptar el acuerdo</span>
+                    <CommissionAgreementModal leadId={row.id} />
+                  </>
+                )}
+                {row.commission_agreement_accepted_at && row.affiliate_link_id && (
                   <div className="flex flex-col items-start gap-1">
                     {row.commission_paid_at ? (
                       <Badge tone="success">{copy.panel.commissionPaid}</Badge>
                     ) : (
                       <>
                         <span className="text-[11px] font-medium text-amber-700">
-                          {copy.panel.payAffiliateDaysRemaining(daysRemainingToPay(row.commission_confirmed_at))}
+                          {copy.panel.payAffiliateDaysRemaining(daysRemainingToPay(row.commission_confirmed_at!))}
                         </span>
                         <MarkPaidButton leadId={row.id} />
                       </>
@@ -101,8 +104,27 @@ export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agent
               </td>
             </tr>
           ))}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     </div>
+  );
+}
+
+export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug: string }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        {copy.panel.leadsEmpty}
+      </div>
+    );
+  }
+
+  return (
+    <MonthYearAccordion
+      rows={rows}
+      getDate={(r) => r.referral_date}
+      renderGroup={(monthRows) => <LeadsForMonth rows={monthRows} agentSlug={agentSlug} />}
+    />
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { copy } from "@/lib/copy";
 import type { AgentChatRow } from "@/types/domain";
 
@@ -27,6 +28,48 @@ function dateFmt(value: string) {
   });
 }
 
+function ChatsForMonth({ rows, onView }: { rows: AgentChatRow[]; onView: (row: AgentChatRow) => void }) {
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-emerald-200 bg-white">
+      <table className="w-full text-left text-xs">
+        <thead className="bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
+          <tr>
+            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.chatLead}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.affiliatePanel.property}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.chatDate}</th>
+            <th className="px-4 py-3 font-medium">{copy.panel.chatSummary}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-medium" />
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-emerald-100">
+          {rows.map((row) => (
+            <tr key={row.id}>
+              <td className="whitespace-nowrap px-4 py-3">
+                <p className="font-medium text-slate-900">{row.buyer_name ?? copy.panel.anonymousVisitor}</p>
+                {row.buyer_phone && <p className="text-slate-500">{row.buyer_phone}</p>}
+              </td>
+              <td className="whitespace-nowrap px-4 py-3 text-slate-700">{row.property_title}</td>
+              <td className="whitespace-nowrap px-4 py-3 text-slate-500">{dateFmt(row.updated_at)}</td>
+              <td className="px-4 py-3 text-slate-600">
+                <p className="line-clamp-2 max-w-xs">{row.summary ?? "—"}</p>
+              </td>
+              <td className="whitespace-nowrap px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => onView(row)}
+                  className="font-medium text-emerald-700 hover:underline"
+                >
+                  {copy.panel.viewConversation}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function ChatsTable({ rows }: { rows: AgentChatRow[] }) {
   const [viewing, setViewing] = useState<AgentChatRow | null>(null);
 
@@ -46,43 +89,11 @@ export function ChatsTable({ rows }: { rows: AgentChatRow[] }) {
 
   return (
     <>
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-left text-xs">
-          <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.chatLead}</th>
-              <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.affiliatePanel.property}</th>
-              <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.chatDate}</th>
-              <th className="px-4 py-3 font-medium">{copy.panel.chatSummary}</th>
-              <th className="whitespace-nowrap px-4 py-3 font-medium" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {rows.map((row) => (
-              <tr key={row.id}>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <p className="font-medium text-slate-900">{row.buyer_name ?? copy.panel.anonymousVisitor}</p>
-                  {row.buyer_phone && <p className="text-slate-500">{row.buyer_phone}</p>}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-700">{row.property_title}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-slate-500">{dateFmt(row.updated_at)}</td>
-                <td className="px-4 py-3 text-slate-600">
-                  <p className="line-clamp-2 max-w-xs">{row.summary ?? "—"}</p>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() => setViewing(row)}
-                    className="font-medium text-emerald-700 hover:underline"
-                  >
-                    {copy.panel.viewConversation}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <MonthYearAccordion
+        rows={rows}
+        getDate={(r) => r.updated_at}
+        renderGroup={(monthRows) => <ChatsForMonth rows={monthRows} onView={setViewing} />}
+      />
 
       {viewing && (
         <div

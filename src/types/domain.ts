@@ -90,4 +90,5 @@ export type AffiliateSaleNotice = {
   commission_is_estimate: boolean;
   commission_paid_at: string | null;
   report_path: string | null;
+  commission_agreement_path: string | null;
 };

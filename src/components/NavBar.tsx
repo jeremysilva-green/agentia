@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getDictionary } from "@/lib/i18n/locale";
@@ -31,13 +32,13 @@ export async function NavBar() {
       <header className="bg-prussian">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-8">
           <Link href="/" className="flex items-center">
-            <span className="font-display text-2xl uppercase tracking-tight text-white sm:text-5xl">AGENTIA</span>
+            <Image src="/logo.png" alt="Agentia" width={595} height={94} priority className="h-7 w-auto sm:h-10" />
           </Link>
 
           <nav className="flex items-center gap-2.5 font-display print:hidden sm:gap-6">
             <Link
               href="/agentes"
-              className="hidden text-sm font-medium text-white/90 transition-colors hover:text-white sm:block"
+              className="text-sm font-medium text-white/90 transition-colors hover:text-white"
             >
               Portal
             </Link>
@@ -45,7 +46,7 @@ export async function NavBar() {
             {user && role === "agent" && (
               <Link
                 href="/panel"
-                className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+                className="hidden items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 sm:flex"
               >
                 <LayoutDashboard size={16} />
                 {dict.nav.panel}
@@ -55,7 +56,7 @@ export async function NavBar() {
             {user && role === "user" && (
               <Link
                 href="/panel-afiliado"
-                className="flex items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+                className="hidden items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 sm:flex"
               >
                 <LayoutDashboard size={16} />
                 {dict.nav.affiliatePanel}
@@ -81,7 +82,15 @@ export async function NavBar() {
 
             {user && <LogoutButton locale={locale} />}
 
-            <NavMenu />
+            <NavMenu
+              panelLink={
+                user && role === "agent"
+                  ? { href: "/panel", label: dict.nav.panel }
+                  : user && role === "user"
+                    ? { href: "/panel-afiliado", label: dict.nav.affiliatePanel }
+                    : null
+              }
+            />
           </nav>
         </div>
       </header>

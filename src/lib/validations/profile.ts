@@ -3,6 +3,7 @@ import { z } from "zod";
 export const profileSchema = z.object({
   alias: z.string().max(60, "El alias es muy largo").optional().or(z.literal("")),
   phone: z.string().min(6, "Ingresá un teléfono de contacto").optional().or(z.literal("")),
+  ci: z.string().max(20, "El CI es muy largo").optional().or(z.literal("")),
 });
 
 export const agentProfileSchema = z.object({
@@ -13,6 +14,7 @@ export const agentProfileSchema = z.object({
     .string()
     .min(5, "Ingresá un RUC válido")
     .regex(/^[\d.-]+$/, "El RUC solo puede tener números, puntos y guiones"),
+  brandName: z.string().max(80, "El nombre de marca es muy largo").optional().or(z.literal("")),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;

@@ -18,6 +18,7 @@ export interface Database {
           full_name: string | null;
           phone: string | null;
           avatar_url: string | null;
+          ci: string | null;
           terms_accepted_at: string | null;
           created_at: string;
           updated_at: string;
@@ -30,6 +31,7 @@ export interface Database {
           full_name?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
+          ci?: string | null;
           terms_accepted_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
@@ -42,6 +44,8 @@ export interface Database {
           bio: string | null;
           city: string | null;
           cover_image_url: string | null;
+          brand_name: string | null;
+          logo_url: string | null;
           is_active: boolean;
           pagopar_identificador: number | null;
           pagopar_cliente_creado: boolean;
@@ -62,6 +66,8 @@ export interface Database {
           bio?: string | null;
           city?: string | null;
           cover_image_url?: string | null;
+          brand_name?: string | null;
+          logo_url?: string | null;
           is_active?: boolean;
           pagopar_identificador?: number | null;
           pagopar_cliente_creado?: boolean;
@@ -284,6 +290,8 @@ export interface Database {
           commission_confirmed_at: string | null;
           commission_paid_at: string | null;
           report_path: string | null;
+          commission_agreement_accepted_at: string | null;
+          commission_agreement_path: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -305,6 +313,8 @@ export interface Database {
           commission_confirmed_at?: string | null;
           commission_paid_at?: string | null;
           report_path?: string | null;
+          commission_agreement_accepted_at?: string | null;
+          commission_agreement_path?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["leads"]["Insert"]>;
         Relationships: [

@@ -29,6 +29,11 @@ export function AgentCard({ agent, dict }: { agent: AgentCardData; dict: Diction
               <User className="text-slate-400" size={24} />
             </div>
           )}
+          {agent.logo_url && (
+            <div className="absolute bottom-1.5 right-1.5 h-7 w-7 overflow-hidden rounded-md border border-white bg-white shadow-sm">
+              <Image src={agent.logo_url} alt="" fill className="object-cover" sizes="28px" />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-1 flex-col items-center gap-1.5 p-2.5">

@@ -59,7 +59,7 @@ export async function getAffiliateSaleNotifications(userId: string): Promise<Aff
       .eq("status", "sold"),
     supabase
       .from("leads")
-      .select("property_id, commission_amount, commission_paid_at, report_path")
+      .select("property_id, commission_amount, commission_paid_at, report_path, commission_agreement_path")
       .in("affiliate_link_id", linkIds)
       .eq("status", "sold"),
   ]);
@@ -93,6 +93,7 @@ export async function getAffiliateSaleNotifications(userId: string): Promise<Aff
         commission_is_estimate: lead?.commission_amount == null,
         commission_paid_at: lead?.commission_paid_at ?? null,
         report_path: lead?.report_path ?? null,
+        commission_agreement_path: lead?.commission_agreement_path ?? null,
       };
     })
     .sort((a, b) => (b.sold_at ?? "").localeCompare(a.sold_at ?? ""));

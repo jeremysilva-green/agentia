@@ -20,13 +20,14 @@ export async function updateAffiliateProfile(
   const parsed = profileSchema.safeParse({
     alias: formData.get("alias") || "",
     phone: formData.get("phone") || "",
+    ci: formData.get("ci") || "",
   });
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
 
   const { error } = await supabase
     .from("profiles")
-    .update({ alias: parsed.data.alias || null, phone: parsed.data.phone || null })
+    .update({ alias: parsed.data.alias || null, phone: parsed.data.phone || null, ci: parsed.data.ci || null })
     .eq("id", user.id);
 
   if (error) return { error: "No se pudo guardar. Intentá de nuevo." };
@@ -51,6 +52,7 @@ export async function updateAgentProfile(
     phone: formData.get("phone"),
     city: formData.get("city"),
     ruc: formData.get("ruc"),
+    brandName: formData.get("brandName") || "",
   });
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
@@ -63,7 +65,7 @@ export async function updateAgentProfile(
 
   const { error: agentProfileError } = await supabase
     .from("agent_profiles")
-    .update({ city: parsed.data.city, ruc: parsed.data.ruc })
+    .update({ city: parsed.data.city, ruc: parsed.data.ruc, brand_name: parsed.data.brandName || null })
     .eq("id", user.id);
   if (agentProfileError) return { error: "No se pudo guardar. Intentá de nuevo." };
 

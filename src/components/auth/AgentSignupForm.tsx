@@ -22,7 +22,7 @@ export function AgentSignupForm() {
         id="fullName"
         name="fullName"
         label={copy.auth.fullName}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="name"
         value={values.fullName}
@@ -34,7 +34,7 @@ export function AgentSignupForm() {
         id="username"
         name="username"
         label={copy.auth.username}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="username"
         placeholder="juan-perez"
@@ -48,7 +48,7 @@ export function AgentSignupForm() {
         name="email"
         type="email"
         label={copy.auth.email}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="email"
         value={values.email}
@@ -60,7 +60,7 @@ export function AgentSignupForm() {
         id="phone"
         name="phone"
         label={copy.auth.phone}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="tel"
         placeholder="+595 9xx xxx xxx"
@@ -73,7 +73,7 @@ export function AgentSignupForm() {
         id="city"
         name="city"
         label={copy.auth.city}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="address-level2"
         value={values.city}
@@ -85,7 +85,7 @@ export function AgentSignupForm() {
         id="ruc"
         name="ruc"
         label={copy.auth.ruc}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         placeholder="80012345-6"
         value={values.ruc}
@@ -98,16 +98,21 @@ export function AgentSignupForm() {
         name="password"
         type="password"
         label={copy.auth.password}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="new-password"
         error={state?.fieldErrors?.password}
         className="bg-white!"
       />
 
-      {state?.error && !state.fieldErrors && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && !state.fieldErrors && <p className="text-sm text-red-400">{state.error}</p>}
 
-      <Button type="submit" size="lg" disabled={pending} className="font-display border! border-black! bg-black! text-white! hover:bg-white! hover:text-black!">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={pending}
+        className="font-display bg-emerald-500! text-white! hover:bg-emerald-600!"
+      >
         {pending ? "Creando cuenta..." : copy.auth.submitAgent}
       </Button>
     </form>

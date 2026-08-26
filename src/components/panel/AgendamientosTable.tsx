@@ -1,5 +1,8 @@
+"use client";
+
 import { DAY_OF_WEEK_LABELS } from "@/lib/constants/dayOfWeek";
 import { AgendamientoStatusSelect } from "@/components/panel/AgendamientoStatusSelect";
+import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { copy } from "@/lib/copy";
 import type { AgendamientoRow } from "@/types/domain";
 
@@ -7,19 +10,11 @@ function dateFmt(value: string) {
   return new Date(value).toLocaleDateString("es-PY", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-export function AgendamientosTable({ rows }: { rows: AgendamientoRow[] }) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        {copy.panel.agendamientosEmpty}
-      </div>
-    );
-  }
-
+function AgendamientosForMonth({ rows }: { rows: AgendamientoRow[] }) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-2xl border border-emerald-200 bg-white">
       <table className="w-full text-left text-xs">
-        <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+        <thead className="bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
           <tr>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.agendamientosClient}</th>
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.agendamientosProperty}</th>
@@ -28,7 +23,7 @@ export function AgendamientosTable({ rows }: { rows: AgendamientoRow[] }) {
             <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.chatDate}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-emerald-100">
           {rows.map((row) => (
             <tr key={row.id}>
               <td className="whitespace-nowrap px-4 py-3">
@@ -48,5 +43,23 @@ export function AgendamientosTable({ rows }: { rows: AgendamientoRow[] }) {
         </tbody>
       </table>
     </div>
+  );
+}
+
+export function AgendamientosTable({ rows }: { rows: AgendamientoRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        {copy.panel.agendamientosEmpty}
+      </div>
+    );
+  }
+
+  return (
+    <MonthYearAccordion
+      rows={rows}
+      getDate={(r) => r.created_at}
+      renderGroup={(monthRows) => <AgendamientosForMonth rows={monthRows} />}
+    />
   );
 }

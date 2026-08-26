@@ -4,9 +4,11 @@ import { MapPin } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { GenerateLinkButton } from "@/components/property/GenerateLinkButton";
+import { AgentShareButton } from "@/components/property/AgentShareButton";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
+import { getSiteUrl } from "@/lib/siteUrl";
 import type { PropertyWithImages } from "@/types/domain";
 
 const statusTone = {
@@ -26,9 +28,11 @@ const statusLabel = {
 export async function PropertyCard({
   property,
   agentSlug,
+  isOwner = false,
 }: {
   property: PropertyWithImages;
   agentSlug: string;
+  isOwner?: boolean;
 }) {
   const supabase = await createClient();
   const cover = [...property.property_images].sort((a, b) => a.position - b.position)[0];
@@ -84,7 +88,11 @@ export async function PropertyCard({
               <span className="block text-xs font-normal text-slate-600">/mes</span>
             )}
           </p>
-          <GenerateLinkButton propertyId={property.id} propertyPath={propertyPath} />
+          {isOwner ? (
+            <AgentShareButton propertyId={property.id} propertyUrl={`${getSiteUrl()}${propertyPath}`} compact />
+          ) : (
+            <GenerateLinkButton propertyId={property.id} propertyPath={propertyPath} />
+          )}
         </div>
       </div>
     </Card>

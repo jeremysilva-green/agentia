@@ -1,10 +1,12 @@
+"use client";
+
 import { Eye } from "lucide-react";
 import { CopyLinkButton } from "@/components/panel/CopyLinkButton";
 import { DownloadPromoCardButton } from "@/components/panel/DownloadPromoCardButton";
 import { DeleteAgentSocialShareButton } from "@/components/panel/DeleteAgentSocialShareButton";
+import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { Badge } from "@/components/ui/Badge";
 import { copy } from "@/lib/copy";
-import { getSiteUrl } from "@/lib/siteUrl";
 import type { AgentSocialShareRow } from "@/types/domain";
 
 const statusTone = {
@@ -24,17 +26,7 @@ const statusLabel = {
 const dateFmt = (value: string) =>
   new Date(value).toLocaleDateString("es-PY", { day: "2-digit", month: "short", year: "numeric" });
 
-export function AgentSocialSharesTable({ rows }: { rows: AgentSocialShareRow[] }) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        Todavía no compartiste ninguna propiedad. Generá un enlace desde la ficha de una propiedad para empezar.
-      </div>
-    );
-  }
-
-  const siteUrl = getSiteUrl();
-
+function AgentSocialSharesForMonth({ rows, siteUrl }: { rows: AgentSocialShareRow[]; siteUrl: string }) {
   return (
     <>
       {/* Mobile: image left, details right */}
@@ -106,9 +98,10 @@ export function AgentSocialSharesTable({ rows }: { rows: AgentSocialShareRow[] }
       </div>
 
       {/* Desktop: table */}
-      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white sm:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-emerald-200 bg-white sm:block">
+        <div className="max-h-[480px] overflow-auto">
         <table className="w-full text-left text-xs">
-          <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+          <thead className="sticky top-0 z-10 bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
             <tr>
               <th className="px-3 py-3 font-medium">{copy.affiliatePanel.property}</th>
               <th className="px-3 py-3 font-medium">{copy.panel.status}</th>
@@ -117,7 +110,7 @@ export function AgentSocialSharesTable({ rows }: { rows: AgentSocialShareRow[] }
               <th className="px-3 py-3 font-medium" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-emerald-100">
             {rows.map((row) => {
               const fullUrl = `${siteUrl}/sa/${row.code}`;
 
@@ -183,7 +176,26 @@ export function AgentSocialSharesTable({ rows }: { rows: AgentSocialShareRow[] }
             })}
           </tbody>
         </table>
+        </div>
       </div>
     </>
+  );
+}
+
+export function AgentSocialSharesTable({ rows, siteUrl }: { rows: AgentSocialShareRow[]; siteUrl: string }) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        Todavía no compartiste ninguna propiedad. Generá un enlace desde la ficha de una propiedad para empezar.
+      </div>
+    );
+  }
+
+  return (
+    <MonthYearAccordion
+      rows={rows}
+      getDate={(r) => r.created_at}
+      renderGroup={(monthRows) => <AgentSocialSharesForMonth rows={monthRows} siteUrl={siteUrl} />}
+    />
   );
 }
