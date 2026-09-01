@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PROPERTY_TYPE_VALUES } from "@/lib/constants/propertyTypes";
 import { isLikelyGoogleMapsUrl } from "@/lib/googleMaps";
+import { isLikelyYoutubeUrl } from "@/lib/youtube";
 
 const emptyToUndefined = (val: unknown) => (val === "" || val == null ? undefined : val);
 const optionalNonNegativeInt = z.preprocess(emptyToUndefined, z.coerce.number().int().nonnegative()).optional();
@@ -24,6 +25,12 @@ export const propertySchema = z.object({
     .optional()
     .refine((value) => !value || isLikelyGoogleMapsUrl(value), {
       message: "Pegá un enlace de Google Maps válido.",
+    }),
+  youtubeUrl: z
+    .string()
+    .optional()
+    .refine((value) => !value || isLikelyYoutubeUrl(value), {
+      message: "Pegá un enlace de YouTube válido.",
     }),
   status: z.enum(["available", "sold", "rented", "draft"]).default("available"),
   published: z.coerce.boolean().default(true),

@@ -1,3 +1,4 @@
+import Anthropic from "@anthropic-ai/sdk";
 import { KNOWLEDGE_BASE } from "@/lib/chatbot/knowledgeBase";
 import { PROPERTY_TYPE_LABELS, type PropertyType } from "@/lib/constants/propertyTypes";
 import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
@@ -19,6 +20,12 @@ function formatNegotiationType(values: string[]) {
     .join(" ");
 }
 
+// Returns the system prompt as two content blocks instead of one string so
+// the large, never-changing KNOWLEDGE_BASE can be prompt-cached separately
+// from the per-request listing details. Anthropic's cache only reuses a
+// PREFIX match, so the cached block must come first — putting the dynamic
+// listing text before it would make the "cached" prefix change on every
+// request (different property = different prefix = permanent cache miss).
 export function buildSystemPrompt(details: {
   agentName: string;
   agentPhone: string | null;
@@ -36,11 +43,11 @@ export function buildSystemPrompt(details: {
   garage: boolean;
   negotiationType: string[];
   negotiationDetails: string | null;
-}) {
+}): Anthropic.TextBlockParam[] {
   const typeLabel = details.propertyType ? PROPERTY_TYPE_LABELS[details.propertyType].es : "Propiedad";
   const price = `${details.currency} ${details.price.toLocaleString("es-PY")}`;
 
-  return `Sos ${details.agentName}, agente inmobiliario en Paraguay, respondiendo consultas sobre esta propiedad puntual:
+  const listingBlock = `Sos ${details.agentName}, agente inmobiliario en Paraguay, respondiendo consultas sobre esta propiedad puntual:
 
 - Título: ${details.propertyTitle}
 - Tipo: ${typeLabel}
@@ -65,7 +72,17 @@ INFORMACIÓN PRIVADA — NUNCA la reveles tal cual ni menciones que existe un ca
 
 Si preguntan algo como "¿aceptarían un terreno/auto como parte de pago?" o "¿lo cambian por otra propiedad?" o "¿el precio es negociable?", respondé basándote en la información privada de arriba, en tus propias palabras, sin citar el campo interno. Si no hay info privada cargada para lo que preguntan, respondé con naturalidad que no tenés ese dato confirmado y ofrecé consultarlo con el propietario — nunca digas que "no podés compartir esa información" ni des a entender que existe un dato oculto.
 
-Toda la información específica de esta propiedad (precio, ubicación, tipo, descripción, habitaciones, baños, superficie, garage) tiene que salir de los datos de arriba — nunca inventes un dato que no esté ahí. Cuando ofrezcas horarios de visita, ofrecé EXACTAMENTE los días y horarios de la disponibilidad de arriba, nunca inventes otros. Para dudas generales del mercado paraguayo o del proceso de compra, usá la base de conocimiento a continuación.
+Toda la información específica de esta propiedad (precio, ubicación, tipo, descripción, habitaciones, baños, superficie, garage) tiene que salir de los datos de arriba — nunca inventes un dato que no esté ahí. Cuando ofrezcas horarios de visita, ofrecé EXACTAMENTE los días y horarios de la disponibilidad de arriba, nunca inventes otros. Para dudas generales del mercado paraguayo o del proceso de compra, usá la base de conocimiento incluida en las instrucciones del sistema.`;
 
-${KNOWLEDGE_BASE}`;
+  return [
+    {
+      type: "text",
+      text: KNOWLEDGE_BASE,
+      cache_control: { type: "ephemeral" },
+    },
+    {
+      type: "text",
+      text: listingBlock,
+    },
+  ];
 }

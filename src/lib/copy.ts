@@ -247,7 +247,7 @@ export const copy = {
     price: "Precio",
     priceMin: "Precio mínimo",
     priceMax: "Precio máximo",
-    commissionDisclaimer: (pct: number) => `Comisión de agente y afiliado: ${pct.toLocaleString("es-PY")}%`,
+    commissionDisclaimer: (pct: number) => `Comisión de agente: ${pct.toLocaleString("es-PY")}% IVA incluído.`,
     submit: "Enviar solicitud",
     submitting: "Enviando...",
     successTitle: "¡Listo!",

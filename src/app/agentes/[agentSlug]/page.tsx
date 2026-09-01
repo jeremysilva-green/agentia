@@ -60,8 +60,8 @@ export default async function AgentPortfolioPage({
   const milestone = getMilestone(ratingSummary.avg, ratingSummary.count);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white">
-      <InteractiveBackground />
+    <div className="relative min-h-screen overflow-hidden bg-neutral-900">
+      <InteractiveBackground dotColor="rgb(255 255 255 / 0.14)" spotColor="rgb(52 211 153 / 0.9)" />
       <PortfolioTracker agentId={agent.id} />
       <div className="relative mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6">
         <div className="flex items-center gap-3">
@@ -77,9 +77,9 @@ export default async function AgentPortfolioPage({
             </div>
           )}
           <div className="flex min-w-0 flex-col gap-1">
-            <h1 className="font-display text-lg font-semibold leading-tight text-prussian">{displayName}</h1>
+            <h1 className="font-display text-lg font-semibold leading-tight text-white">{displayName}</h1>
             {agent.city && (
-              <p className="flex items-center gap-1 text-xs text-slate-500">
+              <p className="flex items-center gap-1 text-xs text-white/60">
                 <MapPin size={12} />
                 {agent.city}
               </p>
@@ -88,7 +88,9 @@ export default async function AgentPortfolioPage({
               <Badge tone="success" className="border-emerald-200! bg-emerald-50! text-emerald-700!">
                 {availableCount} disponibles
               </Badge>
-              <Badge tone="neutral">{soldCount} vendidas</Badge>
+              <Badge tone="neutral" className="border-white/15! bg-white/10! text-white/80!">
+                {soldCount} vendidas
+              </Badge>
               {milestone && (
                 <Badge tone="success" className="bg-amber-50 text-amber-700">
                   {milestone.label}
@@ -99,7 +101,7 @@ export default async function AgentPortfolioPage({
           </div>
         </div>
 
-        {agent.bio && <p className="max-w-3xl text-slate-600">{agent.bio}</p>}
+        {agent.bio && <p className="max-w-3xl text-white/70">{agent.bio}</p>}
 
         {!isOwner && (
           <div className="flex justify-center sm:justify-end">
@@ -110,7 +112,7 @@ export default async function AgentPortfolioPage({
         <PropertyFilterBar />
 
         {properties.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50 p-10 text-center text-sm text-slate-500">
+          <p className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-sm text-white/50">
             Este agente todavía no tiene propiedades publicadas con esos filtros.
           </p>
         ) : (

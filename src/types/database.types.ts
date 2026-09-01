@@ -107,6 +107,7 @@ export interface Database {
           lat: number | null;
           lng: number | null;
           maps_url: string | null;
+          youtube_url: string | null;
           status: "available" | "sold" | "rented" | "draft";
           published: boolean;
           hidden_by_downgrade: boolean;
@@ -135,6 +136,7 @@ export interface Database {
           lat?: number | null;
           lng?: number | null;
           maps_url?: string | null;
+          youtube_url?: string | null;
           status?: "available" | "sold" | "rented" | "draft";
           published?: boolean;
           hidden_by_downgrade?: boolean;

@@ -7,7 +7,7 @@ import { isPropertyType } from "@/lib/constants/propertyTypes";
 import { DAY_OF_WEEK_VALUES, isDayOfWeek } from "@/lib/constants/dayOfWeek";
 import type { MessageParam } from "@anthropic-ai/sdk/resources/messages";
 
-const MODEL = "claude-sonnet-5";
+const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOOL_ROUNDS = 3;
 
 const SAVE_LEAD_TOOL: Anthropic.Tool = {
@@ -164,6 +164,17 @@ export async function POST(request: Request) {
         system,
         tools: [SAVE_LEAD_TOOL, BOOK_VISIT_TOOL],
         messages,
+      });
+
+      // Confirms prompt caching is actually hitting: cache_read_input_tokens
+      // should be ~the size of KNOWLEDGE_BASE on every call after the first
+      // one for a given 5-minute cache window; cache_creation_input_tokens
+      // is only nonzero the first time (or after the cache expires).
+      console.log("[chat] token usage", {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+        cache_read_input_tokens: response.usage.cache_read_input_tokens ?? 0,
+        cache_creation_input_tokens: response.usage.cache_creation_input_tokens ?? 0,
       });
 
       messages.push({ role: "assistant", content: response.content });

@@ -9,7 +9,7 @@ import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { Button } from "@/components/ui/Button";
 import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
-import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { AGENT_COMMISSION_PCT } from "@/lib/constants/commission";
 import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import { submitClientRequest } from "@/lib/actions/clientRequests";
 import { copy } from "@/lib/copy";
@@ -24,7 +24,7 @@ const CITY_SELECT_OPTIONS = CITY_OPTIONS.map((city) => ({ value: city, label: ci
 const CURRENCIES = ["PYG", "USD"] as const;
 
 const checkboxClass = "h-3.5 w-3.5 rounded border-bone text-emerald-600 accent-emerald-600 focus-visible:outline-emerald-600";
-const fieldClass = "bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!";
+const fieldClass = "bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!";
 
 export function ClientRequestModal({
   kind,
@@ -56,7 +56,6 @@ export function ClientRequestModal({
 
   const priceNum = Number(price) || 0;
   const agentCommission = priceNum * (AGENT_COMMISSION_PCT / 100);
-  const affiliateCommission = priceNum * (AFFILIATE_COMMISSION_PCT / 100);
 
   function handleToggleIva(checked: boolean) {
     setWithIva(checked);
@@ -116,7 +115,7 @@ export function ClientRequestModal({
               value={fieldValue("fullName")}
               onChange={setField("fullName")}
               error={fieldError("fullName")}
-              className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+              className="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
             />
             <Input
               id="phone"
@@ -127,7 +126,7 @@ export function ClientRequestModal({
               value={fieldValue("phone")}
               onChange={setField("phone")}
               error={fieldError("phone")}
-              className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+              className="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
             />
             <SingleSelectDropdown
               name="propertyType"
@@ -136,12 +135,12 @@ export function ClientRequestModal({
               options={PROPERTY_TYPE_OPTIONS}
               onChange={setPropertyType}
               error={fieldError("propertyType")}
-              buttonClassName="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
-              panelClassName="border-emerald-100! bg-emerald-50!"
+              buttonClassName="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
+              panelClassName="border-slate-400! bg-slate-300!"
             />
 
             {propertyType === "proyecto_en_pozo" && (
-              <div className="flex flex-col gap-2 rounded-xl border border-emerald-100 bg-emerald-50 p-3">
+              <div className="flex flex-col gap-2 rounded-xl border border-slate-400 bg-slate-300 p-3">
                 <label className="flex items-center gap-2 text-sm text-slate-700">
                   <input
                     type="checkbox"
@@ -194,8 +193,8 @@ export function ClientRequestModal({
               showAllOption={false}
               options={CITY_SELECT_OPTIONS}
               error={fieldError("city")}
-              buttonClassName="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
-              panelClassName="border-emerald-100! bg-emerald-50!"
+              buttonClassName="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
+              panelClassName="border-slate-400! bg-slate-300!"
             />
             <Textarea
               id="description"
@@ -205,7 +204,7 @@ export function ClientRequestModal({
               value={fieldValue("description")}
               onChange={setField("description")}
               error={fieldError("description")}
-              className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+              className="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
             />
 
             {isVendedor ? (
@@ -217,7 +216,7 @@ export function ClientRequestModal({
                   options={NEGOTIATION_OPTIONS}
                   onChange={setNegotiationType}
                   buttonClassName={fieldClass}
-                  panelClassName="border-emerald-100! bg-emerald-50!"
+                  panelClassName="border-slate-400! bg-slate-300!"
                 />
                 {negotiationType.includes("canje_permuta") && (
                   <div className="flex flex-col gap-1">
@@ -280,7 +279,7 @@ export function ClientRequestModal({
                     { value: "true", label: "Sí" },
                   ]}
                   buttonClassName={fieldClass}
-                  panelClassName="border-emerald-100! bg-emerald-50!"
+                  panelClassName="border-slate-400! bg-slate-300!"
                 />
                 <div className="flex flex-col gap-1">
                   <Input
@@ -338,16 +337,12 @@ export function ClientRequestModal({
                   onChange={(e) => setPrice(e.target.value)}
                   error={fieldError("price")}
                   placeholder="sin puntos ni comas"
-                  className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+                  className="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
                 />
                 <div className="flex flex-col gap-1 rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
                   <div className="flex items-center justify-between">
                     <span>Comisión Agente ({AGENT_COMMISSION_PCT}%)</span>
                     <span className="font-medium text-slate-700">{formatMoney(agentCommission)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Comisión Referido ({AFFILIATE_COMMISSION_PCT}%)</span>
-                    <span className="font-medium text-slate-700">{formatMoney(affiliateCommission)}</span>
                   </div>
                 </div>
               </div>
@@ -366,7 +361,7 @@ export function ClientRequestModal({
                     onChange={setField("priceMin")}
                     error={fieldError("priceMin")}
                     placeholder="sin puntos ni comas"
-                    className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+                    className="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
                   />
                   <Input
                     id="priceMax"
@@ -380,11 +375,11 @@ export function ClientRequestModal({
                     onChange={setField("priceMax")}
                     error={fieldError("priceMax")}
                     placeholder="sin puntos ni comas"
-                    className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+                    className="bg-slate-300! focus:border-emerald-600! focus:ring-emerald-500/20!"
                   />
                 </div>
                 <p className="text-xs text-slate-500">
-                  {copy.clientRequest.commissionDisclaimer(AGENT_COMMISSION_PCT + AFFILIATE_COMMISSION_PCT)}
+                  {copy.clientRequest.commissionDisclaimer(AGENT_COMMISSION_PCT)}
                 </p>
               </div>
             )}

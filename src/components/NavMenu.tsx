@@ -2,9 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, MessageCircle, Info, Trophy, LayoutDashboard } from "lucide-react";
+import { Menu, MessageCircle, Info, Trophy, LayoutDashboard, LogIn, UserPlus } from "lucide-react";
 
-export function NavMenu({ panelLink }: { panelLink: { href: string; label: string } | null }) {
+export function NavMenu({
+  panelLink,
+  authLinks,
+}: {
+  panelLink: { href: string; label: string } | null;
+  authLinks: { loginLabel: string; signupLabel: string } | null;
+}) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +44,26 @@ export function NavMenu({ panelLink }: { panelLink: { href: string; label: strin
               <LayoutDashboard size={16} />
               {panelLink.label}
             </Link>
+          )}
+          {authLinks && (
+            <>
+              <Link
+                href="/ingresar"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/5 hover:text-white sm:hidden"
+              >
+                <LogIn size={16} />
+                {authLinks.loginLabel}
+              </Link>
+              <Link
+                href="/registro"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-white/5 sm:hidden"
+              >
+                <UserPlus size={16} />
+                {authLinks.signupLabel}
+              </Link>
+            </>
           )}
           <Link
             href="/que-es-agentia"

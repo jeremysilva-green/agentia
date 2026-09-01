@@ -38,7 +38,7 @@ export default async function EditarPropiedadPage({
         <DeletePropertyButton propertyId={propertyId} />
       </div>
 
-      <Card className="border-emerald-100! bg-emerald-50! p-6 sm:p-8">
+      <Card className="border-slate-400! bg-slate-300! p-6 sm:p-8">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Fotos</h2>
         <PropertyPhotoManager
           propertyId={propertyId}
@@ -47,7 +47,7 @@ export default async function EditarPropiedadPage({
         />
       </Card>
 
-      <Card className="border-emerald-100! bg-emerald-50! p-6 sm:p-8">
+      <Card className="border-slate-400! bg-slate-300! p-6 sm:p-8">
         <PropertyForm action={boundUpdate} defaultValues={property} submitLabel="Guardar cambios" />
       </Card>
     </div>

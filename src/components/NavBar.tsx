@@ -64,7 +64,7 @@ export async function NavBar() {
             )}
 
             {!user && (
-              <div className="flex items-center gap-2.5 sm:gap-4">
+              <div className="hidden items-center gap-2.5 sm:flex sm:gap-4">
                 <Link
                   href="/ingresar"
                   className="text-sm font-medium text-white/90 transition-colors hover:text-white"
@@ -90,6 +90,7 @@ export async function NavBar() {
                     ? { href: "/panel-afiliado", label: dict.nav.affiliatePanel }
                     : null
               }
+              authLinks={!user ? { loginLabel: dict.nav.login, signupLabel: dict.nav.signup } : null}
             />
           </nav>
         </div>

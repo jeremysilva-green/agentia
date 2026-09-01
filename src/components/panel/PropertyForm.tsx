@@ -48,6 +48,7 @@ export function PropertyForm({
     bathrooms: defaultValues?.bathrooms != null ? String(defaultValues.bathrooms) : "",
     areaM2: defaultValues?.area_m2 != null ? String(defaultValues.area_m2) : "",
     mapsUrl: defaultValues?.maps_url ?? "",
+    youtubeUrl: defaultValues?.youtube_url ?? "",
     negotiationDetails: defaultValues?.negotiation_details ?? "",
   });
   const setField = (name: string) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -108,7 +109,7 @@ export function PropertyForm({
             ...PROPERTY_TYPE_VALUES.map((type) => ({ value: type, label: PROPERTY_TYPE_LABELS[type].es })),
           ]}
           buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-          panelClassName="border-emerald-100! bg-emerald-50!"
+          panelClassName="border-slate-200! bg-slate-50!"
         />
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
@@ -184,7 +185,7 @@ export function PropertyForm({
               ...CITY_OPTIONS.map((city) => ({ value: city, label: city })),
             ]}
             buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-            panelClassName="border-emerald-100! bg-emerald-50!"
+            panelClassName="border-slate-200! bg-slate-50!"
           />
         </div>
         <Input
@@ -245,7 +246,7 @@ export function PropertyForm({
             { value: "true", label: "Sí" },
           ]}
           buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-          panelClassName="border-emerald-100! bg-emerald-50!"
+          panelClassName="border-slate-200! bg-slate-50!"
         />
       </div>
 
@@ -262,6 +263,22 @@ export function PropertyForm({
         />
         <p className="text-xs text-slate-500">
           Pegá el enlace para compartir de Google Maps — lo usamos para el mapa en la ficha de la propiedad.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Input
+          id="youtubeUrl"
+          name="youtubeUrl"
+          label="Video de YouTube"
+          placeholder="https://www.youtube.com/watch?v=..."
+          value={values.youtubeUrl}
+          onChange={setField("youtubeUrl")}
+          error={fieldError("youtubeUrl")}
+          className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
+        />
+        <p className="text-xs text-slate-500">
+          Opcional — se muestra en la ficha de la propiedad junto a las fotos.
         </p>
       </div>
 
@@ -311,7 +328,7 @@ export function PropertyForm({
             { value: "draft", label: "Borrador" },
           ]}
           buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-          panelClassName="border-emerald-100! bg-emerald-50!"
+          panelClassName="border-slate-200! bg-slate-50!"
         />
         <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium text-slate-700">
           <input

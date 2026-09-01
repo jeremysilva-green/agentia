@@ -15,7 +15,7 @@ export function ClientRequestTabs({ agentId }: { agentId: string }) {
         <button
           type="button"
           onClick={() => setOpenModal("comprador")}
-          className="inline-flex items-center gap-1.5 rounded-full border border-black bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white hover:text-black"
+          className="inline-flex items-center gap-1.5 rounded-full border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700"
         >
           <Search size={12} />
           {copy.clientRequest.tabComprador}
@@ -23,7 +23,7 @@ export function ClientRequestTabs({ agentId }: { agentId: string }) {
         <button
           type="button"
           onClick={() => setOpenModal("vendedor")}
-          className="inline-flex items-center gap-1.5 rounded-full border border-black bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-white hover:text-black"
+          className="inline-flex items-center gap-1.5 rounded-full border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700"
         >
           <Home size={12} />
           {copy.clientRequest.tabVendedor}

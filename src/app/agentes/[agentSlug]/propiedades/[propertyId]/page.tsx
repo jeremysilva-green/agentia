@@ -5,6 +5,7 @@ import { MapPin, User, BedDouble, Bath, Ruler, Car } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getPropertyForPublicView } from "@/lib/data/agentPortfolio";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
+import { PropertyVideo } from "@/components/property/PropertyVideo";
 import { PropertyMap } from "@/components/property/PropertyMap";
 import { ChatWidget } from "@/components/property/ChatWidget";
 import { ShareButton } from "@/components/property/ShareButton";
@@ -124,6 +125,7 @@ export default async function PropertyDetailPage({
         </div>
 
         <PropertyGallery imageUrls={imageUrls} title={property.title} />
+        <PropertyVideo url={property.youtube_url} />
       </div>
 
       <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2">
