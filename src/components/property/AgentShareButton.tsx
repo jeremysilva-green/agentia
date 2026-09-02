@@ -16,6 +16,7 @@ export function AgentShareButton({
 }) {
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handleShare(e?: MouseEvent) {
@@ -33,13 +34,20 @@ export function AgentShareButton({
 
       await navigator.clipboard.writeText(url.toString());
       setCopied(true);
+      setSaved(true);
       setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setSaved(false), 2500);
     });
   }
 
   if (compact) {
     return (
-      <div className="flex flex-col items-end gap-1">
+      <div className="relative flex flex-col items-end gap-1">
+        {saved && (
+          <div className="absolute -top-9 right-0 whitespace-nowrap rounded-lg bg-prussian px-3 py-1.5 text-xs font-medium text-white shadow-lg">
+            Guardado en Mi Panel
+          </div>
+        )}
         <button
           type="button"
           onClick={handleShare}
@@ -55,7 +63,12 @@ export function AgentShareButton({
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="relative flex flex-col gap-1">
+      {saved && (
+        <div className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-prussian px-3 py-1.5 text-xs font-medium text-white shadow-lg">
+          Guardado en Mi Panel
+        </div>
+      )}
       <Button
         type="button"
         variant="secondary"

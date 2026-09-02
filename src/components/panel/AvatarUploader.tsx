@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Camera, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { ImageCropModal } from "@/components/ui/ImageCropModal";
 
 export function AvatarUploader({
   userId,
@@ -25,19 +26,33 @@ export function AvatarUploader({
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
   function handleFile(file: File | undefined) {
     if (!file) return;
     setError(null);
+    setCropSrc(URL.createObjectURL(file));
+  }
+
+  function handleCropCancel() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function handleCropped(blob: Blob) {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
 
     startTransition(async () => {
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/${pathPrefix}${crypto.randomUUID()}.${ext}`;
+      const path = `${userId}/${pathPrefix}${crypto.randomUUID()}.jpg`;
 
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, {
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(path, blob, {
         upsert: true,
+        contentType: "image/jpeg",
       });
       if (uploadError) {
         setError("No se pudo subir la imagen.");
@@ -70,6 +85,15 @@ export function AvatarUploader({
     />
   );
 
+  const cropModal = cropSrc && (
+    <ImageCropModal
+      imageSrc={cropSrc}
+      cropShape={target === "logo" ? "rect" : "round"}
+      onCancel={handleCropCancel}
+      onCropped={handleCropped}
+    />
+  );
+
   if (variant === "compact") {
     return (
       <div className="flex flex-col gap-1.5">
@@ -95,6 +119,7 @@ export function AvatarUploader({
         </button>
         {input}
         {error && <p className="text-xs text-red-600">{error}</p>}
+        {cropModal}
       </div>
     );
   }
@@ -124,6 +149,7 @@ export function AvatarUploader({
         </button>
         {error && <p className="text-xs text-red-600">{error}</p>}
       </div>
+      {cropModal}
     </div>
   );
 }

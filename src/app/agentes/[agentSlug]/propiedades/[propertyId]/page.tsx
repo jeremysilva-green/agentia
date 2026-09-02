@@ -104,7 +104,7 @@ export default async function PropertyDetailPage({
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-3">
       <LeadTracker propertyId={propertyId} refCode={ref} />
 
-      <div className="flex flex-col gap-6 lg:col-span-2 lg:col-start-1 lg:row-start-1">
+      <div className="flex min-w-0 flex-col gap-6 lg:col-span-2 lg:col-start-1 lg:row-start-1">
         <div className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <h1 className="font-display text-2xl font-semibold text-white">{property.title}</h1>
@@ -128,7 +128,7 @@ export default async function PropertyDetailPage({
         <PropertyVideo url={property.youtube_url} />
       </div>
 
-      <div className="flex flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2">
+      <div className="flex min-w-0 flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2">
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm sm:text-left">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{copy.property.price}</p>
           <p className="font-display text-2xl font-semibold text-prussian">
@@ -167,7 +167,7 @@ export default async function PropertyDetailPage({
             </div>
           )}
 
-          <p className="mt-4 whitespace-pre-line border-t border-slate-100 pt-4 text-sm text-slate-600">
+          <p className="mt-4 whitespace-pre-line break-words border-t border-slate-100 pt-4 text-sm text-slate-600">
             {property.description}
           </p>
 
@@ -198,7 +198,7 @@ export default async function PropertyDetailPage({
       </div>
 
       {(property.lat || property.address) && (
-        <div className="flex flex-col gap-2 lg:col-span-2 lg:col-start-1 lg:row-start-2">
+        <div className="flex min-w-0 flex-col gap-2 lg:col-span-2 lg:col-start-1 lg:row-start-2">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">
             {copy.property.location}
           </h2>

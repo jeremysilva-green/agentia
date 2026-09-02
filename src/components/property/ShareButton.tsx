@@ -9,6 +9,7 @@ import { copy } from "@/lib/copy";
 export function ShareButton({ propertyId, propertyUrl }: { propertyId: string; propertyUrl: string }) {
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handleShare() {
@@ -24,13 +25,20 @@ export function ShareButton({ propertyId, propertyUrl }: { propertyId: string; p
 
       await navigator.clipboard.writeText(url.toString());
       setCopied(true);
+      setSaved(true);
       setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setSaved(false), 2500);
     });
   }
 
   return (
     <div className="flex flex-col gap-1">
       <div className="group relative">
+        {saved && (
+          <div className="absolute -top-20 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-lg bg-prussian px-3 py-1.5 text-xs font-medium text-white shadow-lg">
+            Guardado en Mi Panel
+          </div>
+        )}
         <Button
           type="button"
           variant="secondary"

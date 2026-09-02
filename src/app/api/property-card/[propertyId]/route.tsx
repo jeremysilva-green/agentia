@@ -6,7 +6,7 @@ import { getPublicStorageUrl } from "@/lib/storage";
 
 const BASE_WIDTH = 1080;
 const BASE_HEIGHT = 1350;
-const DESCRIPTION_LIMIT = 200;
+const DESCRIPTION_LIMIT = 300;
 const GREEN = "#16a34a";
 
 // Route Handlers render outside the RSC client boundary, so lucide-react's
@@ -73,15 +73,6 @@ function MapPinIcon(props: { size: number; color: string }) {
   );
 }
 
-function UserIcon(props: { size: number; color: string }) {
-  return (
-    <Icon {...props}>
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </Icon>
-  );
-}
-
 function buildDotBackground(width: number, height: number) {
   const spacing = 28;
   const radius = 1.6;
@@ -127,7 +118,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
 
   const { data: property } = await service
     .from("properties")
-    .select("*, property_images(*), agent_profiles(profiles(avatar_url))")
+    .select("*, property_images(*)")
     .eq("id", propertyId)
     .eq("published", true)
     .single();
@@ -138,19 +129,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
 
   const cover = [...(property.property_images ?? [])].sort((a, b) => a.position - b.position)[0];
   const coverUrl = cover ? getPublicStorageUrl("property-photos", cover.storage_path) : null;
-  const agentAvatarUrl =
-    (
-      property as typeof property & {
-        agent_profiles: { profiles: { avatar_url: string | null } | null } | null;
-      }
-    ).agent_profiles?.profiles?.avatar_url ?? null;
 
-  const [semiboldFont, lightFont, logoBytes, coverDataUri, agentAvatarDataUri] = await Promise.all([
+  const [semiboldFont, lightFont, logoBytes, coverDataUri] = await Promise.all([
     readFile(join(process.cwd(), "font", "ClashDisplay-Semibold.otf")),
     readFile(join(process.cwd(), "font", "ClashDisplay-Light.otf")),
-    readFile(join(process.cwd(), "assets", "agentia_00000.png")),
+    readFile(join(process.cwd(), "assets", "agentia-04.png")),
     coverUrl ? fetchImageAsDataUri(coverUrl) : Promise.resolve(null),
-    agentAvatarUrl ? fetchImageAsDataUri(agentAvatarUrl) : Promise.resolve(null),
   ]);
   const logoDataUri = `data:image/png;base64,${logoBytes.toString("base64")}`;
 
@@ -176,8 +160,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
 
   const pad = px(28);
   const imageHeight = Math.round(height * 0.4);
+  // agentia-04.png is 5947x943 (~6.31:1) — a full wordmark (house icon + "AGENTIA" text).
+  const LOGO_ASPECT_RATIO = 943 / 5947;
   const logoWidth = px(260);
-  const logoHeight = Math.round(logoWidth * (339 / 1787));
+  const logoHeight = Math.round(logoWidth * LOGO_ASPECT_RATIO);
+  const headerLogoHeight = px(56);
+  const headerLogoWidth = Math.round(headerLogoHeight / LOGO_ASPECT_RATIO);
 
   const stats: { icon: typeof BedIcon; text: string }[] = [];
   if (property.bedrooms != null) stats.push({ icon: BedIcon, text: `${property.bedrooms} Hab.` });
@@ -213,44 +201,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
             padding: `${px(44)}px ${pad}px 0`,
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: px(18), marginBottom: px(32) }}>
-            <div
-              style={{
-                display: "flex",
-                width: px(70),
-                height: px(70),
-                borderRadius: 999,
-                overflow: "hidden",
-                background: "#e2e8f0",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {agentAvatarDataUri ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={agentAvatarDataUri}
-                  width={px(70)}
-                  height={px(70)}
-                  style={{ objectFit: "cover", width: "100%", height: "100%", borderRadius: 999 }}
-                  alt=""
-                />
-              ) : (
-                <UserIcon size={px(32)} color="#94a3b8" />
-              )}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                fontFamily: "ClashSemibold",
-                fontSize: px(46),
-                color: "#ffffff",
-                letterSpacing: -1,
-                textTransform: "uppercase",
-              }}
-            >
-              Agentia
-            </div>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: px(32) }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoDataUri} width={headerLogoWidth} height={headerLogoHeight} alt="Agentia" />
           </div>
 
           <div
@@ -392,11 +345,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
               <div
                 style={{
                   display: "flex",
+                  alignSelf: "stretch",
+                  wordBreak: "break-word",
                   fontFamily: "ClashLight",
                   fontSize: px(30),
                   color: "#64748b",
                   lineHeight: 1.4,
-                  textAlign: "center",
+                  textAlign: "left",
                   marginTop: px(34),
                 }}
               >
