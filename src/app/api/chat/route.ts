@@ -352,7 +352,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ reply: "Dejame confirmar ese detalle y te aviso enseguida." });
-  } catch {
+  } catch (err) {
+    console.error("[chat] request failed:", err);
     return NextResponse.json(
       { reply: "No pude conectarme en este momento. Probá de nuevo en unos minutos." },
       { status: 200 }
