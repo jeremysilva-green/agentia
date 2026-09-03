@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AgentCardData } from "@/types/domain";
 import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
+import { normalizeText } from "@/lib/text";
 
 export type MarketplaceFilters = {
   city?: string;
@@ -10,18 +11,6 @@ export type MarketplaceFilters = {
   propertyType?: PropertyType[];
   q?: string;
 };
-
-// Agents type their city (and other free-text fields) without necessarily
-// matching the accented canonical spelling used elsewhere (e.g. "Asuncion"
-// vs "Asunción"). Comparing on normalized (accent- and case-stripped)
-// strings avoids silently dropping matches over a missing tilde.
-function normalizeText(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .trim();
-}
 
 const LISTING_TYPE_LABELS: Record<"rent" | "sale", string> = { sale: "venta", rent: "alquiler" };
 

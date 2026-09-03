@@ -53,19 +53,51 @@ export async function updateAgentProfile(
     city: formData.get("city"),
     ruc: formData.get("ruc"),
     brandName: formData.get("brandName") || "",
+    ci: formData.get("ci") || "",
+    address: formData.get("address") || "",
+    sifenCityId: formData.get("sifenCityId") || "",
   });
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
 
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({ full_name: parsed.data.fullName, phone: parsed.data.phone })
+    .update({ full_name: parsed.data.fullName, phone: parsed.data.phone, ci: parsed.data.ci || null })
     .eq("id", user.id);
   if (profileError) return { error: "No se pudo guardar. Intentá de nuevo." };
 
+  // Fiscal city (SIFEN department/district/city codes) is stored
+  // denormalized on agent_profiles — only overwrite those six columns
+  // when the agent actually picked one, so re-saving the form without
+  // touching this field never clears a previously-saved selection.
+  let sifenCityFields = {};
+  if (parsed.data.sifenCityId) {
+    const { data: sifenCity } = await supabase
+      .from("sifen_cities")
+      .select("*")
+      .eq("id", parsed.data.sifenCityId)
+      .maybeSingle();
+    if (sifenCity) {
+      sifenCityFields = {
+        sifen_ciudad_id: sifenCity.ciudad_id,
+        sifen_ciudad_desc: sifenCity.ciudad_desc,
+        sifen_distrito_id: sifenCity.distrito_id,
+        sifen_distrito_desc: sifenCity.distrito_desc,
+        sifen_departamento_id: sifenCity.departamento_id,
+        sifen_departamento_desc: sifenCity.departamento_desc,
+      };
+    }
+  }
+
   const { error: agentProfileError } = await supabase
     .from("agent_profiles")
-    .update({ city: parsed.data.city, ruc: parsed.data.ruc, brand_name: parsed.data.brandName || null })
+    .update({
+      city: parsed.data.city,
+      ruc: parsed.data.ruc,
+      brand_name: parsed.data.brandName || null,
+      address: parsed.data.address || null,
+      ...sifenCityFields,
+    })
     .eq("id", user.id);
   if (agentProfileError) return { error: "No se pudo guardar. Intentá de nuevo." };
 

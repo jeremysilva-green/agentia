@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MapPin, User } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { PropertyFilterBar } from "@/components/marketplace/PropertyFilterBar";
+import { SearchBar } from "@/components/marketplace/SearchBar";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { getAgentBySlug, getAgentProperties, getAgentRatingSummary } from "@/lib/data/agentPortfolio";
 import { getMilestone } from "@/lib/ratings";
@@ -25,6 +26,7 @@ export default async function AgentPortfolioPage({
     propertyType?: string | string[];
     minPrice?: string;
     maxPrice?: string;
+    q?: string;
   }>;
 }) {
   const { agentSlug } = await params;
@@ -44,6 +46,7 @@ export default async function AgentPortfolioPage({
       propertyType: parsePropertyTypeParam(filters.propertyType),
       minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
       maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
+      q: filters.q,
     }),
     getAgentRatingSummary(agent.id),
   ]);
@@ -109,7 +112,10 @@ export default async function AgentPortfolioPage({
           </div>
         )}
 
-        <PropertyFilterBar />
+        <div className="flex flex-col gap-3">
+          <SearchBar placeholder="Buscá por título, ciudad o palabra clave..." />
+          <PropertyFilterBar />
+        </div>
 
         {properties.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-sm text-white/50">

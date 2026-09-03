@@ -1,6 +1,9 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { PropertyType } from "@/lib/constants/propertyTypes";
+import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
+import { normalizeText } from "@/lib/text";
+
+const LISTING_TYPE_LABELS: Record<"rent" | "sale", string> = { sale: "venta", rent: "alquiler" };
 
 export async function getAgentBySlug(slug: string) {
   const supabase = await createClient();
@@ -22,6 +25,7 @@ export async function getAgentProperties(
     propertyType?: PropertyType[];
     minPrice?: number;
     maxPrice?: number;
+    q?: string;
   }
 ) {
   const supabase = await createClient();
@@ -41,7 +45,30 @@ export async function getAgentProperties(
   if (filters.maxPrice != null) query = query.lte("price", filters.maxPrice);
 
   const { data } = await query;
-  return data ?? [];
+  const properties = data ?? [];
+
+  const q = filters.q?.trim();
+  if (!q) return properties;
+
+  // Same free-text matching approach as getMarketplaceAgents: title,
+  // description, city, or a property/listing type whose label contains the
+  // query — a hit on any one field is enough.
+  const normalizedQuery = normalizeText(q);
+  const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
+    normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
+  );
+  const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
+    normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
+  );
+
+  return properties.filter(
+    (p) =>
+      normalizeText(p.title).includes(normalizedQuery) ||
+      normalizeText(p.description).includes(normalizedQuery) ||
+      normalizeText(p.city).includes(normalizedQuery) ||
+      (p.property_type !== null && matchingPropertyTypes.includes(p.property_type)) ||
+      matchingListingTypes.includes(p.listing_type)
+  );
 }
 
 export async function getAgentRatingSummary(agentId: string) {

@@ -57,6 +57,13 @@ export interface Database {
           dlocal_card_last4: string | null;
           dlocal_recurring_supported: boolean | null;
           ruc: string | null;
+          address: string | null;
+          sifen_ciudad_id: number | null;
+          sifen_ciudad_desc: string | null;
+          sifen_distrito_id: number | null;
+          sifen_distrito_desc: string | null;
+          sifen_departamento_id: number | null;
+          sifen_departamento_desc: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -78,6 +85,13 @@ export interface Database {
           dlocal_transaction_link_id?: string | null;
           dlocal_card_last4?: string | null;
           dlocal_recurring_supported?: boolean | null;
+          address?: string | null;
+          sifen_ciudad_id?: number | null;
+          sifen_ciudad_desc?: string | null;
+          sifen_distrito_id?: number | null;
+          sifen_distrito_desc?: string | null;
+          sifen_departamento_id?: number | null;
+          sifen_departamento_desc?: string | null;
           ruc?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["agent_profiles"]["Insert"]>;
@@ -489,6 +503,81 @@ export interface Database {
             referencedColumns: ["id"];
           },
         ];
+      };
+      billing_invoices: {
+        Row: {
+          id: string;
+          payment_id: string;
+          subscription_id: string;
+          agent_id: string;
+          invoice_number: number | null;
+          cdc: string | null;
+          lote_id: string | null;
+          invoice_status: "pending" | "approved" | "rejected" | "blocked_missing_data" | "error";
+          kude_storage_path: string | null;
+          error_message: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          payment_id: string;
+          subscription_id: string;
+          agent_id: string;
+          invoice_number?: number | null;
+          cdc?: string | null;
+          lote_id?: string | null;
+          invoice_status?: "pending" | "approved" | "rejected" | "blocked_missing_data" | "error";
+          kude_storage_path?: string | null;
+          error_message?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["billing_invoices"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "billing_invoices_payment_id_fkey";
+            columns: ["payment_id"];
+            isOneToOne: true;
+            referencedRelation: "payments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoices_subscription_id_fkey";
+            columns: ["subscription_id"];
+            isOneToOne: false;
+            referencedRelation: "subscriptions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "billing_invoices_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sifen_cities: {
+        Row: {
+          id: string;
+          ciudad_id: number;
+          ciudad_desc: string;
+          distrito_id: number;
+          distrito_desc: string;
+          departamento_id: number;
+          departamento_desc: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          ciudad_id: number;
+          ciudad_desc: string;
+          distrito_id: number;
+          distrito_desc: string;
+          departamento_id: number;
+          departamento_desc: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["sifen_cities"]["Insert"]>;
+        Relationships: [];
       };
       agent_ratings: {
         Row: {
@@ -922,6 +1011,10 @@ export interface Database {
       is_agent_active: {
         Args: { check_agent_id: string };
         Returns: boolean;
+      };
+      increment_invoice_number: {
+        Args: Record<string, never>;
+        Returns: number;
       };
       next_shop_process_id: {
         Args: Record<string, never>;

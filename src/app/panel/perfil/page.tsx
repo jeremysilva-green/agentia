@@ -10,10 +10,17 @@ export default async function AgentProfilePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/ingresar");
 
-  const [{ data: profile }, { data: agentProfile }] = await Promise.all([
-    supabase.from("profiles").select("full_name, phone, avatar_url").eq("id", user.id).single(),
-    supabase.from("agent_profiles").select("city, ruc, brand_name, logo_url").eq("id", user.id).single(),
+  const [{ data: profile }, { data: agentProfile }, { data: sifenCities }] = await Promise.all([
+    supabase.from("profiles").select("full_name, phone, avatar_url, ci").eq("id", user.id).single(),
+    supabase
+      .from("agent_profiles")
+      .select("city, ruc, brand_name, logo_url, address, sifen_ciudad_id")
+      .eq("id", user.id)
+      .single(),
+    supabase.from("sifen_cities").select("*").order("ciudad_desc"),
   ]);
+
+  const sifenCityId = sifenCities?.find((c) => c.ciudad_id === agentProfile?.sifen_ciudad_id)?.id ?? null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -30,6 +37,10 @@ export default async function AgentProfilePage() {
         ruc={agentProfile?.ruc ?? null}
         brandName={agentProfile?.brand_name ?? null}
         logoUrl={agentProfile?.logo_url ?? null}
+        ci={profile?.ci ?? null}
+        address={agentProfile?.address ?? null}
+        sifenCityId={sifenCityId}
+        sifenCities={sifenCities ?? []}
       />
     </div>
   );

@@ -4,8 +4,10 @@ import { useActionState, useState, type ChangeEvent } from "react";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { SingleSelectDropdown } from "@/components/ui/SingleSelectDropdown";
 import { updateAgentProfile } from "@/lib/actions/profile";
 import { copy } from "@/lib/copy";
+import type { SifenCity } from "@/types/domain";
 
 export function AgentProfileForm({
   userId,
@@ -16,6 +18,10 @@ export function AgentProfileForm({
   ruc,
   brandName,
   logoUrl,
+  ci,
+  address,
+  sifenCityId,
+  sifenCities,
 }: {
   userId: string;
   avatarUrl: string | null;
@@ -25,6 +31,10 @@ export function AgentProfileForm({
   ruc: string | null;
   brandName: string | null;
   logoUrl: string | null;
+  ci: string | null;
+  address: string | null;
+  sifenCityId: string | null;
+  sifenCities: SifenCity[];
 }) {
   const [state, formAction, pending] = useActionState(updateAgentProfile, undefined);
   // Controlled so a failed save doesn't revert an in-progress edit back to
@@ -36,6 +46,8 @@ export function AgentProfileForm({
     city: city ?? "",
     ruc: ruc ?? "",
     brandName: brandName ?? "",
+    ci: ci ?? "",
+    address: address ?? "",
   });
   const setField = (name: keyof typeof values) => (e: ChangeEvent<HTMLInputElement>) =>
     setValues((prev) => ({ ...prev, [name]: e.target.value }));
@@ -107,6 +119,46 @@ export function AgentProfileForm({
           placeholder="80012345-6"
           className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
+
+        <Input
+          id="ci"
+          name="ci"
+          label="Cédula de Identidad (CI)"
+          value={values.ci}
+          onChange={setField("ci")}
+          error={state?.fieldErrors?.ci}
+          placeholder="1234567"
+          className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+        />
+
+        <Input
+          id="address"
+          name="address"
+          label="Dirección"
+          value={values.address}
+          onChange={setField("address")}
+          error={state?.fieldErrors?.address}
+          placeholder="Calle, número, barrio"
+          className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+        />
+
+        <div className="flex flex-col gap-1.5">
+          <SingleSelectDropdown
+            name="sifenCityId"
+            label="Ciudad (facturación)"
+            showAllOption={false}
+            defaultValue={sifenCityId ?? ""}
+            options={sifenCities.map((c) => ({
+              value: c.id,
+              label: `${c.ciudad_desc} — ${c.distrito_desc}, ${c.departamento_desc}`,
+            }))}
+            buttonClassName="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+            panelClassName="border-emerald-100! bg-emerald-50!"
+          />
+          <p className="text-xs text-slate-500">
+            Usada para generar tu factura electrónica. Elegí la ciudad donde estás registrado ante la SET.
+          </p>
+        </div>
 
         <Input
           id="brandName"

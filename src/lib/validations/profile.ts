@@ -15,6 +15,12 @@ export const agentProfileSchema = z.object({
     .min(5, "Ingresá un RUC válido")
     .regex(/^[\d.-]+$/, "El RUC solo puede tener números, puntos y guiones"),
   brandName: z.string().max(80, "El nombre de marca es muy largo").optional().or(z.literal("")),
+  // Fiscal fields, only required for FacturaSend electronic invoicing —
+  // nullable at the DB level (existing agents don't have these on file
+  // yet), same "optional now, filled going forward" pattern as ruc.
+  ci: z.string().max(20, "El CI es muy largo").optional().or(z.literal("")),
+  address: z.string().max(200, "La dirección es muy larga").optional().or(z.literal("")),
+  sifenCityId: z.string().uuid().optional().or(z.literal("")),
 });
 
 export type ProfileInput = z.infer<typeof profileSchema>;
