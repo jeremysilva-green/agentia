@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { MapPin, User } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { PropertyFilterBar } from "@/components/marketplace/PropertyFilterBar";
 import { SearchBar } from "@/components/marketplace/SearchBar";
@@ -9,6 +9,7 @@ import { getAgentBySlug, getAgentProperties, getAgentRatingSummary } from "@/lib
 import { getMilestone } from "@/lib/ratings";
 import { createClient } from "@/lib/supabase/server";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
+import { AgentProfileAvatar } from "@/components/property/AgentProfileAvatar";
 import { ClientRequestTabs } from "@/components/marketplace/ClientRequestTabs";
 import { RateAgentWidget } from "@/components/property/RateAgentWidget";
 import { PortfolioTracker } from "@/components/property/PortfolioTracker";
@@ -71,13 +72,7 @@ export default async function AgentPortfolioPage({
           {isOwner ? (
             <AvatarUploader userId={agent.id} initialAvatarUrl={profile?.avatar_url ?? null} variant="compact" displayName={displayName} />
           ) : (
-            <div className="relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-emerald-500 bg-slate-100">
-              {profile?.avatar_url ? (
-                <Image src={profile.avatar_url} alt={displayName} fill className="object-cover" sizes="96px" />
-              ) : (
-                <User className="text-slate-400" size={40} />
-              )}
-            </div>
+            <AgentProfileAvatar avatarUrl={profile?.avatar_url ?? null} logoUrl={agent.logo_url} displayName={displayName} />
           )}
           <div className="flex min-w-0 flex-col gap-1">
             <h1 className="font-display text-lg font-semibold leading-tight text-white">{displayName}</h1>
@@ -102,6 +97,17 @@ export default async function AgentPortfolioPage({
             </div>
             {!isOwner && <RateAgentWidget agentId={agent.id} agentSlug={agentSlug} myRating={ratingSummary.myRating} />}
           </div>
+
+          {agent.logo_url && (
+            <div className="ml-auto hidden shrink-0 items-center gap-3 sm:flex">
+              {agent.brand_name && (
+                <p className="font-display text-right text-sm font-semibold text-white">{agent.brand_name}</p>
+              )}
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-emerald-500 bg-white">
+                <Image src={agent.logo_url} alt={agent.brand_name ?? "Logo del agente"} fill className="object-contain p-1" sizes="56px" />
+              </div>
+            </div>
+          )}
         </div>
 
         {agent.bio && <p className="max-w-3xl text-white/70">{agent.bio}</p>}
