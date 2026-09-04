@@ -99,13 +99,13 @@ export default async function AgentPortfolioPage({
           </div>
 
           {agent.logo_url && (
-            <div className="ml-auto hidden shrink-0 items-center gap-3 sm:flex">
-              {agent.brand_name && (
-                <p className="font-display text-right text-sm font-semibold text-white">{agent.brand_name}</p>
-              )}
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-emerald-500 bg-white">
-                <Image src={agent.logo_url} alt={agent.brand_name ?? "Logo del agente"} fill className="object-contain p-1" sizes="56px" />
+            <div className="ml-auto hidden shrink-0 flex-col items-center gap-1.5 sm:flex">
+              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+                <Image src={agent.logo_url} alt={agent.brand_name ?? "Logo del agente"} fill className="object-contain" sizes="56px" />
               </div>
+              {agent.brand_name && (
+                <p className="font-display text-center text-sm font-semibold text-white">{agent.brand_name}</p>
+              )}
             </div>
           )}
         </div>
