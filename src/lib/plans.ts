@@ -13,7 +13,7 @@ export type Plan = {
 
 const PRO_FEATURES = [
   "Propiedades ilimitadas",
-  "Perfil profesional",
+  "Perfil con branding propio",
   "Portfolio del agente",
   "Página individual para cada propiedad",
   "Link de propiedad para compartir por WhatsApp",
@@ -23,12 +23,9 @@ const PRO_FEATURES = [
   "Analíticas",
   "Reportes en PDF",
   "Herramientas de marketing",
-  "Información y características de la propiedad",
   "Botón de contacto por WhatsApp",
   "Gestión de leads",
   "Sistema de referidos/afiliados",
-  'Badge "Agente Pro"',
-  "Soporte prioritario",
 ];
 
 // Agents sign up free on Básico (no card required, up to 3 active listings,
