@@ -10,6 +10,7 @@ type ChatMessage = { role: "user" | "assistant"; text: string };
 
 const MIN_REPLY_DELAY_MS = 5000;
 const MAX_REPLY_DELAY_MS = 8000;
+const AUTO_CLOSE_INACTIVITY_MS = 5 * 60 * 1000;
 
 function splitReplyIntoChunks(text: string): string[] {
   return text
@@ -55,6 +56,15 @@ export function ChatWidget({
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isPending]);
+
+  // Auto-closes the widget after a few minutes of no activity — resets on
+  // every new message (sent or received), not just on open. Doesn't touch
+  // the conversation data, so reopening picks up right where it left off.
+  useEffect(() => {
+    if (!open) return;
+    const timer = setTimeout(() => setOpen(false), AUTO_CLOSE_INACTIVITY_MS);
+    return () => clearTimeout(timer);
+  }, [open, messages]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

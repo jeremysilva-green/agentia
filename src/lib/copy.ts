@@ -72,7 +72,7 @@ export const copy = {
   },
   chat: {
     greeting: (agentName: string) => `¡Hola! Soy ${agentName}. ¿En qué te puedo ayudar con esta propiedad?`,
-    typing: "Escribiendo...",
+    typing: "...",
     inputPlaceholder: "Escribí tu mensaje...",
     send: "Enviar",
     errorReply: "No pude conectarme en este momento. Probá de nuevo en unos minutos.",

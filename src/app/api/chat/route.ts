@@ -9,6 +9,7 @@ import type { MessageParam } from "@anthropic-ai/sdk/resources/messages";
 
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOOL_ROUNDS = 3;
+const CONVERSATION_STALE_MS = 24 * 60 * 60 * 1000;
 
 const SAVE_LEAD_TOOL: Anthropic.Tool = {
   name: "save_lead_contact",
@@ -27,7 +28,7 @@ const SAVE_LEAD_TOOL: Anthropic.Tool = {
 const BOOK_VISIT_TOOL: Anthropic.Tool = {
   name: "book_visit",
   description:
-    "Registra una visita agendada cuando el interesado elige uno de los días y horarios de la disponibilidad del agente. El día y horario deben ser EXACTAMENTE una de las opciones ofrecidas. Necesita nombre y teléfono del interesado. Llamala una sola vez que confirme un día y horario concretos.",
+    "Registra una visita agendada cuando el interesado confirma un día y horario. El horario elegido tiene que caer DENTRO de la ventana de disponibilidad del agente para ese día (no hace falta que coincida exactamente con toda la ventana — por ejemplo, si el agente está disponible de 08:00 a 14:00, un horario de 09:00 a 11:00 es válido). Necesita nombre y teléfono del interesado. NUNCA inventes ni asumas un end_time (por ejemplo, una hora de duración por defecto) — si el interesado solo dio la hora de inicio, preguntale hasta qué hora le queda bien ANTES de llamar esta herramienta. Llamala una sola vez que tengas día, hora de inicio Y hora de fin confirmadas explícitamente por el interesado, sin insistir en que el horario coincida exactamente con la ventana completa.",
   input_schema: {
     type: "object",
     properties: {
@@ -38,8 +39,8 @@ const BOOK_VISIT_TOOL: Anthropic.Tool = {
         enum: [...DAY_OF_WEEK_VALUES],
         description: "Día elegido, en minúsculas sin tildes: lunes, martes, miercoles, jueves, viernes, sabado o domingo",
       },
-      start_time: { type: "string", description: "Hora de inicio del horario elegido, formato HH:MM (24hs)" },
-      end_time: { type: "string", description: "Hora de fin del horario elegido, formato HH:MM (24hs)" },
+      start_time: { type: "string", description: "Hora de inicio del horario elegido, formato HH:MM (24hs) — dicha explícitamente por el interesado, nunca asumida" },
+      end_time: { type: "string", description: "Hora de fin del horario elegido, formato HH:MM (24hs) — dicha explícitamente por el interesado, nunca asumida ni una duración por defecto" },
     },
     required: ["name", "phone", "day_of_week", "start_time", "end_time"],
   },
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
   const { data: property } = await service
     .from("properties")
     .select(
-      "id, title, description, price, currency, city, address, property_type, bedrooms, bathrooms, area_m2, garage, negotiation_type, negotiation_details, agent_id, agent_profiles(profiles(full_name, username, phone))"
+      "id, title, description, price, price_includes_iva, currency, city, address, property_type, bedrooms, bathrooms, area_m2, garage, negotiation_type, negotiation_details, agent_id, agent_profiles(profiles(full_name, username, phone))"
     )
     .eq("id", propertyId)
     .eq("published", true)
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
 
   const { data: conversation } = await service
     .from("chat_conversations")
-    .select("id, messages")
+    .select("id, messages, updated_at")
     .eq("property_id", propertyId)
     .eq("visitor_id", visitorId)
     .maybeSingle();
@@ -99,7 +100,13 @@ export async function POST(request: Request) {
 
   const availability = (availabilityRows ?? []).filter((row) => isDayOfWeek(row.day_of_week));
 
-  const history = (conversation?.messages as unknown as MessageParam[] | null) ?? [];
+  // A returning visitor picking the conversation back up after a long gap
+  // starts fresh instead of dragging the whole old thread (and its token
+  // cost) into every new message forever — same row gets reused (keeps
+  // buyer_name/phone/lead_id), just the message history resets.
+  const isStale =
+    conversation != null && Date.now() - new Date(conversation.updated_at).getTime() > CONVERSATION_STALE_MS;
+  const history = (!isStale && (conversation?.messages as unknown as MessageParam[] | null)) || [];
   const messages: MessageParam[] = [...history, { role: "user", content: userMessage }];
 
   const system = buildSystemPrompt({
@@ -109,6 +116,7 @@ export async function POST(request: Request) {
     propertyDescription: detail.description,
     propertyType: detail.property_type && isPropertyType(detail.property_type) ? detail.property_type : null,
     price: detail.price,
+    priceIncludesIva: detail.price_includes_iva,
     currency: detail.currency,
     availability,
     city: detail.city,
@@ -149,7 +157,7 @@ export async function POST(request: Request) {
       messages.push({ role: "assistant", content: response.content });
 
       if (response.stop_reason !== "tool_use") {
-        const replyText = extractText(response.content) || "Disculpá, ¿podés reformular tu consulta?";
+        const replyText = extractText(response.content) || "Te escribo por WhatsApp y te cuento.";
 
         await service
           .from("chat_conversations")
@@ -234,15 +242,20 @@ export async function POST(request: Request) {
             end_time?: string;
           };
 
+          // The visitor's requested start/end just needs to fall WITHIN one
+          // of the agent's availability windows for that day — it doesn't
+          // need to exactly match the whole window (e.g. "9-11" inside an
+          // "8-14" window is a perfectly valid booking, not a mismatch).
           const slotMatch =
             input.day_of_week &&
             input.start_time &&
             input.end_time &&
+            input.start_time < input.end_time &&
             availability.find(
               (slot) =>
                 slot.day_of_week === input.day_of_week &&
-                slot.start_time.slice(0, 5) === input.start_time &&
-                slot.end_time.slice(0, 5) === input.end_time
+                input.start_time! >= slot.start_time.slice(0, 5) &&
+                input.end_time! <= slot.end_time.slice(0, 5)
             );
 
           if (!input.name || !input.phone) {
@@ -256,7 +269,7 @@ export async function POST(request: Request) {
             toolResults.push({
               type: "tool_result",
               tool_use_id: toolUse.id,
-              content: "Ese día y horario no está entre las opciones ofrecidas. Ofrecé de nuevo solo los horarios de la disponibilidad del agente.",
+              content: "Ese horario no cae dentro de tu disponibilidad para ese día. Ofrecé un horario que esté dentro de tu ventana disponible.",
               is_error: true,
             });
           } else {
@@ -293,8 +306,8 @@ export async function POST(request: Request) {
                 client_name: input.name,
                 client_phone: input.phone,
                 day_of_week: slotMatch.day_of_week,
-                start_time: slotMatch.start_time,
-                end_time: slotMatch.end_time,
+                start_time: input.start_time!,
+                end_time: input.end_time!,
               });
 
               toolResults.push({
