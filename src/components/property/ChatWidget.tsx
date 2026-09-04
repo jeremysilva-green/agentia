@@ -8,6 +8,20 @@ import { copy } from "@/lib/copy";
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
 
+const MIN_REPLY_DELAY_MS = 5000;
+const MAX_REPLY_DELAY_MS = 8000;
+
+function splitReplyIntoChunks(text: string): string[] {
+  return text
+    .split(/\n\s*\n/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean);
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function getVisitorId() {
   if (typeof window === "undefined") return "";
   const key = "agently_chat_visitor";
@@ -42,7 +56,7 @@ export function ChatWidget({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, isPending]);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const text = input.trim();
     if (!text || isPending) return;
@@ -51,19 +65,26 @@ export function ChatWidget({
     setInput("");
     setIsPending(true);
 
-    fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propertyId, visitorId: getVisitorId(), message: text, ref: refCode }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setMessages((prev) => [...prev, { role: "assistant", text: data.reply ?? copy.chat.errorReply }]);
-      })
-      .catch(() => {
-        setMessages((prev) => [...prev, { role: "assistant", text: copy.chat.errorReply }]);
-      })
-      .finally(() => setIsPending(false));
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, visitorId: getVisitorId(), message: text, ref: refCode }),
+      });
+      const data = await res.json();
+      const chunks = splitReplyIntoChunks(data.reply ?? copy.chat.errorReply);
+
+      // Reveal each chunk as its own bubble with a human-paced "typing" delay
+      // in between, instead of dumping the whole reply in one instant block.
+      for (const chunk of chunks) {
+        await wait(MIN_REPLY_DELAY_MS + Math.random() * (MAX_REPLY_DELAY_MS - MIN_REPLY_DELAY_MS));
+        setMessages((prev) => [...prev, { role: "assistant", text: chunk }]);
+      }
+    } catch {
+      setMessages((prev) => [...prev, { role: "assistant", text: copy.chat.errorReply }]);
+    } finally {
+      setIsPending(false);
+    }
   }
 
   return (
