@@ -160,7 +160,6 @@ export async function POST(request: Request) {
         model: MODEL,
         max_tokens: 1024,
         thinking: { type: "disabled" },
-        output_config: { effort: "low" },
         system,
         tools: [SAVE_LEAD_TOOL, BOOK_VISIT_TOOL],
         messages,
@@ -381,7 +380,6 @@ async function generateSummary(propertyId: string, visitorId: string, messages: 
     model: MODEL,
     max_tokens: 200,
     thinking: { type: "disabled" },
-    output_config: { effort: "low" },
     system:
       "Resumí esta conversación entre un comprador interesado y un agente inmobiliario (o su asistente) en 1-2 frases, para el panel del agente. Destacá lo más importante: qué le interesa, presupuesto o financiamiento mencionado, y el próximo paso acordado si lo hay. Respondé solo con el resumen, en español, sin introducción.",
     messages: [{ role: "user", content: transcript }],
