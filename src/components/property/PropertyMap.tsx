@@ -1,16 +1,12 @@
-export function PropertyMap({
-  lat,
-  lng,
-  address,
-}: {
-  lat: number | null;
-  lng: number | null;
-  address: string | null;
-}) {
-  const query = lat != null && lng != null ? `${lat},${lng}` : address;
-  if (!query) return null;
+export function PropertyMap({ lat, lng }: { lat: number | null; lng: number | null }) {
+  // Only renders when real coordinates exist — those only get set when the
+  // agent pastes an actual Google Maps link (see resolveMapCoordinates in
+  // src/lib/actions/properties.ts). Deliberately no fallback to the
+  // free-text address field: a rough/incomplete address shouldn't produce
+  // a map the agent never explicitly provided a link for.
+  if (lat == null || lng == null) return null;
 
-  const src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&z=15&output=embed`;
+  const src = `https://maps.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}&z=15&output=embed`;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200">

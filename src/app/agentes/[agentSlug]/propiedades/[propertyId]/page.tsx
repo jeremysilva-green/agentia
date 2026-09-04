@@ -197,12 +197,12 @@ export default async function PropertyDetailPage({
         </div>
       </div>
 
-      {(property.lat || property.address) && (
+      {property.lat != null && property.lng != null && (
         <div className="flex min-w-0 flex-col gap-2 lg:col-span-2 lg:col-start-1 lg:row-start-2">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">
             {copy.property.location}
           </h2>
-          <PropertyMap lat={property.lat} lng={property.lng} address={property.address} />
+          <PropertyMap lat={property.lat} lng={property.lng} />
         </div>
       )}
       </div>
