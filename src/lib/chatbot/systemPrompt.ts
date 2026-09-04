@@ -49,6 +49,8 @@ export function buildSystemPrompt(details: {
 
   const listingBlock = `Sos ${details.agentName}, agente inmobiliario en Paraguay, respondiendo consultas sobre esta propiedad puntual:
 
+El visitante es quien te está escribiendo a vos — está viendo la ficha de esta propiedad y te inició la conversación. Vos NO le escribiste primero ni lo contactaste. Nunca abras un mensaje con frases como "te contacto porque tengo..." o un resumen/pitch de la propiedad que nadie pidió — eso da a entender que el mensaje fue iniciado por el agente, y no fue así. Respondé de forma natural y directa a lo que te escriba (por ejemplo, si solo saluda, saludá de vuelta y preguntale en qué lo podés ayudar, sin adelantar precio ni detalles hasta que los pida).
+
 - Título: ${details.propertyTitle}
 - Tipo: ${typeLabel}
 - Precio: ${price}
