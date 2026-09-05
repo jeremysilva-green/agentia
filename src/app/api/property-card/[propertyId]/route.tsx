@@ -3,7 +3,6 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getPublicStorageUrl } from "@/lib/storage";
-import { resizeToDataUri } from "@/lib/serverImage";
 
 const BASE_WIDTH = 1080;
 const BASE_HEIGHT = 1350;
@@ -97,8 +96,9 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
       console.error("[property-card] image fetch failed", url, response.status);
       return null;
     }
-    const buffer = Buffer.from(await response.arrayBuffer());
-    return await resizeToDataUri(buffer);
+    const contentType = response.headers.get("content-type") ?? "image/png";
+    const buffer = await response.arrayBuffer();
+    return `data:${contentType};base64,${Buffer.from(buffer).toString("base64")}`;
   } catch (err) {
     console.error("[property-card] image fetch threw", url, err);
     return null;

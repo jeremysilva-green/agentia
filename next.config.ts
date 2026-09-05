@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   // harfbuzzjs dependency loads a .wasm file relative to its own __dirname —
   // Turbopack's bundling breaks both path resolutions, so they need to stay
   // real Node requires instead.
-  serverExternalPackages: ["@resvg/resvg-js", "satori", "harfbuzzjs", "sharp"],
+  serverExternalPackages: ["@resvg/resvg-js", "satori", "harfbuzzjs"],
   experimental: {
     serverActions: {
       // Owners can attach up to three document photos/PDFs (título,
