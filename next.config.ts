@@ -11,6 +11,22 @@ const nextConfig: NextConfig = {
   // Turbopack's bundling breaks both path resolutions, so they need to stay
   // real Node requires instead.
   serverExternalPackages: ["@resvg/resvg-js", "satori", "harfbuzzjs", "sharp"],
+  // marking sharp external (above) stops Turbopack from trying to inline it,
+  // but Vercel's deployed function still crashed with ERR_DLOPEN_FAILED:
+  // libvips-cpp.so.8.18.6 missing — Turbopack's output tracing doesn't
+  // follow sharp's dlopen of its separate @img/sharp-libvips-linux-x64
+  // package, so that .so file never made it into the deployed bundle.
+  // Force-include it (confirmed via Vercel's own function logs).
+  outputFileTracingIncludes: {
+    "/api/property-card/\\[propertyId\\]": [
+      "./node_modules/@img/sharp-linux-x64/**/*",
+      "./node_modules/@img/sharp-libvips-linux-x64/**/*",
+    ],
+    "/api/social-images/generate": [
+      "./node_modules/@img/sharp-linux-x64/**/*",
+      "./node_modules/@img/sharp-libvips-linux-x64/**/*",
+    ],
+  },
   experimental: {
     serverActions: {
       // Owners can attach up to three document photos/PDFs (título,
