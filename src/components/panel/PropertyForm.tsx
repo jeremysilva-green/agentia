@@ -184,6 +184,7 @@ export function PropertyForm({
                 : []),
               ...CITY_OPTIONS.map((city) => ({ value: city, label: city })),
             ]}
+            error={fieldError("city")}
             buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
             panelClassName="border-slate-200! bg-slate-50!"
           />
@@ -341,7 +342,7 @@ export function PropertyForm({
         </label>
       </div>
 
-      {state?.error && !state.fieldErrors && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
 
       <Button
         type="submit"
