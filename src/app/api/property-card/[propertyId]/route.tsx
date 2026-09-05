@@ -105,6 +105,11 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
   }
 }
 
+// Fetching + resizing a large agent-uploaded cover photo can run past
+// Vercel's default function timeout, killing the invocation with no
+// catchable error (confirmed via Vercel logs: 500 with zero log output).
+export const maxDuration = 30;
+
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
   available: { bg: "#ecfdf5", color: "#047857", label: "Disponible" },
   sold: { bg: "#f1f5f9", color: "#475569", label: "Vendida" },

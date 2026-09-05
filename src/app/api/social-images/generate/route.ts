@@ -20,6 +20,11 @@ import { getPropertyForSocialCard } from "@/lib/data/social-image-property";
 
 const RENDER_SECRET = process.env.SOCIAL_IMAGE_RENDER_SECRET;
 
+// Fetching + resizing a large agent-uploaded cover photo can run past
+// Vercel's default function timeout, killing the invocation with no
+// catchable error (confirmed via Vercel logs: 500 with zero log output).
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   const secret = req.headers.get("x-render-secret");
   if (!RENDER_SECRET || secret !== RENDER_SECRET) {
