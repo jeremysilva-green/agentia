@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { ListingType, PropertySocialCardProps } from "@/components/social-images/types";
+import { resizeToDataUri } from "@/lib/serverImage";
 
 // If the project already has a service-role client factory (e.g. in
 // src/lib/supabase/server.ts), use that instead of this inline one —
@@ -69,17 +70,13 @@ export async function getPropertyForSocialCard(
   if (!imageResponse.ok) {
     throw new Error(`Could not fetch cover image for property ${propertyId}`);
   }
-  // Was hardcoded to "image/jpeg" regardless of the real file — every
-  // property photo is actually a PNG (per PropertyPhotoManager's upload
-  // path), so this mislabeled every cover photo. Satori picks its decoder
-  // (parseJPEG vs parsePNG) off the data URI's declared MIME type rather
-  // than sniffing the actual bytes, so a PNG labeled as JPEG got parsed by
-  // the JPEG decoder and immediately threw "Offset is outside the bounds
-  // of the DataView" — confirmed by reproducing this exact error locally
-  // with the real file. Use the real content-type from the fetch response.
-  const contentType = imageResponse.headers.get("content-type") ?? "image/png";
-  const imageBuffer = await imageResponse.arrayBuffer();
-  const imageDataUri = `data:${contentType};base64,${Buffer.from(imageBuffer).toString("base64")}`;
+  // Re-encoding to JPEG via resizeToDataUri also fixes the old mislabeled-
+  // content-type bug this comment used to describe (PNG photos labeled as
+  // JPEG made Satori's decoder throw) — resizeToDataUri always declares the
+  // real output format, and caps dimensions so large source photos (seen:
+  // 8.9MB) don't blow Satori's SVG parser buffer limit either.
+  const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+  const imageDataUri = await resizeToDataUri(imageBuffer);
 
   const listingType: ListingType = property.listing_type === "rent" ? "rent" : "sale";
 
