@@ -7,7 +7,7 @@ import { getAgentContext } from "@/lib/data/panel";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { SubscriptionStatusBadge } from "@/components/panel/SubscriptionStatusBadge";
-import { PagoparCheckoutButton } from "@/components/panel/PagoparCheckoutButton";
+import { BancardCheckoutButton } from "@/components/panel/BancardCheckoutButton";
 import { CancelSubscriptionButton } from "@/components/panel/CancelSubscriptionButton";
 import { PricingPlans } from "@/components/panel/PricingPlans";
 import { PLANS, isPlanId, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
@@ -115,7 +115,7 @@ export default async function SuscripcionPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <PagoparCheckoutButton label="Pagar ahora" />
+            <BancardCheckoutButton label="Pagar ahora" plan={currentPlan ?? ""} />
           </div>
         </div>
       )}
@@ -148,30 +148,33 @@ export default async function SuscripcionPage() {
             </summary>
             <div className="max-h-72 divide-y divide-white/10 overflow-y-auto border-t border-white/10">
               {payments.map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between px-5 py-3 text-sm">
-                  <span className="text-slate-400">
-                    {new Date(payment.created_at).toLocaleDateString("es-PY")}
-                  </span>
-                  <span className="text-slate-400">{payment.plan ? PLANS[payment.plan].name : "—"}</span>
-                  <span className="text-slate-200">
-                    {new Intl.NumberFormat("es-PY", { style: "currency", currency: payment.currency }).format(
-                      payment.amount
-                    )}
-                  </span>
-                  <span
-                    className={
-                      payment.status === "approved"
-                        ? "font-medium text-emerald-400"
-                        : payment.status === "rejected" || payment.status === "error"
-                          ? "font-medium text-red-400"
-                          : "font-medium text-amber-400"
-                    }
-                  >
-                    {payment.status === "approved" && "Aprobado"}
-                    {payment.status === "rejected" && "Rechazado"}
-                    {payment.status === "error" && "Error"}
-                    {payment.status === "initiated" && "Pendiente"}
-                  </span>
+                <div key={payment.id} className="flex flex-col gap-1 px-5 py-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-400">
+                      {new Date(payment.created_at).toLocaleDateString("es-PY")}
+                    </span>
+                    <span className="text-slate-400">{payment.plan ? PLANS[payment.plan].name : "—"}</span>
+                    <span className="text-slate-200">
+                      {new Intl.NumberFormat("es-PY", { style: "currency", currency: payment.currency }).format(
+                        payment.amount
+                      )}
+                    </span>
+                    <span
+                      className={
+                        payment.status === "approved"
+                          ? "font-medium text-emerald-400"
+                          : payment.status === "rejected" || payment.status === "error"
+                            ? "font-medium text-red-400"
+                            : "font-medium text-amber-400"
+                      }
+                    >
+                      {payment.status === "approved" && "Aprobado"}
+                      {payment.status === "rejected" && "Rechazado"}
+                      {payment.status === "error" && "Error"}
+                      {payment.status === "initiated" && "Pendiente"}
+                    </span>
+                  </div>
+                  {payment.error_message && <p className="text-xs text-amber-400">{payment.error_message}</p>}
                 </div>
               ))}
             </div>

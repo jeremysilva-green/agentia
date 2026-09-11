@@ -4,8 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { isPlanId } from "@/lib/plans";
 
-// Direct-Bancard equivalent of PagoparCheckoutButton (kept as-is, unused for
-// now). Used for the "pay now" retry path when a subscription is
+// Used for the "pay now" retry path when a subscription is
 // past_due/pending — charges whatever plan is currently on the subscription.
 export function BancardCheckoutButton({ label, plan }: { label: string; plan: string }) {
   const [isPending, startTransition] = useTransition();

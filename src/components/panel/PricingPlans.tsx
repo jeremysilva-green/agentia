@@ -5,7 +5,6 @@ import { Check, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { PLANS, PLAN_ORDER, type PlanId } from "@/lib/plans";
 import { selectPlan } from "@/lib/actions/subscription";
-import { callPagoparFunction } from "@/lib/pagoparFunctions";
 
 export function PricingPlans({
   currentPlan,
@@ -31,8 +30,14 @@ export function PricingPlans({
       if (planId === "basico") return;
 
       try {
-        const checkout = await callPagoparFunction<{ redirectUrl: string }>("crear-pedido-pagopar");
-        window.location.href = checkout.redirectUrl;
+        const response = await fetch("/api/checkout/bancard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: planId }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error ?? "No se pudo iniciar el pago.");
+        window.location.href = data.redirectUrl;
       } catch (err) {
         setError(err instanceof Error ? err.message : "No se pudo iniciar el pago.");
       }

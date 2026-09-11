@@ -192,9 +192,9 @@ export async function enforceBasicoPropertyLimit(agentId: string): Promise<void>
 }
 
 // Counterpart to enforceBasicoPropertyLimit — called once a Pro/Fundador
-// payment is actually confirmed (Pagopar webhook, Bancard webhook, dLocal
-// checkout/webhook), so properties that were auto-hidden by a previous
-// downgrade come back automatically. Only touches rows still flagged
+// payment is actually confirmed (Pagopar webhook, Bancard webhook), so
+// properties that were auto-hidden by a previous downgrade come back
+// automatically. Only touches rows still flagged
 // hidden_by_downgrade, so a property the agent deliberately unpublished
 // themselves (which never gets that flag, or has it cleared by an explicit
 // re-publish in updateProperty) is left alone.

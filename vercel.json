@@ -9,10 +9,6 @@
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/api/cron/dlocal-cobro-mensual",
-      "schedule": "0 8 * * *"
-    },
-    {
       "path": "/api/cron/invoice-status",
       "schedule": "*/15 * * * *"
     }

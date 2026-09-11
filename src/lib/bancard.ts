@@ -14,6 +14,14 @@ function requireEnv(name: string): string {
   return value;
 }
 
+// VERIFY BEFORE FIRST REAL SANDBOX CHARGE: this sends 2-decimal strings
+// ("150000.00"), matching Bancard vPOS "Compra Simple" v0.3.1's documented
+// spec (the source for this file). A separate migration brief for this same
+// integration described the target product as "VPOS 2.0" and said amounts
+// must be decimal-free integer strings ("150000") instead — these may be
+// different API versions/products with different rules. Confirm the real
+// format in Bancard's merchant portal (comercios.bancard.com.py) before
+// trusting either assumption with a real charge.
 /** Bancard requires amounts as strings with exactly 2 decimals, "." separator. */
 export function formatAmount(amount: number): string {
   return amount.toFixed(2);
@@ -142,7 +150,8 @@ export function buildAliasChargeToken(shopProcessId: number, amount: string, cur
 }
 
 type AliasChargeResponse =
-  | { status: "success"; confirmation: { response: "S" | "N"; response_code: string; authorization_number?: string; ticket_number?: string } }
+  | { status: "success"; confirmation: { response: string; response_code: string; authorization_number?: string; ticket_number?: string } }
+  | { status: "success"; confirmation?: undefined; [key: string]: unknown }
   | { status: "error"; messages?: unknown };
 
 /**
@@ -151,6 +160,18 @@ type AliasChargeResponse =
  * accepts an alias_token in place of driving the user through the hosted
  * payment page, and returns the charge result synchronously rather than via
  * the async confirm webhook used for the first, card-entry purchase.
+ *
+ * Debit-card handling: Bancard's own docs (bancard-checkout-js README)
+ * confirm that charging an alias_token for a debit card doesn't decline or
+ * approve outright — it comes back needing customer PIN confirmation via
+ * their client-side `Bancard.Confirmation.loadPinPad` widget. We have no
+ * browser/PIN-pad in this server-side recurring-charge path, so that
+ * confirmation can never be supplied — `response` in that case is expected
+ * to be something other than the documented "S"/"N" pair (exact value
+ * unconfirmed without portal access). Treat anything that isn't a clean
+ * "S" + "00" as NOT approved (already strict below) and flag the
+ * needs-confirmation case distinctly so the failure reason is legible
+ * instead of looking like a generic decline.
  */
 export async function chargeWithAliasToken(params: {
   shopProcessId: number;
@@ -158,7 +179,7 @@ export async function chargeWithAliasToken(params: {
   currency?: string;
   aliasToken: string;
   description: string;
-}): Promise<{ approved: boolean; raw: unknown }> {
+}): Promise<{ approved: boolean; needsConfirmation: boolean; raw: unknown }> {
   const publicKey = requireEnv("BANCARD_PUBLIC_KEY");
   const currency = params.currency ?? "PYG";
   const amount = formatAmount(params.amount);
@@ -182,9 +203,17 @@ export async function chargeWithAliasToken(params: {
 
   const data = (await response.json()) as AliasChargeResponse;
   if (data.status !== "success") {
-    return { approved: false, raw: data };
+    return { approved: false, needsConfirmation: false, raw: data };
+  }
+
+  if (!data.confirmation) {
+    // No confirmation block at all on an otherwise "success" envelope —
+    // closest fit for the "needs customer PIN confirmation" case the docs
+    // describe, since a clean approval/decline is expected to include one.
+    return { approved: false, needsConfirmation: true, raw: data };
   }
 
   const approved = data.confirmation.response === "S" && data.confirmation.response_code === "00";
-  return { approved, raw: data };
+  const needsConfirmation = !approved && data.confirmation.response !== "N";
+  return { approved, needsConfirmation, raw: data };
 }

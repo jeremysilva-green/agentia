@@ -14,10 +14,17 @@ declare global {
   }
 }
 
-// Direct-Bancard equivalent of PagoparCardForm (kept as-is, unused for now).
-// Renders the same official Bancard card-catastro iframe, but the process_id
-// ("resultado") now comes from our own /api/checkout/bancard/tarjeta route
-// instead of Pagopar's agregar-tarjeta edge function.
+// Renders the official Bancard card-catastro iframe; the process_id
+// ("resultado") comes from our own /api/checkout/bancard/tarjeta route.
+//
+// Debit cards are NOT rejected here — Bancard's public docs don't expose a
+// verified card-type field at tokenization time (only behind the merchant
+// portal), so we can't reliably block one at save time. The real safety net
+// is at charge time: chargeSubscriptionBancard (src/lib/bancardSubscription.ts)
+// can never complete a debit-card alias_token charge anyway, since that
+// requires mounting Bancard's Confirmation.loadPinPad widget in a live
+// browser — something our unattended recurring-charge cron has no way to
+// do. The warning copy below just sets the right expectation up front.
 export function BancardCardForm() {
   const [resultado, setResultado] = useState<string | null>(null);
   const [scriptReady, setScriptReady] = useState(false);
@@ -70,6 +77,10 @@ export function BancardCardForm() {
 
   return (
     <>
+      <p className="mb-3 text-xs text-amber-700">
+        Usá una tarjeta de <strong>crédito</strong>. Con tarjetas de débito, Bancard puede pedir confirmación por PIN
+        en cada cobro — algo que no podemos solicitar en una renovación automática, así que el cobro mensual fallaría.
+      </p>
       <Script src="/bancard-checkout-2.1.0.js" onLoad={() => setScriptReady(true)} />
       <div style={{ height: 180, width: "100%", margin: "auto" }} id="iframe-container">
         {!resultado && <p className="text-sm text-slate-500">Cargando formulario de tarjeta...</p>}

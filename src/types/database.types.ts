@@ -470,6 +470,7 @@ export interface Database {
           plan: "basico" | "pro" | "fundador" | null;
           status: "initiated" | "approved" | "rejected" | "error";
           raw_response: Json | null;
+          error_message: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -492,6 +493,7 @@ export interface Database {
           plan?: "basico" | "pro" | "fundador" | null;
           status: "initiated" | "approved" | "rejected" | "error";
           raw_response?: Json | null;
+          error_message?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["payments"]["Insert"]>;
         Relationships: [
@@ -516,6 +518,8 @@ export interface Database {
           invoice_status: "pending" | "approved" | "rejected" | "blocked_missing_data" | "error";
           kude_storage_path: string | null;
           error_message: string | null;
+          invoice_email_sent_at: string | null;
+          invoice_email_error: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -530,6 +534,8 @@ export interface Database {
           invoice_status?: "pending" | "approved" | "rejected" | "blocked_missing_data" | "error";
           kude_storage_path?: string | null;
           error_message?: string | null;
+          invoice_email_sent_at?: string | null;
+          invoice_email_error?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["billing_invoices"]["Insert"]>;
         Relationships: [

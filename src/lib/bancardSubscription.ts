@@ -49,7 +49,7 @@ export async function chargeSubscriptionBancard(
     .select("id")
     .single();
 
-  const { approved, raw } = await chargeWithAliasToken({
+  const { approved, needsConfirmation, raw } = await chargeWithAliasToken({
     shopProcessId,
     amount,
     aliasToken: agentProfile.bancard_alias_token,
@@ -59,7 +59,13 @@ export async function chargeSubscriptionBancard(
   if (payment) {
     await service
       .from("payments")
-      .update({ status: approved ? "approved" : "rejected", raw_response: raw as never })
+      .update({
+        status: approved ? "approved" : "rejected",
+        raw_response: raw as never,
+        error_message: needsConfirmation
+          ? "La tarjeta requiere confirmación por PIN (probable tarjeta de débito) — no se puede cobrar automáticamente. Guardá una tarjeta de crédito."
+          : null,
+      })
       .eq("id", payment.id);
   }
 

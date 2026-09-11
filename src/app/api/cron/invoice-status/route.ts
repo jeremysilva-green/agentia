@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { consultarEstadoPorCdc, obtenerKudeBase64 } from "@/lib/billing/facturasend";
+import { sendInvoiceEmail } from "@/lib/email/sendInvoiceEmail";
 
 function isAuthorized(request: Request) {
   const bearer = request.headers.get("authorization");
@@ -52,6 +53,16 @@ export async function GET(req: Request) {
           .update({ invoice_status: "approved", kude_storage_path: kudeStoragePath })
           .eq("id", record.id);
         results.push({ id: record.id, status: "approved" });
+
+        const emailResult = await sendInvoiceEmail(record.id);
+        await service
+          .from("billing_invoices")
+          .update(
+            emailResult.success
+              ? { invoice_email_sent_at: new Date().toISOString(), invoice_email_error: null }
+              : { invoice_email_error: emailResult.error }
+          )
+          .eq("id", record.id);
       } else if (situacion === 4) {
         await service.from("billing_invoices").update({ invoice_status: "rejected" }).eq("id", record.id);
         results.push({ id: record.id, status: "rejected" });
