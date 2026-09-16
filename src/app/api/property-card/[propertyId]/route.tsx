@@ -392,6 +392,16 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
         { name: "ClashSemibold", data: semiboldFont, style: "normal", weight: 600 },
         { name: "ClashLight", data: lightFont, style: "normal", weight: 300 },
       ],
+      // This route had no caching at all — every request (DB lookup, fetch +
+      // resize the cover photo, Satori/resvg render) took 3+ seconds on
+      // every single hit, including repeat crawler fetches of the exact
+      // same URL. Confirmed via real-world symptom: WhatsApp's link-preview
+      // crawler never showed an image, consistent with it timing out before
+      // a cold, uncached render finished. Cache at Vercel's edge so only
+      // the first hit per property+width pays the render cost.
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
     }
   );
 }
