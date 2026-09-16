@@ -156,10 +156,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
     maximumFractionDigits: 0,
   }).format(property.price);
 
+  // Stray \r (from text pasted out of Windows/Word, \r\n line endings)
+  // corrupts Satori's text-wrapping badly — confirmed by reproducing it in
+  // isolation: dropped spaces ("Lapropiedad"), misaligned wrapped lines,
+  // and text overflowing past the card's right edge. Stripping it restores
+  // normal wrapping; \n\n is left alone since Satori/CSS already collapses
+  // it into ordinary whitespace between paragraphs.
+  const cleanDescription = property.description.replace(/\r/g, "");
   const description =
-    property.description.length > DESCRIPTION_LIMIT
-      ? `${property.description.slice(0, DESCRIPTION_LIMIT).trim()}…`
-      : property.description;
+    cleanDescription.length > DESCRIPTION_LIMIT
+      ? `${cleanDescription.slice(0, DESCRIPTION_LIMIT).trim()}…`
+      : cleanDescription;
 
   const dotBgUri = buildDotBackground(width, height);
 
