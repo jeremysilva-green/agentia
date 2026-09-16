@@ -11,6 +11,20 @@ export const loginSchema = z.object({
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Ingresá un correo válido"),
+});
+
+export const newPasswordSchema = z
+  .object({
+    password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  });
+
 export const agentSignupSchema = z.object({
   email: z.string().email("Ingresá un correo válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),

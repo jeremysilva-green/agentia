@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { agentSignupSchema, loginSchema, userSignupSchema } from "@/lib/validations/auth";
+import { agentSignupSchema, forgotPasswordSchema, loginSchema, newPasswordSchema, userSignupSchema } from "@/lib/validations/auth";
 import { fieldErrorsFrom } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
 
@@ -178,5 +178,57 @@ export async function login(_prevState: ActionState, formData: FormData): Promis
     .eq("id", data.user.id)
     .single();
 
+  redirect(profile?.role === "agent" ? "/panel" : "/panel-afiliado");
+}
+
+export async function requestPasswordReset(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = forgotPasswordSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { error: firstIssueMessage(parsed.error.issues), fieldErrors: fieldErrorsFrom(parsed.error) };
+  }
+
+  const supabase = await createClient();
+  const siteUrl = getSiteUrl();
+
+  // Never reveals whether the email actually has an account — Supabase
+  // itself already behaves this way (resetPasswordForEmail succeeds
+  // silently for an unknown address), so the generic success message here
+  // doesn't leak anything an attacker couldn't already infer.
+  //
+  // Points straight at /restablecer-contrasena (which exchanges its own
+  // ?code= param — see that page) rather than routing through
+  // /auth/callback?next=..., since Supabase's Redirect URLs allowlist
+  // currently has exactly one bare entry (no query string) and it's
+  // unverified whether it matches with one appended. A bare URL here
+  // mirrors that exact proven pattern instead of gambling on it.
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${siteUrl}/restablecer-contrasena`,
+  });
+  if (error) return { error: translateAuthError(error.message) };
+
+  return { success: true };
+}
+
+export async function updatePassword(_prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const parsed = newPasswordSchema.safeParse({
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { error: firstIssueMessage(parsed.error.issues), fieldErrors: fieldErrorsFrom(parsed.error) };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "El enlace expiró o ya fue usado. Solicitá uno nuevo desde Ingresar." };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return { error: translateAuthError(error.message) };
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   redirect(profile?.role === "agent" ? "/panel" : "/panel-afiliado");
 }
