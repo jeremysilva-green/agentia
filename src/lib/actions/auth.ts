@@ -219,6 +219,21 @@ export async function updatePassword(_prevState: ActionState, formData: FormData
   }
 
   const supabase = await createClient();
+
+  // The recovery code is exchanged here rather than in the page's Server
+  // Component render — Next.js Server Components cannot set cookies, so
+  // doing it there looked like it worked (the in-memory session was fine
+  // for that one render) but never actually persisted a session, and this
+  // exact form submission failed with "El enlace expiró" every time.
+  // Server Actions can set cookies, so the exchange belongs here instead.
+  const code = formData.get("code");
+  if (typeof code === "string" && code) {
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    if (exchangeError) {
+      return { error: "El enlace expiró o ya fue usado. Solicitá uno nuevo desde Ingresar." };
+    }
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ code }: { code?: string }) {
   const [state, formAction, pending] = useActionState(updatePassword, undefined);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {code && <input type="hidden" name="code" value={code} />}
       <Input
         id="password"
         name="password"

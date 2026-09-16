@@ -6,27 +6,29 @@ import { createClient } from "@/lib/supabase/server";
 import { copy } from "@/lib/copy";
 
 // Reached directly via the recovery email's link (resetPasswordForEmail's
-// redirectTo points straight here, not through /auth/callback — see the
-// comment in requestPasswordReset for why), so this page does its own
-// ?code= exchange rather than relying on a separate callback route.
+// redirectTo points straight here). Deliberately does NOT exchange the
+// ?code= itself: Server Components can't set cookies in Next.js, so
+// calling exchangeCodeForSession here would appear to work for this one
+// render (the in-memory session looks fine) but never actually persist a
+// session cookie to the browser — confirmed by reproducing exactly this
+// failure. The code is instead handed to updatePassword (a Server Action,
+// which can set cookies) via a hidden field, and exchanged there.
 export default async function RestablecerContrasenaPage({
   searchParams,
 }: {
   searchParams: Promise<{ code?: string }>;
 }) {
   const { code } = await searchParams;
-  const supabase = await createClient();
 
-  if (code) {
-    await supabase.auth.exchangeCodeForSession(code);
+  if (!code) {
+    // No code and no way to get one from here — only an existing session
+    // (e.g. a page refresh right after a successful exchange) makes sense.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/ingresar");
   }
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  // No session means the link expired, was already used, or was never
-  // valid — nothing to let them do here.
-  if (!user) redirect("/ingresar");
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-neutral-900">
@@ -35,7 +37,7 @@ export default async function RestablecerContrasenaPage({
       <div className="relative mx-auto flex max-w-md flex-col gap-6 px-4 py-16 sm:px-6">
         <h1 className="font-display text-center text-2xl font-semibold text-white">{copy.auth.resetPasswordTitle}</h1>
         <Card className="border-emerald-200! bg-emerald-50! p-6 sm:p-8">
-          <ResetPasswordForm />
+          <ResetPasswordForm code={code} />
         </Card>
       </div>
     </div>
