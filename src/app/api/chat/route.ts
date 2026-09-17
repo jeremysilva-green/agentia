@@ -54,6 +54,14 @@ function extractText(content: Anthropic.ContentBlock[]): string {
     .trim();
 }
 
+// A truthy string isn't enough — confirmed via testing that a forced tool
+// call with no real contact info in context makes the model fill in a
+// literal "<UNKNOWN>" placeholder rather than refuse. Require an actual
+// phone-shaped value (at least 6 digits) so that never becomes a real lead.
+function isPlausiblePhone(value: string | undefined): value is string {
+  return typeof value === "string" && value.replace(/\D/g, "").length >= 6;
+}
+
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const propertyId = typeof body?.propertyId === "string" ? body.propertyId : null;
@@ -88,7 +96,7 @@ export async function POST(request: Request) {
 
   const { data: conversation } = await service
     .from("chat_conversations")
-    .select("id, messages, updated_at")
+    .select("id, messages, updated_at, lead_id")
     .eq("property_id", propertyId)
     .eq("visitor_id", visitorId)
     .maybeSingle();
@@ -130,7 +138,25 @@ export async function POST(request: Request) {
   });
 
   const client = new Anthropic();
-  let leadId: string | null = null;
+  let leadId: string | null = conversation?.lead_id ?? null;
+
+  // Real conversation caught in production: the visitor typed both pieces
+  // in one message ("me llamo José Silva 0971370229"), and Haiku replied
+  // "Perfecto, ya tengo tus datos anotados" WITHOUT ever calling
+  // save_lead_contact — the tool's description alone wasn't reliable
+  // enough. Rather than trust prompting harder, detect a Paraguayan mobile
+  // number (09 + 8 digits — anchored on the real "09" mobile prefix, not
+  // just any 9-10 digit run, since a bare-digit PYG price like
+  // "185000000" is otherwise indistinguishable from a phone number) and
+  // force the tool call when a lead hasn't been captured yet for this
+  // conversation. The model still does the actual name/phone extraction —
+  // this only removes its discretion over WHETHER to call it. Confirmed
+  // via testing that forcing it WITHOUT a real phone in context makes the
+  // model fill in literal "<UNKNOWN>" placeholders instead of refusing —
+  // see the real digit-count validation below, which is what actually
+  // stops that from becoming a garbage lead.
+  const looksLikePhone = /\b09\d{8}\b/.test(userMessage);
+  const forceSaveLead = looksLikePhone && !leadId;
 
   try {
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
@@ -140,6 +166,8 @@ export async function POST(request: Request) {
         thinking: { type: "disabled" },
         system,
         tools: [SAVE_LEAD_TOOL, BOOK_VISIT_TOOL],
+        tool_choice:
+          forceSaveLead && round === 0 ? { type: "tool", name: "save_lead_contact" } : { type: "auto" },
         messages,
       });
 
@@ -188,7 +216,7 @@ export async function POST(request: Request) {
       for (const toolUse of toolUseBlocks) {
         if (toolUse.name === "save_lead_contact") {
           const input = toolUse.input as { name?: string; phone?: string };
-          if (input.name && input.phone) {
+          if (input.name && isPlausiblePhone(input.phone)) {
             const result = await upsertLeadFromChatClick({
               propertyId,
               buyerName: input.name,
@@ -258,7 +286,7 @@ export async function POST(request: Request) {
                 input.end_time! <= slot.end_time.slice(0, 5)
             );
 
-          if (!input.name || !input.phone) {
+          if (!input.name || !isPlausiblePhone(input.phone)) {
             toolResults.push({
               type: "tool_result",
               tool_use_id: toolUse.id,
