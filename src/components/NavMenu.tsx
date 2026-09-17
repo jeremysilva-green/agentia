@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, MessageCircle, Info, Trophy, LayoutDashboard, LogIn, UserPlus } from "lucide-react";
+import { Menu, MessageCircle, Info, Trophy, LayoutDashboard, LogIn, UserPlus, Sparkles } from "lucide-react";
 
 export function NavMenu({
   panelLink,
+  servicesLink,
   authLinks,
 }: {
   panelLink: { href: string; label: string } | null;
+  servicesLink: { href: string; label: string } | null;
   authLinks: { loginLabel: string; signupLabel: string } | null;
 }) {
   const [open, setOpen] = useState(false);
@@ -43,6 +45,16 @@ export function NavMenu({
             >
               <LayoutDashboard size={16} />
               {panelLink.label}
+            </Link>
+          )}
+          {servicesLink && (
+            <Link
+              href={servicesLink.href}
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-emerald-400 transition-colors hover:bg-white/5"
+            >
+              <Sparkles size={16} />
+              {servicesLink.label}
             </Link>
           )}
           {authLinks && (

@@ -90,6 +90,7 @@ export async function NavBar() {
                     ? { href: "/panel-afiliado", label: dict.nav.affiliatePanel }
                     : null
               }
+              servicesLink={user && role === "agent" ? { href: "/panel/servicios", label: "Servicios" } : null}
               authLinks={!user ? { loginLabel: dict.nav.login, signupLabel: dict.nav.signup } : null}
             />
           </nav>
