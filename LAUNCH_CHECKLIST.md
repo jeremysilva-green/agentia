@@ -2,7 +2,7 @@
 
 Running list of everything left open, deferred, or undecided before this goes live. Check things off as they're actually resolved, not just discussed.
 
-**Current deploy state:** the Supabase **database schema** is live through migration `0055` (RLS fix on `invoice_counters`, invoice email tracking, payment error messages — see §33/§34). **`main` (production, `agentia.com.py`) and `preview` are both live at commit `64bf5c8`, fully in sync** — covers §33 through §38 below. Production was synced with the user's explicit go-ahead (needed a live webhook URL to give Bancard); the fast-forward was clean since main hadn't diverged all session. Stable preview URL: `https://agentia-git-preview-jeremys-projects-987e22ec.vercel.app` (behind Vercel's deployment-protection SSO wall). **One real gap remains, carried over from several updates back:** the `0052` migration's own `notify_payment_approved()` trigger function still has the **literal placeholder text `<SITE_URL>`** baked into the URL it POSTs to (a code deploy can't fix this — needs a `create or replace function` run directly against Supabase with the real domain). Until that's fixed, a real approved payment's invoicing trigger silently fails rather than creating an invoice. Standing rule, reaffirmed: never deploy to Vercel **production** without an explicit go-ahead — even the literal word "deploy" needs a clarifying question first.
+**Current deploy state:** the Supabase **database schema** is live through migration `0055` (RLS fix on `invoice_counters`, invoice email tracking, payment error messages — see §33/§34). **`main` (production, `agentia.com.py`) is live at commit `3a30597`** — covers §39 through §42 below. **`preview` has fallen behind — it's still at `87ff7ce`, missing 5 commits main has** (the forgot-password flow, the chat lead-capture fix, and the commission-agreement modal fix all went straight to production per explicit user go-ahead each time, skipping preview entirely). Worth a full preview→main sync next time there's a reason to touch preview, so the two don't stay silently divergent. Stable preview URL: `https://agentia-git-preview-jeremys-projects-987e22ec.vercel.app` (behind Vercel's deployment-protection SSO wall). **One real gap remains, carried over from several updates back:** the `0052` migration's own `notify_payment_approved()` trigger function still has the **literal placeholder text `<SITE_URL>`** baked into the URL it POSTs to (a code deploy can't fix this — needs a `create or replace function` run directly against Supabase with the real domain). Until that's fixed, a real approved payment's invoicing trigger silently fails rather than creating an invoice. Standing rule, reaffirmed: never deploy to Vercel **production** without an explicit go-ahead — even the literal word "deploy" needs a clarifying question first.
 
 - [x] Vercel project confirmed to exist and connected to GitHub — resolves part of §3 below
 - [x] `preview` branch workflow established: commit → push `preview` → poll GitHub's commit status API for the Vercel check (`success`/`failure`) → same stable branch URL every time, no new link needed per push
@@ -377,6 +377,35 @@ Real user report, with a screenshot: a property's description text overflowed pa
 
 - [x] Strip `\r` from `property.description` before truncating/rendering in `property-card`'s route. Confirmed via the same isolated repro that stripping `\r` alone fixes it completely — reverted the earlier (ineffective) `alignSelf`/width change to keep the code clean. The sibling social-images pipeline doesn't render descriptions at all, so no changes needed there.
 - [x] Verified against the real production build (not just `next dev`) and on live production after deploy.
+
+## 39. Forgot-password flow — ✅ pushed, plus two real bugs found and fixed along the way
+
+Password reset previously had nowhere to go: Supabase's recovery email redirected to the bare landing page with no way to actually set a new password, since no forgot-password UI or page ever existed in the app.
+
+- [x] `LoginForm.tsx` now has a "¿Olvidaste tu contraseña?" link that swaps to an email-only view, calls a new `requestPasswordReset` server action, and shows a generic confirmation (never reveals whether the email has an account).
+- [x] New `/restablecer-contrasena` page + `ResetPasswordForm`, reached directly via `resetPasswordForEmail`'s `redirectTo` (a bare URL, not routed through `/auth/callback` — the project's Supabase Redirect URLs allowlist had exactly one bare entry with no query-string precedent, so this avoided gambling on whether a `?next=...` variant would match it). User added `https://agentia.com.py/restablecer-contrasena` to that allowlist.
+- [x] **Real bug #1, caught via actual testing (not assumed):** the page's Server Component was calling `exchangeCodeForSession(code)` directly — but Next.js Server Components can't set cookies, so the exchange silently "worked" for that one render (form displayed fine) while never persisting a session. Every real submission failed with "El enlace expiró..." Fixed by deferring the actual exchange into the `updatePassword` Server Action (which *can* set cookies), with the code passed through as a hidden form field.
+- [x] **Real bug #2, found while investigating:** `/auth/callback`'s `next` query param wasn't validated as a same-site path (unlike the equivalent check already in `login()`) — a genuine open-redirect gap, fixed alongside.
+- [ ] **Operational hiccup, noted for awareness:** the very first push of this feature (`4a38362`) landed correctly on `main` but never triggered a Vercel deployment at all — no entry appeared in the Deployments list, unlike every other push this session. Re-pushing (an empty commit) triggered it normally; root cause unconfirmed (a one-off missed GitHub→Vercel webhook delivery is the only plausible explanation found).
+
+## 40. Chat leads not being captured when a buyer gives contact info in one message — ✅ pushed
+
+Real user test: a buyer typed name + phone together ("me llamo José Silva 0971370229"), and Claude replied "Ya tengo tus datos anotados" — but never actually called `save_lead_contact`. Confirmed directly against the database: the conversation row had `buyer_name`/`buyer_phone`/`lead_id` all null despite the bot's confident reply. This was a pure model-reliability gap, not a data-plumbing bug — the write path was already correct whenever the tool actually fired.
+
+- [x] Detect a real Paraguayan mobile number (`09` + 8 digits, anchored specifically on that prefix) in the incoming message and force the tool call via the Claude API's `tool_choice` param when no lead has been captured yet for the conversation — removing the model's discretion over *whether* to call the tool, while it still does the actual name/phone extraction.
+- [x] **Found via testing the fix itself:** forcing the tool without real contact info in context (tested with a 9-digit PYG price mentioned in chat) made the model fill in literal `"<UNKNOWN>"` placeholders — which the existing presence-only check (`input.name && input.phone`) would have happily accepted as a real lead. Added actual validation (≥6 digits after stripping non-digits) to both `save_lead_contact` and `book_visit`'s phone handling.
+- [x] Verified against the exact failing conversation and the adversarial false-positive case; all test data cleaned up from the database afterward.
+
+## 41. Commission-agreement modal overflowing horizontally — ✅ pushed
+
+The property/link/date box (and the modal itself) are flex containers without `min-w-0` — flex children default to `min-width: auto`, so the long referral URL forced the whole modal wider instead of wrapping, even though that line already had `break-all`. Added `min-w-0` down the flex chain (modal box, scrollable content area, preview wrapper). Verified visually with the exact real content (long property title, long referral URL) — no horizontal overflow.
+
+## 42. Same overflow bug in the commission-agreement PDF — fixed locally, **not yet pushed**
+
+Same underlying issue, completely different rendering engine: the downloadable PDF (`commissionAgreementPdf.ts`) uses `pdf-lib` with a hand-rolled `wrapText()` that only splits on spaces. The referral URL is one unbreakable "word" wider than the page's content width, and `pdf-lib`'s `drawText` doesn't clip or auto-wrap — so it just ran off the page's right edge.
+
+- [x] Added character-level splitting (`splitLongWord`) for any single word wider than the page, the PDF-drawing equivalent of CSS's `break-all`. Verified by generating a real PDF with the exact real content and rendering it to an image — the URL now correctly breaks across two lines within the margin.
+- [ ] **Not committed or pushed yet** — user said "don't push yet, let's call it a night" right after this was verified locally.
 
 ## Standing rules (not action items — just don't forget these)
 
