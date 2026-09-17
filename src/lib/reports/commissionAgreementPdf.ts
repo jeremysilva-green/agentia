@@ -6,17 +6,47 @@ const PAGE_HEIGHT = 842;
 const MARGIN = 50;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN * 2;
 
+// pdf-lib's drawText doesn't clip or wrap on its own — a word wider than
+// maxWidth (e.g. the referral URL, one unbreakable token with no spaces)
+// would otherwise get drawn whole and run straight off the page's right
+// edge. splitLongWord breaks such a word at the character level, the same
+// role CSS's break-all plays for the on-screen version of this agreement.
+function splitLongWord(word: string, font: PDFFont, size: number, maxWidth: number): string[] {
+  const chunks: string[] = [];
+  let chunk = "";
+  for (const char of word) {
+    const attempt = chunk + char;
+    if (chunk && font.widthOfTextAtSize(attempt, size) > maxWidth) {
+      chunks.push(chunk);
+      chunk = char;
+    } else {
+      chunk = attempt;
+    }
+  }
+  if (chunk) chunks.push(chunk);
+  return chunks;
+}
+
 function wrapText(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
   const words = text.split(" ");
   const lines: string[] = [];
   let current = "";
   for (const word of words) {
     const attempt = current ? `${current} ${word}` : word;
-    if (current && font.widthOfTextAtSize(attempt, size) > maxWidth) {
+    if (font.widthOfTextAtSize(attempt, size) <= maxWidth) {
+      current = attempt;
+      continue;
+    }
+    if (current) {
       lines.push(current);
+      current = "";
+    }
+    if (font.widthOfTextAtSize(word, size) <= maxWidth) {
       current = word;
     } else {
-      current = attempt;
+      const chunks = splitLongWord(word, font, size, maxWidth);
+      for (let i = 0; i < chunks.length - 1; i++) lines.push(chunks[i]);
+      current = chunks[chunks.length - 1] ?? "";
     }
   }
   if (current) lines.push(current);
