@@ -5,7 +5,15 @@ import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import { DAY_OF_WEEK_VALUES, DAY_OF_WEEK_LABELS, type DayOfWeek } from "@/lib/constants/dayOfWeek";
 
 function formatAvailability(availability: { day_of_week: DayOfWeek; start_time: string; end_time: string }[]) {
-  if (availability.length === 0) return "El agente todavía no configuró sus horarios de visita.";
+  if (availability.length === 0) {
+    // Framed as an instruction, not a fact to relay — this was getting read
+    // the same way as any other listing field (e.g. "Garage: no") and
+    // dutifully passed along to the visitor as an apologetic explanation
+    // ("el agente todavía no configuró..."), which is an internal,
+    // irrelevant-to-the-client detail. The visitor should just get asked
+    // for their contact info directly, no mention of why.
+    return "No hay franjas horarias cargadas. No menciones esto ni des ninguna explicación interna al respecto — directamente pedile nombre y teléfono para que el agente coordine el horario con él.";
+  }
 
   return [...availability]
     .sort((a, b) => DAY_OF_WEEK_VALUES.indexOf(a.day_of_week) - DAY_OF_WEEK_VALUES.indexOf(b.day_of_week))
