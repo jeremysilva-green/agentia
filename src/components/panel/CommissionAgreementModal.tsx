@@ -50,13 +50,13 @@ export function CommissionAgreementModal({ leadId }: { leadId: string }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
+      <div className="flex max-h-[85vh] w-full min-w-0 max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
         <div className="flex items-center gap-2 border-b border-slate-200 px-6 py-4">
           <FileSignature size={18} className="text-emerald-600" />
           <h2 className="text-base font-semibold text-slate-900">Acuerdo de reconocimiento y pago de comisión</h2>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
+        <div className="min-w-0 flex-1 overflow-y-auto px-6 py-5">
           {loadError && (
             <div className="flex flex-col items-start gap-2">
               <p className="text-sm text-red-600">{loadError}</p>
@@ -69,7 +69,7 @@ export function CommissionAgreementModal({ leadId }: { leadId: string }) {
           {!preview && !loadError && <p className="text-sm text-slate-500">Cargando acuerdo...</p>}
 
           {preview && (
-            <div className="flex flex-col gap-4 text-sm leading-relaxed text-slate-700">
+            <div className="flex min-w-0 flex-col gap-4 text-sm leading-relaxed text-slate-700">
               <h3 className="text-center text-base font-semibold text-slate-900">
                 ACUERDO DE RECONOCIMIENTO Y PAGO DE COMISIÓN POR REFERENCIA
               </h3>
