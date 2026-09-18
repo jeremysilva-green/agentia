@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import { copy } from "@/lib/copy";
 
 const inter = Inter({
@@ -50,6 +51,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white font-sans text-slate-900">
         <NavBar />
+        <OnboardingTour />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

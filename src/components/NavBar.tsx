@@ -46,6 +46,7 @@ export async function NavBar() {
             {user && role === "agent" && (
               <Link
                 href="/panel"
+                data-tour="tour-mi-panel"
                 className="hidden items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 sm:flex"
               >
                 <LayoutDashboard size={16} />

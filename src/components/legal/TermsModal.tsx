@@ -26,7 +26,22 @@ export function TermsModal({ role }: { role: "agent" | "affiliate" }) {
     setError(null);
     startTransition(async () => {
       const result = await acceptTerms();
-      if (result?.error) setError(result.error);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+      // Kicks off the onboarding tour (OnboardingTour.tsx, rendered
+      // globally in the root layout) — only ever fires once per agent,
+      // since terms_accepted_at is permanent and this modal never shows
+      // again afterward. No redirect needed: Step 1 points at "Mi Panel"
+      // in the global nav, which is present on whatever page this is.
+      if (role === "agent") {
+        localStorage.setItem("agentia_onboarding_step", "1");
+        // localStorage's own "storage" event only fires in OTHER tabs, not
+        // this one — OnboardingTour (already mounted globally) needs an
+        // explicit nudge to notice the value it just missed.
+        window.dispatchEvent(new Event("agentia-onboarding-updated"));
+      }
     });
   }
 

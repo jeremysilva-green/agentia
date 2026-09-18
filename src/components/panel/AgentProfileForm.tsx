@@ -54,7 +54,7 @@ export function AgentProfileForm({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:gap-8">
+      <div data-tour="tour-perfil-form" className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:gap-8">
         <div>
           <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">{copy.profile.photo}</p>
           <AvatarUploader userId={userId} initialAvatarUrl={avatarUrl} displayName={fullName ?? undefined} />
@@ -145,7 +145,7 @@ export function AgentProfileForm({
         <div className="flex flex-col gap-1.5">
           <SingleSelectDropdown
             name="sifenCityId"
-            label="Ciudad (facturación)"
+            label="Ciudad"
             showAllOption={false}
             defaultValue={sifenCityId ?? ""}
             options={sifenCities.map((c) => ({
@@ -155,9 +155,6 @@ export function AgentProfileForm({
             buttonClassName="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
             panelClassName="border-emerald-100! bg-emerald-50!"
           />
-          <p className="text-xs text-slate-500">
-            Usada para generar tu factura electrónica. Elegí la ciudad donde estás registrado ante la SET.
-          </p>
         </div>
 
         <Input

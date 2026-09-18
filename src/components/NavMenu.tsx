@@ -30,6 +30,7 @@ export function NavMenu({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label="Más opciones"
+        data-tour="tour-mi-panel-mobile"
         className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-white/90 transition-colors hover:border-emerald-400 hover:text-emerald-400 sm:h-10 sm:w-10"
       >
         <Menu size={18} />

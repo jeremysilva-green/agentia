@@ -24,21 +24,27 @@ import { copy } from "@/lib/copy";
 import { markSectionSeen } from "@/lib/actions/panelNotifications";
 import type { PanelSection } from "@/types/domain";
 
-const agentNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection }[] = [
+const agentNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection; dataTour?: string }[] = [
   { href: "/panel", label: copy.panel.overview, icon: Home },
   { href: "/panel/propiedades", label: copy.panel.properties, icon: Building2 },
   { href: "/panel/redes-sociales", label: "Redes Sociales", icon: Link2 },
   { href: "/panel/leads", label: copy.panel.leads, icon: Users, notifyKey: "leads" },
   { href: "/panel/solicitudes", label: copy.panel.solicitudes, icon: Inbox, notifyKey: "solicitudes" },
   { href: "/panel/chats", label: copy.panel.chats, icon: MessageCircle, notifyKey: "chats" },
-  { href: "/panel/agendamientos", label: copy.panel.agendamientos, icon: CalendarClock, notifyKey: "agendamientos" },
+  {
+    href: "/panel/agendamientos",
+    label: copy.panel.agendamientos,
+    icon: CalendarClock,
+    notifyKey: "agendamientos",
+    dataTour: "tour-agendamientos",
+  },
   { href: "/panel/acuerdos", label: "Acuerdo Privado", icon: FileSignature, notifyKey: "acuerdos" },
   { href: "/panel/suscripcion", label: copy.panel.subscription, icon: CreditCard },
   { href: "/panel/vista-global", label: copy.panel.vistaGlobal, icon: LayoutDashboard },
-  { href: "/panel/perfil", label: copy.profile.title, icon: UserRound },
+  { href: "/panel/perfil", label: copy.profile.title, icon: UserRound, dataTour: "tour-perfil" },
 ];
 
-const affiliateNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection }[] = [
+const affiliateNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection; dataTour?: string }[] = [
   { href: "/panel-afiliado", label: copy.affiliatePanel.overview, icon: Home },
   { href: "/panel-afiliado/enlaces", label: copy.affiliatePanel.myLinks, icon: Link2 },
   { href: "/panel-afiliado/avisos", label: copy.affiliatePanel.avisos, icon: Bell },
@@ -71,6 +77,7 @@ export function PanelNav({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        data-tour="tour-panel-nav-mobile"
         className="flex w-full items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm font-medium text-white backdrop-blur-md lg:hidden"
       >
         <span className="flex items-center gap-2">
@@ -95,6 +102,7 @@ export function PanelNav({
               key={item.href}
               href={item.href}
               onClick={() => handleClick(item.notifyKey)}
+              data-tour={item.dataTour}
               className={cn(
                 "flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
                 item.href === pathname
