@@ -1011,6 +1011,86 @@ export interface Database {
           },
         ];
       };
+      enhancement_prompt_templates: {
+        Row: {
+          enhancement_type: string;
+          prompt_template: string;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          enhancement_type: string;
+          prompt_template: string;
+          active?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["enhancement_prompt_templates"]["Insert"]>;
+        Relationships: [];
+      };
+      enhancement_jobs: {
+        Row: {
+          id: string;
+          agent_id: string;
+          enhancement_type: string;
+          status: "completed" | "failed";
+          input_tokens: number | null;
+          output_tokens: number | null;
+          cost_usd: number | null;
+          credit_charged: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_id: string;
+          enhancement_type: string;
+          status: "completed" | "failed";
+          input_tokens?: number | null;
+          output_tokens?: number | null;
+          cost_usd?: number | null;
+          credit_charged?: boolean;
+        };
+        Update: Partial<Database["public"]["Tables"]["enhancement_jobs"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "enhancement_jobs_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "enhancement_jobs_enhancement_type_fkey";
+            columns: ["enhancement_type"];
+            isOneToOne: false;
+            referencedRelation: "enhancement_prompt_templates";
+            referencedColumns: ["enhancement_type"];
+          },
+        ];
+      };
+      agent_ai_credits: {
+        Row: {
+          agent_id: string;
+          plan_monthly_allowance: number;
+          credits_remaining: number;
+          cycle_reset_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          agent_id: string;
+          plan_monthly_allowance?: number;
+          credits_remaining?: number;
+          cycle_reset_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["agent_ai_credits"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "agent_ai_credits_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: true;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1025,6 +1105,14 @@ export interface Database {
       next_shop_process_id: {
         Args: Record<string, never>;
         Returns: number;
+      };
+      try_charge_ai_credit: {
+        Args: { p_agent_id: string };
+        Returns: boolean;
+      };
+      refund_ai_credit: {
+        Args: { p_agent_id: string };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;
