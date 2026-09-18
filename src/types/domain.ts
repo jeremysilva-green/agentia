@@ -39,6 +39,10 @@ export type LeadPipelineRow = Lead & {
   property_price: number;
   property_currency: string;
   affiliate_username: string | null;
+  affiliate_phone: string | null;
+  affiliate_alias: string | null;
+  affiliate_qr_url: string | null;
+  affiliate_avatar_url: string | null;
 };
 
 export type AffiliateLeadRow = Lead & {

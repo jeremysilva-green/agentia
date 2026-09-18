@@ -4,7 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { LeadStatusSelect } from "@/components/panel/LeadStatusSelect";
 import { CloseDealButton } from "@/components/panel/CloseDealButton";
-import { MarkPaidButton } from "@/components/panel/MarkPaidButton";
+import { PayAffiliateModal } from "@/components/panel/PayAffiliateModal";
 import { CommissionAgreementModal } from "@/components/panel/CommissionAgreementModal";
 import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
 import { copy } from "@/lib/copy";
@@ -90,13 +90,36 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                 {row.commission_agreement_accepted_at && row.affiliate_link_id && (
                   <div className="flex flex-col items-start gap-1">
                     {row.commission_paid_at ? (
-                      <Badge tone="success">{copy.panel.commissionPaid}</Badge>
+                      <>
+                        <Badge tone="success">{copy.panel.commissionPaid}</Badge>
+                        <PayAffiliateModal
+                          leadId={row.id}
+                          paid
+                          affiliate={{
+                            username: row.affiliate_username ?? "",
+                            phone: row.affiliate_phone,
+                            alias: row.affiliate_alias,
+                            qrUrl: row.affiliate_qr_url,
+                            avatarUrl: row.affiliate_avatar_url,
+                          }}
+                        />
+                      </>
                     ) : (
                       <>
                         <span className="text-[11px] font-medium text-amber-700">
                           {copy.panel.payAffiliateDaysRemaining(daysRemainingToPay(row.commission_confirmed_at!))}
                         </span>
-                        <MarkPaidButton leadId={row.id} />
+                        <PayAffiliateModal
+                          leadId={row.id}
+                          paid={false}
+                          affiliate={{
+                            username: row.affiliate_username ?? "",
+                            phone: row.affiliate_phone,
+                            alias: row.affiliate_alias,
+                            qrUrl: row.affiliate_qr_url,
+                            avatarUrl: row.affiliate_avatar_url,
+                          }}
+                        />
                       </>
                     )}
                   </div>
