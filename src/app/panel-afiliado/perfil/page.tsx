@@ -12,7 +12,7 @@ export default async function AffiliateProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("alias, phone, avatar_url, ci")
+    .select("alias, phone, avatar_url, ci, qr_url")
     .eq("id", user.id)
     .single();
 
@@ -28,6 +28,7 @@ export default async function AffiliateProfilePage() {
         alias={profile?.alias ?? null}
         phone={profile?.phone ?? null}
         ci={profile?.ci ?? null}
+        qrUrl={profile?.qr_url ?? null}
       />
     </div>
   );

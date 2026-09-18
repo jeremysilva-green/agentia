@@ -14,15 +14,18 @@ export function AvatarUploader({
   target = "avatar",
   pathPrefix = "",
   errorMessage = "No se pudo guardar la foto de perfil.",
+  emptyIcon = User,
 }: {
   userId: string;
   initialAvatarUrl: string | null;
   variant?: "panel" | "compact";
   displayName?: string;
-  target?: "avatar" | "logo";
+  target?: "avatar" | "logo" | "qr";
   pathPrefix?: string;
   errorMessage?: string;
+  emptyIcon?: typeof User;
 }) {
+  const EmptyIcon = emptyIcon;
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +67,9 @@ export function AvatarUploader({
       const { error: updateError } =
         target === "logo"
           ? await supabase.from("agent_profiles").update({ logo_url: data.publicUrl }).eq("id", userId)
-          : await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", userId);
+          : target === "qr"
+            ? await supabase.from("profiles").update({ qr_url: data.publicUrl }).eq("id", userId)
+            : await supabase.from("profiles").update({ avatar_url: data.publicUrl }).eq("id", userId);
 
       if (updateError) {
         setError(errorMessage);
@@ -88,7 +93,7 @@ export function AvatarUploader({
   const cropModal = cropSrc && (
     <ImageCropModal
       imageSrc={cropSrc}
-      cropShape={target === "logo" ? "rect" : "round"}
+      cropShape={target === "avatar" ? "round" : "rect"}
       onCancel={handleCropCancel}
       onCropped={handleCropped}
     />
@@ -106,7 +111,7 @@ export function AvatarUploader({
           {avatarUrl ? (
             <Image src={avatarUrl} alt={displayName ?? "Foto de perfil"} fill className="object-cover" sizes="96px" />
           ) : (
-            <User className="text-slate-400" size={40} />
+            <EmptyIcon className="text-slate-400" size={40} />
           )}
           <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-white opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100">
             <Camera size={20} />

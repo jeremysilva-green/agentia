@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, type ChangeEvent } from "react";
+import { QrCode } from "lucide-react";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -13,12 +14,14 @@ export function AffiliateProfileForm({
   alias,
   phone,
   ci,
+  qrUrl,
 }: {
   userId: string;
   avatarUrl: string | null;
   alias: string | null;
   phone: string | null;
   ci: string | null;
+  qrUrl: string | null;
 }) {
   const [state, formAction, pending] = useActionState(updateAffiliateProfile, undefined);
   const [values, setValues] = useState({ alias: alias ?? "", phone: phone ?? "", ci: ci ?? "" });
@@ -33,15 +36,32 @@ export function AffiliateProfileForm({
       </div>
 
       <form action={formAction} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5">
-        <Input
-          id="alias"
-          name="alias"
-          label={copy.profile.alias}
-          value={values.alias}
-          onChange={setField("alias")}
-          error={state?.fieldErrors?.alias}
-          className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
-        />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="flex-1">
+            <Input
+              id="alias"
+              name="alias"
+              label={copy.profile.alias}
+              value={values.alias}
+              onChange={setField("alias")}
+              error={state?.fieldErrors?.alias}
+              className="bg-emerald-50! focus:border-emerald-600! focus:ring-emerald-500/20!"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm font-medium text-slate-700">{copy.profile.qr}</p>
+            <AvatarUploader
+              userId={userId}
+              initialAvatarUrl={qrUrl}
+              variant="compact"
+              target="qr"
+              pathPrefix="qr-"
+              emptyIcon={QrCode}
+              errorMessage="No se pudo guardar el QR."
+            />
+          </div>
+        </div>
 
         <Input
           id="phone"

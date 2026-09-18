@@ -231,6 +231,7 @@ export const copy = {
     photo: "Foto de perfil",
     logo: "Logo del agente",
     alias: "Alias Bancario",
+    qr: "QR de Cobro",
     phone: "Teléfono",
     fullName: "Nombre completo",
     city: "Ciudad",
