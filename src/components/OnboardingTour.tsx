@@ -229,16 +229,16 @@ export function OnboardingTour() {
       />
       <div
         className="fixed z-[60] rounded-xl p-4 shadow-2xl"
-        style={{ top, left, width: BUBBLE_WIDTH, backgroundColor: INK, border: "1px solid rgba(255,255,255,0.12)" }}
+        style={{ top, left, width: BUBBLE_WIDTH, backgroundColor: GREEN, border: "1px solid rgba(255,255,255,0.2)" }}
       >
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-medium text-white">{active.text}</p>
-          <button type="button" onClick={handleSkip} className="shrink-0 text-white/40 hover:text-white/70">
+          <button type="button" onClick={handleSkip} className="shrink-0 text-white/70 hover:text-white">
             <X size={14} />
           </button>
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <button type="button" onClick={handleSkip} className="text-xs text-white/50 hover:text-white/70">
+          <button type="button" onClick={handleSkip} className="text-xs text-white/80 hover:text-white">
             Saltar guía
           </button>
           {!active.advanceOn && (
@@ -246,7 +246,7 @@ export function OnboardingTour() {
               type="button"
               onClick={handleNext}
               className="rounded-lg px-3 py-1 text-xs font-semibold transition-colors"
-              style={{ backgroundColor: GREEN, color: INK }}
+              style={{ backgroundColor: "white", color: GREEN }}
             >
               Entendido
             </button>
