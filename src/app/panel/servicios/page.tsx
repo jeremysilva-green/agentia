@@ -1,23 +1,27 @@
 import Link from "next/link";
-import { Home as HomeIcon, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { Sparkles } from "lucide-react";
 import { ReactCompareSlider } from "react-compare-slider";
 
-// Placeholder visual for the before/after slider — no real AI-enhanced
-// property photo exists yet, so this is an honest gradient/label stand-in
-// rather than a fabricated "before/after" image.
-//
-// Content is anchored toward each side's OUTER edge rather than centered —
-// confirmed via a visual test that dead-center content collides with the
-// slider's drag handle, which also sits at the center by default.
-function PlaceholderSide({ label, className, side }: { label: string; className: string; side: "left" | "right" }) {
+function SlideLabel({ label, side }: { label: string; side: "left" | "right" }) {
   return (
     <div
-      className={`flex h-full w-full flex-col justify-center gap-2 ${className} ${
-        side === "left" ? "items-start pl-4" : "items-end pr-4"
+      className={`pointer-events-none absolute inset-0 flex flex-col justify-end p-4 ${
+        side === "left" ? "items-start" : "items-end"
       }`}
     >
-      <HomeIcon size={40} className="text-white/70" />
-      <span className="font-display text-sm font-semibold uppercase tracking-wide text-white/80">{label}</span>
+      <span className="rounded-md bg-black/60 px-2 py-1 font-display text-xs font-semibold uppercase tracking-wide text-white">
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function SlideImage({ src, label, side }: { src: string; label: string; side: "left" | "right" }) {
+  return (
+    <div className="relative h-full w-full">
+      <Image src={src} alt={label} fill sizes="448px" className="object-cover" />
+      <SlideLabel label={label} side={side} />
     </div>
   );
 }
@@ -42,10 +46,8 @@ export default function ServiciosPage() {
         <div className="overflow-hidden rounded-xl border border-neutral-800 bg-neutral-950">
           <ReactCompareSlider
             style={{ height: 260 }}
-            itemOne={<PlaceholderSide label="Antes" className="bg-neutral-800" side="left" />}
-            itemTwo={
-              <PlaceholderSide label="Después" className="bg-gradient-to-br from-emerald-700 to-emerald-500" side="right" />
-            }
+            itemOne={<SlideImage src="/servicios/antes.png" label="Antes" side="left" />}
+            itemTwo={<SlideImage src="/servicios/despues.png" label="Después" side="right" />}
           />
         </div>
       </div>
