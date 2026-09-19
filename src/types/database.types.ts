@@ -831,6 +831,28 @@ export interface Database {
           },
         ];
       };
+      affiliate_section_views: {
+        Row: {
+          affiliate_id: string;
+          section: "resumen" | "avisos";
+          seen_at: string;
+        };
+        Insert: {
+          affiliate_id: string;
+          section: "resumen" | "avisos";
+          seen_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["affiliate_section_views"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_section_views_affiliate_id_fkey";
+            columns: ["affiliate_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       agent_availability: {
         Row: {
           id: string;

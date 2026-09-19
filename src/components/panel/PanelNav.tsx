@@ -21,8 +21,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
-import { markSectionSeen } from "@/lib/actions/panelNotifications";
-import type { PanelSection } from "@/types/domain";
+import { markSectionSeen, markAffiliateSectionSeen } from "@/lib/actions/panelNotifications";
+import type { AffiliateSectionView, PanelSection, PanelSectionView } from "@/types/domain";
 
 const agentNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection; dataTour?: string }[] = [
   { href: "/panel", label: copy.panel.overview, icon: Home },
@@ -45,9 +45,9 @@ const agentNavItems: { href: string; label: string; icon: typeof Home; notifyKey
 ];
 
 const affiliateNavItems: { href: string; label: string; icon: typeof Home; notifyKey?: PanelSection; dataTour?: string }[] = [
-  { href: "/panel-afiliado", label: copy.affiliatePanel.overview, icon: Home },
+  { href: "/panel-afiliado", label: copy.affiliatePanel.overview, icon: Home, notifyKey: "resumen" },
   { href: "/panel-afiliado/enlaces", label: copy.affiliatePanel.myLinks, icon: Link2 },
-  { href: "/panel-afiliado/avisos", label: copy.affiliatePanel.avisos, icon: Bell },
+  { href: "/panel-afiliado/avisos", label: copy.affiliatePanel.avisos, icon: Bell, notifyKey: "avisos" },
   { href: "/panel-afiliado/perfil", label: copy.profile.title, icon: UserRound },
 ];
 
@@ -68,7 +68,11 @@ export function PanelNav({
     setOpen(false);
     if (notifyKey && notifications?.[notifyKey] && !cleared.has(notifyKey)) {
       setCleared((prev) => new Set(prev).add(notifyKey));
-      void markSectionSeen(notifyKey);
+      if (variant === "agent") {
+        void markSectionSeen(notifyKey as PanelSectionView["section"]);
+      } else {
+        void markAffiliateSectionSeen(notifyKey as AffiliateSectionView["section"]);
+      }
     }
   }
 

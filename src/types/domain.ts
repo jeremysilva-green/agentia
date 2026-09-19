@@ -20,7 +20,11 @@ export type Agendamiento = Database["public"]["Tables"]["agendamientos"]["Row"];
 export type ShortLink = Database["public"]["Tables"]["short_links"]["Row"];
 export type AgentSocialShare = Database["public"]["Tables"]["agent_social_shares"]["Row"];
 export type PanelSectionView = Database["public"]["Tables"]["panel_section_views"]["Row"];
-export type PanelSection = PanelSectionView["section"];
+export type AffiliateSectionView = Database["public"]["Tables"]["affiliate_section_views"]["Row"];
+// Shared prop type for PanelNav (used by both the agent and affiliate
+// variants) — a union of both tables' section literals, not tied to either
+// one's own DB check constraint.
+export type PanelSection = PanelSectionView["section"] | AffiliateSectionView["section"];
 
 export type AgentCardData = AgentProfile & {
   profile: Pick<Profile, "username" | "full_name" | "avatar_url">;
