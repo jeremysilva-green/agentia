@@ -105,6 +105,18 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Video intro */}
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+        <video
+          controls
+          preload="metadata"
+          poster="/video/agentia-intro-poster.jpg"
+          className="aspect-video w-full rounded-2xl border border-emerald-500/40 bg-black"
+        >
+          <source src="/video/agentia-intro.mp4" type="video/mp4" />
+        </video>
+      </section>
+
       {/* Cómo funciona */}
       <section className="relative mx-auto max-w-5xl px-4 pb-16 sm:px-6">
         <div className="grid gap-4 sm:grid-cols-3">
