@@ -21,8 +21,8 @@ export function CommissionAgreementModal({ leadId }: { leadId: string }) {
   const [isPending, startTransition] = useTransition();
 
   function loadPreview() {
-    setLoadError(null);
     startTransition(async () => {
+      setLoadError(null);
       const result = await getCommissionAgreementPreview(leadId);
       if ("error" in result) {
         setLoadError(result.error);
@@ -49,7 +49,12 @@ export function CommissionAgreementModal({ leadId }: { leadId: string }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    // whitespace-normal resets inheritance from LeadsTable's <td
+    // className="whitespace-nowrap">, this modal's DOM parent — nowrap is
+    // inherited regardless of this being `fixed` (inheritance follows the
+    // DOM tree, not the layout/positioning scheme), which was forcing every
+    // paragraph onto one unbroken line and overriding break-all below.
+    <div className="fixed inset-0 z-50 flex items-center justify-center whitespace-normal bg-black/60 p-4">
       <div className="flex max-h-[85vh] w-full min-w-0 max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
         <div className="flex items-center gap-2 border-b border-slate-200 px-6 py-4">
           <FileSignature size={18} className="text-emerald-600" />

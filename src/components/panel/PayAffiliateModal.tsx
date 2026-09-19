@@ -65,7 +65,14 @@ export function PayAffiliateModal({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setOpen(false)}>
+        // whitespace-normal resets inheritance from LeadsTable's <td
+        // className="whitespace-nowrap">, this modal's DOM parent — see
+        // CommissionAgreementModal.tsx for why that matters even though
+        // this is `fixed`.
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center whitespace-normal bg-black/60 p-4"
+          onClick={() => setOpen(false)}
+        >
           <div
             className="flex w-full max-w-sm flex-col gap-4 rounded-2xl bg-white p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
