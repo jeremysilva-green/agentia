@@ -30,7 +30,7 @@ export function PricingPlans({
       if (planId === "basico") return;
 
       try {
-        const response = await fetch("/api/checkout/bancard", {
+        const response = await fetch("/api/checkout/dlocal-go", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ plan: planId }),

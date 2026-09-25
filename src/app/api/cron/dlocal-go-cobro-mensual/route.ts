@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { chargeSubscriptionBancard } from "@/lib/bancardSubscription";
+import { chargeSubscriptionDlocalGo } from "@/lib/dlocalGoSubscription";
 
-// Direct-Bancard equivalent of the pagopar-cobro-mensual edge function
-// (left running in parallel, untouched, in case Pagopar is ever revisited).
-// Selects trialing subscriptions whose trial just ended, or active
-// subscriptions whose period_end is today or earlier. Only agents with a
-// Bancard card on file get charged here; agents without one are marked
-// past_due (mirrors subscriptions-check's lapsed-subscription handling).
+// dLocal Go equivalent of the old bancard-cobro-mensual cron. Selects
+// trialing subscriptions whose trial just ended, or active subscriptions
+// whose period_end is today or earlier. Only agents with a dLocal Go card on
+// file get charged here; agents without one are left for subscriptions-check
+// to mark past_due.
 function isAuthorized(request: Request) {
   const bearer = request.headers.get("authorization");
   return bearer === `Bearer ${process.env.CRON_SECRET}`;
 }
 
-async function runBancardCobroMensual() {
+async function runDlocalGoCobroMensual() {
   const service = createServiceClient();
   const today = new Date().toISOString().slice(0, 10);
   const now = new Date().toISOString();
@@ -33,18 +32,15 @@ async function runBancardCobroMensual() {
       .eq("id", subscription.agent_id)
       .single();
 
-    if (!agentProfile?.tarjeta_guardada || agentProfile.proveedor_tarjeta !== "Bancard") {
-      // No Bancard card on file — either no card at all (subscriptions-check
-      // already handles that case) or a Pagopar card, which the Pagopar cron
-      // (still running independently) is responsible for.
+    if (!agentProfile?.tarjeta_guardada || agentProfile.proveedor_tarjeta !== "dLocalGo") {
       continue;
     }
 
-    const result = await chargeSubscriptionBancard(subscription.agent_id);
+    const result = await chargeSubscriptionDlocalGo(subscription.agent_id);
     results.push({ agentId: subscription.agent_id, success: result.success, error: "error" in result ? result.error : undefined });
 
     if (!result.success) {
-      console.error(`[bancard-cobro-mensual] agent ${subscription.agent_id}: cobro falló — ${result.error}`);
+      console.error(`[dlocal-go-cobro-mensual] agent ${subscription.agent_id}: cobro falló — ${result.error}`);
     }
   }
 
@@ -53,10 +49,10 @@ async function runBancardCobroMensual() {
 
 export async function GET(request: Request) {
   if (!isAuthorized(request)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  return NextResponse.json(await runBancardCobroMensual());
+  return NextResponse.json(await runDlocalGoCobroMensual());
 }
 
 export async function POST(request: Request) {
   if (!isAuthorized(request)) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  return NextResponse.json(await runBancardCobroMensual());
+  return NextResponse.json(await runDlocalGoCobroMensual());
 }

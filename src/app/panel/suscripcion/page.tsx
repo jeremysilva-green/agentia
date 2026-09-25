@@ -1,13 +1,11 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CreditCard, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getAgentContext } from "@/lib/data/panel";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { SubscriptionStatusBadge } from "@/components/panel/SubscriptionStatusBadge";
-import { BancardCheckoutButton } from "@/components/panel/BancardCheckoutButton";
+import { DlocalGoCheckoutButton } from "@/components/panel/DlocalGoCheckoutButton";
 import { CancelSubscriptionButton } from "@/components/panel/CancelSubscriptionButton";
 import { PricingPlans } from "@/components/panel/PricingPlans";
 import { PLANS, isPlanId, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
@@ -58,17 +56,9 @@ export default async function SuscripcionPage() {
             <p className="text-xs text-emerald-700">
               {cardOnFile
                 ? "Ya tenés una tarjeta guardada — te cobraremos automáticamente cuando termine la prueba."
-                : "Guardá una tarjeta para que la renovación sea automática cuando termine la prueba."}
+                : "Elegí un plan abajo para guardar una tarjeta y que la renovación sea automática cuando termine la prueba."}
             </p>
           </div>
-          {!cardOnFile && (
-            <Link href="/panel/suscripcion/tarjeta">
-              <Button size="sm" variant="secondary">
-                <CreditCard size={15} />
-                Guardar tarjeta
-              </Button>
-            </Link>
-          )}
         </Card>
       )}
 
@@ -115,21 +105,9 @@ export default async function SuscripcionPage() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <BancardCheckoutButton label="Pagar ahora" plan={currentPlan ?? ""} />
+            <DlocalGoCheckoutButton label="Pagar ahora" plan={currentPlan ?? ""} />
           </div>
         </div>
-      )}
-
-      {status === "active" && !cardOnFile && currentPlan !== "basico" && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 border-sky-100! bg-sky-50! p-4">
-          <p className="text-sm text-slate-600">Guardá una tarjeta para que tus próximas renovaciones sean automáticas.</p>
-          <Link href="/panel/suscripcion/tarjeta">
-            <Button size="sm" variant="secondary" className="border-sky-600! bg-sky-600! text-white! hover:bg-sky-700!">
-              <CreditCard size={15} />
-              Guardar tarjeta
-            </Button>
-          </Link>
-        </Card>
       )}
 
       <div className="flex flex-col gap-3">

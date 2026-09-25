@@ -5,7 +5,7 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/bancard-cobro-mensual",
+      "path": "/api/cron/dlocal-go-cobro-mensual",
       "schedule": "0 9 * * *"
     },
     {

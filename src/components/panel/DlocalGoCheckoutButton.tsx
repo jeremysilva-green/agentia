@@ -6,7 +6,7 @@ import { isPlanId } from "@/lib/plans";
 
 // Used for the "pay now" retry path when a subscription is
 // past_due/pending — charges whatever plan is currently on the subscription.
-export function BancardCheckoutButton({ label, plan }: { label: string; plan: string }) {
+export function DlocalGoCheckoutButton({ label, plan }: { label: string; plan: string }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +15,7 @@ export function BancardCheckoutButton({ label, plan }: { label: string; plan: st
     setError(null);
     startTransition(async () => {
       try {
-        const response = await fetch("/api/checkout/bancard", {
+        const response = await fetch("/api/checkout/dlocal-go", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ plan }),

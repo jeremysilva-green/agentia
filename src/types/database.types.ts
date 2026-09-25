@@ -52,12 +52,13 @@ export interface Database {
           pagopar_identificador: number | null;
           pagopar_cliente_creado: boolean;
           tarjeta_guardada: boolean;
-          proveedor_tarjeta: "Bancard" | "uPay" | "dLocal" | null;
+          proveedor_tarjeta: "Bancard" | "uPay" | "dLocal" | "dLocalGo" | null;
           bancard_alias_token: string | null;
           dlocal_network_payment_reference: string | null;
           dlocal_transaction_link_id: string | null;
           dlocal_card_last4: string | null;
           dlocal_recurring_supported: boolean | null;
+          dlocal_go_checkout_token: string | null;
           ruc: string | null;
           address: string | null;
           sifen_ciudad_id: number | null;
@@ -81,12 +82,13 @@ export interface Database {
           pagopar_identificador?: number | null;
           pagopar_cliente_creado?: boolean;
           tarjeta_guardada?: boolean;
-          proveedor_tarjeta?: "Bancard" | "uPay" | "dLocal" | null;
+          proveedor_tarjeta?: "Bancard" | "uPay" | "dLocal" | "dLocalGo" | null;
           bancard_alias_token?: string | null;
           dlocal_network_payment_reference?: string | null;
           dlocal_transaction_link_id?: string | null;
           dlocal_card_last4?: string | null;
           dlocal_recurring_supported?: boolean | null;
+          dlocal_go_checkout_token?: string | null;
           address?: string | null;
           sifen_ciudad_id?: number | null;
           sifen_ciudad_desc?: string | null;
@@ -467,6 +469,8 @@ export interface Database {
           dlocal_payment_id: string | null;
           dlocal_order_id: string | null;
           dlocal_tipo: "primer_pago" | "recurrente" | null;
+          dlocal_go_payment_id: string | null;
+          dlocal_go_tipo: "checkout" | "recurrente" | null;
           amount: number;
           currency: string;
           plan: "basico" | "pro" | "fundador" | null;
@@ -490,6 +494,8 @@ export interface Database {
           dlocal_payment_id?: string | null;
           dlocal_order_id?: string | null;
           dlocal_tipo?: "primer_pago" | "recurrente" | null;
+          dlocal_go_payment_id?: string | null;
+          dlocal_go_tipo?: "checkout" | "recurrente" | null;
           amount: number;
           currency?: string;
           plan?: "basico" | "pro" | "fundador" | null;

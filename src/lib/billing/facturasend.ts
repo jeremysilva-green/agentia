@@ -3,8 +3,11 @@ const TENANT_ID = process.env.FACTURASEND_TENANT_ID!;
 const API_KEY = process.env.FACTURASEND_API_KEY!;
 
 function headers() {
+  // FacturaSend rejects the bare key with "Formato de Token inválido" —
+  // confirmed live against GET /agentiaeas/test — it requires the
+  // "api_key_" prefix on the token itself, not just a Bearer scheme.
   return {
-    Authorization: `Bearer ${API_KEY}`,
+    Authorization: `Bearer api_key_${API_KEY}`,
     "Content-Type": "application/json; charset=utf-8",
   };
 }
