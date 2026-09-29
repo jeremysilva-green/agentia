@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 
 function InstagramIcon({ size }: { size: number }) {
   return (
@@ -23,6 +23,8 @@ function InstagramIcon({ size }: { size: number }) {
 const links = [
   { href: "/que-es-agentia", label: "¿Qué es Agentia?" },
   { href: "/ranking-afiliados", label: "Ranking de Afiliados" },
+  { href: "/terminos", label: "Términos y Condiciones" },
+  { href: "/privacidad", label: "Privacidad" },
 ];
 
 export function Footer() {
@@ -40,6 +42,14 @@ export function Footer() {
           >
             <MessageCircle size={15} />
             Comunidad WhatsApp
+          </a>
+
+          <a
+            href="mailto:info@agentia.com.py"
+            className="flex items-center gap-1.5 text-sm font-medium text-white/70 transition-colors hover:text-emerald-400"
+          >
+            <Mail size={15} />
+            info@agentia.com.py
           </a>
 
           {links.map((link) => (

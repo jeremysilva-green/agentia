@@ -68,6 +68,9 @@ export function PropertyForm({
   const priceNum = Number(price) || 0;
   const agentCommission = priceNum * (AGENT_COMMISSION_PCT / 100);
   const affiliateCommission = priceNum * (AFFILIATE_COMMISSION_PCT / 100);
+  // What the agent actually keeps if the sale comes through an affiliate's
+  // referral — the worst case, since not every sale involves one.
+  const netCommission = agentCommission - affiliateCommission;
   const formatMoney = (amount: number) =>
     `${currency} ${amount.toLocaleString("es-PY", { maximumFractionDigits: 0 })}`;
 
@@ -165,6 +168,10 @@ export function PropertyForm({
             <div className="flex items-center justify-between">
               <span>Comisión Referido ({AFFILIATE_COMMISSION_PCT}%)</span>
               <span className="font-medium text-slate-700">{formatMoney(affiliateCommission)}</span>
+            </div>
+            <div className="flex items-center justify-between border-t border-slate-200 pt-1">
+              <span className="font-medium text-slate-700">Tu comisión total</span>
+              <span className="font-semibold text-emerald-700">{formatMoney(netCommission)}</span>
             </div>
           </div>
         </div>

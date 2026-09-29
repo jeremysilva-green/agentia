@@ -33,7 +33,14 @@ export function DlocalGoCheckoutButton({ label, plan }: { label: string; plan: s
 
   return (
     <div className="flex flex-col items-start gap-1.5">
-      <Button type="button" size="lg" onClick={handleClick} disabled={isPending || disabled}>
+      <Button
+        type="button"
+        size="lg"
+        variant="secondary"
+        onClick={handleClick}
+        disabled={isPending || disabled}
+        className="border-emerald-400! bg-transparent! text-emerald-400! hover:border-emerald-500! hover:bg-emerald-500! hover:text-white!"
+      >
         {isPending ? "Redirigiendo..." : label}
       </Button>
       {error && <p className="text-sm text-red-600">{error}</p>}
