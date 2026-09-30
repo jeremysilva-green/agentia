@@ -46,6 +46,10 @@ export default function TerminosPage() {
           <h1 className="text-balance font-display text-4xl font-semibold tracking-tight text-prussian sm:text-5xl">
             Términos de Servicio
           </h1>
+          <p className="mt-3 text-sm text-slate-500">
+            AGENTIA es operada por <span className="font-medium text-slate-700">AGENTIA E.A.S. UNIPERSONAL</span> — RUC
+            80177563-9
+          </p>
         </div>
       </section>
 
