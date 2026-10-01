@@ -151,6 +151,7 @@ function SelectField({
   onChange,
   required,
   name,
+  error,
 }: {
   id: string;
   label: string;
@@ -161,6 +162,7 @@ function SelectField({
   onChange?: (value: string) => void;
   required?: boolean;
   name?: string;
+  error?: string;
 }) {
   const normalized = options.map((o) => (typeof o === "string" ? { value: o, label: o } : o));
   const controlledProps = value !== undefined ? { value } : { defaultValue: defaultValue ?? "" };
@@ -185,6 +187,7 @@ function SelectField({
           </option>
         ))}
       </select>
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
 }
@@ -198,10 +201,12 @@ function DistrictField({
   city,
   editable,
   defaultValue,
+  error,
 }: {
   city: string;
   editable: boolean;
   defaultValue?: string | null;
+  error?: string;
 }) {
   const barrios = getBarriosForCity(city);
   const startsAsOther = Boolean(defaultValue) && !barrios.includes(defaultValue ?? "");
@@ -216,27 +221,37 @@ function DistrictField({
         editable={editable}
         value={otherValue}
         onChange={(e) => setOtherValue(e.target.value)}
+        error={error}
       />
     );
   }
 
   const isOther = selection === OTHER_DISTRICT;
+  // A single hidden input is the one source of truth submitted to the
+  // server — previously the visible <select> carried name="property_district"
+  // directly, stripped to undefined whenever nothing was chosen yet
+  // (to avoid double-submitting alongside the "Otro" text field). That made
+  // formData.get("property_district") return null instead of "" when a
+  // curated-barrio city's dropdown was left on "Seleccioná...", which the
+  // optionalText Zod schema rejects outright (it accepts a string or
+  // undefined, never null) — silently failing the whole submission with no
+  // visible error, since this field's error was never wired to the UI.
+  const finalValue = isOther ? otherValue : selection;
 
   return (
     <div className="flex flex-col gap-1.5">
       <SelectField
         id="property_district_select"
-        name={isOther || selection === "" ? undefined : "property_district"}
         label="Distrito / Barrio"
         editable={editable}
         value={selection}
         onChange={setSelection}
         options={[...barrios.map((b) => ({ value: b, label: b })), { value: OTHER_DISTRICT, label: "Otro (especificar)" }]}
+        error={error}
       />
       {isOther && (
         <Input
-          id="property_district"
-          name="property_district"
+          id="property_district_other"
           value={otherValue}
           onChange={(e) => setOtherValue(e.target.value)}
           disabled={!editable}
@@ -244,6 +259,7 @@ function DistrictField({
           className={editableClass(editable)}
         />
       )}
+      <input type="hidden" name="property_district" value={finalValue} />
     </div>
   );
 }
@@ -452,9 +468,10 @@ export function AcuerdoPrivadoFields({
           value={values.property_type ?? ""}
           onChange={setRadio("property_type")}
           options={PROPERTY_TYPE_VALUES.map((type) => ({ value: type, label: PROPERTY_TYPE_LABELS[type].es }))}
+          error={fieldError("property_type")}
         />
-        <SelectField id="property_city" label="Ciudad" editable={ownerEditable} value={city} onChange={setCity} options={CITY_OPTIONS} required />
-        <DistrictField city={city} editable={ownerEditable} defaultValue={agreement.property_district} />
+        <SelectField id="property_city" label="Ciudad" editable={ownerEditable} value={city} onChange={setCity} options={CITY_OPTIONS} required error={fieldError("property_city")} />
+        <DistrictField city={city} editable={ownerEditable} defaultValue={agreement.property_district} error={fieldError("property_district")} />
         <Field id="property_address" label="Dirección / Ubicación" editable={ownerEditable} value={values.property_address} onChange={setField("property_address")} />
         <Field id="land_area_m2" label="Superficie de terreno (m²)" editable={ownerEditable} value={values.land_area_m2} onChange={setField("land_area_m2")} type="text" inputMode="decimal" />
         <Field id="built_area_m2" label="Superficie construida (m²)" editable={ownerEditable} value={values.built_area_m2} onChange={setField("built_area_m2")} type="text" inputMode="decimal" />
