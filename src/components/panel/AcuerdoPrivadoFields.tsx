@@ -4,6 +4,8 @@ import { useState, type ChangeEvent } from "react";
 import { Paperclip, Download } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { getPublicStorageUrl } from "@/lib/storage";
+import { createClient } from "@/lib/supabase/client";
+import { getAcuerdoDocUploadUrl } from "@/lib/actions/privateAgreements";
 import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { getBarriosForCity } from "@/lib/constants/barrios";
@@ -246,18 +248,57 @@ function DistrictField({
   );
 }
 
+type DocFieldId = "doc_title" | "doc_tax" | "doc_id";
+
+// Uploads straight from the browser to Supabase Storage via a signed URL,
+// rather than sending the file through the final submit Server Action —
+// Vercel's Serverless Functions cap request bodies well below what three
+// phone photos of property documents can add up to, independent of this
+// app's own serverActions.bodySizeLimit config (that only raises Next.js's
+// own check, not Vercel's platform ceiling in front of it). The resulting
+// storage path is carried into the real submission as a plain hidden-input
+// string, not a file.
 function DocUploadField({
   id,
   label,
   editable,
   existingPath,
+  shareCode,
 }: {
-  id: string;
+  id: DocFieldId;
   label: string;
   editable: boolean;
   existingPath?: string | null;
+  shareCode: string;
 }) {
-  const downloadUrl = existingPath ? getPublicStorageUrl("acuerdo-documentos", existingPath) : null;
+  const [uploadedPath, setUploadedPath] = useState<string | null>(existingPath ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleFile(file: File | undefined) {
+    if (!file) return;
+    setError(null);
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "bin";
+      const result = await getAcuerdoDocUploadUrl(shareCode, id, ext);
+      if ("error" in result) throw new Error(result.error);
+
+      const supabase = createClient();
+      const { error: uploadError } = await supabase.storage
+        .from("acuerdo-documentos")
+        .uploadToSignedUrl(result.path, result.token, file);
+      if (uploadError) throw uploadError;
+
+      setUploadedPath(result.path);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo subir el archivo.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const downloadUrl = uploadedPath ? getPublicStorageUrl("acuerdo-documentos", uploadedPath) : null;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -267,13 +308,23 @@ function DocUploadField({
       {editable && (
         <label
           htmlFor={id}
-          className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 bg-emerald-50 px-3 py-2.5 text-xs font-medium text-slate-600 hover:bg-emerald-100"
+          className="flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-dashed border-slate-300 bg-emerald-50 px-3 py-2.5 text-xs font-medium text-slate-600 hover:bg-emerald-100 aria-disabled:cursor-not-allowed aria-disabled:opacity-60"
+          aria-disabled={uploading}
         >
           <Paperclip size={13} />
-          Adjuntar archivo (imagen o PDF)
-          <input id={id} name={id} type="file" accept="image/*,.pdf" className="hidden" />
+          {uploading ? "Subiendo..." : "Adjuntar archivo (imagen o PDF)"}
+          <input
+            id={id}
+            type="file"
+            accept="image/*,.pdf"
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => handleFile(e.target.files?.[0])}
+          />
         </label>
       )}
+      <input type="hidden" name={id} value={uploadedPath ?? ""} />
+      {error && <p className="text-xs text-red-600">{error}</p>}
       {downloadUrl ? (
         <a
           href={downloadUrl}
@@ -474,9 +525,9 @@ export function AcuerdoPrivadoFields({
         c) C.I del Propietario (ambas caras)
       </p>
       <div className="grid gap-3 rounded-xl border border-slate-200 p-3 sm:grid-cols-2">
-        <DocUploadField id="doc_title" label="a) Título de Propiedad" editable={ownerEditable} existingPath={agreement.doc_title} />
-        <DocUploadField id="doc_tax" label="b) Comprobante de Impuesto Inmobiliario" editable={ownerEditable} existingPath={agreement.doc_tax} />
-        <DocUploadField id="doc_id" label="c) C.I. del Propietario (ambas caras)" editable={ownerEditable} existingPath={agreement.doc_id} />
+        <DocUploadField id="doc_title" label="a) Título de Propiedad" editable={ownerEditable} existingPath={agreement.doc_title} shareCode={agreement.share_code ?? ""} />
+        <DocUploadField id="doc_tax" label="b) Comprobante de Impuesto Inmobiliario" editable={ownerEditable} existingPath={agreement.doc_tax} shareCode={agreement.share_code ?? ""} />
+        <DocUploadField id="doc_id" label="c) C.I. del Propietario (ambas caras)" editable={ownerEditable} existingPath={agreement.doc_id} shareCode={agreement.share_code ?? ""} />
       </div>
 
       <SectionTitle>7. Vigencia y modalidad</SectionTitle>

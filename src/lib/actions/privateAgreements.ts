@@ -16,25 +16,48 @@ function computeStatus(agentSignedAt: string | null, ownerSignedAt: string | nul
 }
 
 const DOC_KEYS = ["doc_title", "doc_tax", "doc_id"] as const;
+type DocKey = (typeof DOC_KEYS)[number];
 
-// Uploads whichever of the three optional documents were actually attached
-// in this submission, leaving the rest untouched — attaching them is never
-// required for the agreement to go through.
-async function uploadAttachedDocs(agreementId: string, formData: FormData) {
-  const service = createServiceClient();
-  const updates: Partial<Record<(typeof DOC_KEYS)[number], string>> = {};
-
+// Owner documents now upload directly from the browser to Supabase Storage
+// via a signed URL (see getAcuerdoDocUploadUrl below) rather than through
+// this Server Action — Vercel's Serverless Functions enforce their own
+// hard request-body ceiling (independent of next.config.ts's
+// serverActions.bodySizeLimit, which only raises Next.js's own check), and
+// three phone photos of property documents routinely exceeded it, which is
+// exactly what a real owner hit in production. By the time this action
+// runs, formData's doc_* fields are just the already-uploaded storage
+// paths (plain strings), not file blobs.
+function collectDocPaths(formData: FormData) {
+  const updates: Partial<Record<DocKey, string>> = {};
   for (const key of DOC_KEYS) {
-    const file = formData.get(key);
-    if (!(file instanceof File) || file.size === 0) continue;
-
-    const ext = file.name.split(".").pop() ?? "bin";
-    const path = `${agreementId}/${key}.${ext}`;
-    const { error } = await service.storage.from("acuerdo-documentos").upload(path, file, { upsert: true });
-    if (!error) updates[key] = path;
+    const value = formData.get(key);
+    if (typeof value === "string" && value.length > 0) updates[key] = value;
   }
-
   return updates;
+}
+
+// Issues a short-lived signed upload URL for one owner document, scoped to
+// this agreement's share code — the owner's browser uploads straight to
+// Supabase Storage with it, so the file's bytes never pass through a
+// Vercel function at all.
+export async function getAcuerdoDocUploadUrl(
+  shareCode: string,
+  docKey: DocKey,
+  fileExt: string
+): Promise<{ error: string } | { path: string; token: string }> {
+  if (!DOC_KEYS.includes(docKey)) return { error: "Documento inválido." };
+
+  const service = createServiceClient();
+  const { data: agreement } = await service.from("private_agreements").select("id").eq("share_code", shareCode).single();
+  if (!agreement) return { error: "No se encontró el documento." };
+
+  const safeExt = fileExt.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10) || "bin";
+  const path = `${agreement.id}/${docKey}.${safeExt}`;
+
+  const { data, error } = await service.storage.from("acuerdo-documentos").createSignedUploadUrl(path, { upsert: true });
+  if (error || !data) return { error: "No se pudo preparar la subida del archivo." };
+
+  return { path: data.path, token: data.token };
 }
 
 // Agent-initiated: creates a blank agreement pre-filled with the agent's own
@@ -168,7 +191,7 @@ export async function submitOwnerAgreementByShareCode(
   if (!parsed.success)
     return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
 
-  const docUpdates = await uploadAttachedDocs(existing.id, formData);
+  const docUpdates = collectDocPaths(formData);
 
   const ownerSignedAt = new Date().toISOString();
   const { error } = await service
