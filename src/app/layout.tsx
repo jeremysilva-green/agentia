@@ -5,7 +5,6 @@ import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { OnboardingTour } from "@/components/OnboardingTour";
-import { copy } from "@/lib/copy";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -31,11 +30,11 @@ const rubik = localFont({
 });
 
 export const metadata: Metadata = {
-  title: copy.brand,
+  title: "AGENTIA | Portal Inmobiliario Inteligente",
   // Doubles as the "/" landing page's description — /agentes (the
   // marketplace, formerly at "/") has its own route-level metadata override.
   description:
-    "Tu portafolio, tu CRM, tu asistente de IA y tu propia red de afiliados vendiendo por vos — todo en un solo lugar.",
+    "Tu oficina inmobiliaria, potenciada por IA. CRM · Chatbot · Afiliados · WhatsApp. Única con sistema de afiliados en Paraguay.",
 };
 
 export default function RootLayout({
