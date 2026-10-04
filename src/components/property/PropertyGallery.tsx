@@ -6,8 +6,11 @@ import { ImageOff, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SWIPE_THRESHOLD = 40;
 
+const MAX_FRAME_HEIGHT = 560;
+
 export function PropertyGallery({ imageUrls, title }: { imageUrls: string[]; title: string }) {
   const [active, setActive] = useState(0);
+  const [ratios, setRatios] = useState<Record<string, number>>({});
   const touchStartX = useRef<number | null>(null);
 
   if (imageUrls.length === 0) {
@@ -19,6 +22,15 @@ export function PropertyGallery({ imageUrls, title }: { imageUrls: string[]; tit
   }
 
   const hasMultiple = imageUrls.length > 1;
+  // Each photo keeps its own shape (vertical stays vertical) — the frame
+  // follows the active image's real ratio once it loads, capped in height
+  // so a tall photo doesn't take over the whole page.
+  const activeRatio = ratios[imageUrls[active]] ?? 16 / 9;
+
+  function recordRatio(url: string, width: number, height: number) {
+    if (!width || !height) return;
+    setRatios((prev) => (prev[url] ? prev : { ...prev, [url]: width / height }));
+  }
 
   function goTo(index: number) {
     setActive(((index % imageUrls.length) + imageUrls.length) % imageUrls.length);
@@ -39,12 +51,21 @@ export function PropertyGallery({ imageUrls, title }: { imageUrls: string[]; tit
   return (
     <div className="flex flex-col gap-2">
       <div
-        className="group relative aspect-video touch-pan-y overflow-hidden rounded-2xl bg-slate-100"
+        className="group relative mx-auto w-full touch-pan-y overflow-hidden rounded-2xl bg-slate-100"
+        style={{ aspectRatio: activeRatio, maxWidth: MAX_FRAME_HEIGHT * activeRatio }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
         <div key={active} className="animate-fade-in absolute inset-0">
-          <Image src={imageUrls[active]} alt={title} fill className="object-cover" sizes="800px" priority />
+          <Image
+            src={imageUrls[active]}
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="800px"
+            priority
+            onLoad={(e) => recordRatio(imageUrls[active], e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
+          />
         </div>
 
         {hasMultiple && (
