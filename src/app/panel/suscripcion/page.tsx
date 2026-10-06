@@ -36,7 +36,7 @@ export default async function SuscripcionPage() {
 
   const status = ctx.subscription?.status;
   const currentPlan = ctx.subscription?.plan && isPlanId(ctx.subscription.plan) ? ctx.subscription.plan : null;
-  const cardOnFile = ctx.agentProfile?.tarjeta_guardada ?? false;
+  const cardOnFile = Boolean(ctx.subscription?.dlocal_go_subscription_id);
 
   const trialDaysLeft = ctx.subscription?.trial_ends_at ? daysUntil(ctx.subscription.trial_ends_at) : null;
 
@@ -83,7 +83,7 @@ export default async function SuscripcionPage() {
           )}
           <p className="text-sm text-slate-300">
             Tarjeta guardada: <span className="font-medium text-slate-100">{cardOnFile ? "Sí" : "No"}</span>
-            {cardOnFile && ctx.agentProfile?.proveedor_tarjeta && ` (${ctx.agentProfile.proveedor_tarjeta})`}
+            {cardOnFile && " (dLocal Go)"}
           </p>
           {currentPlan !== "basico" && (status === "active" || status === "trialing") && (
             <div className="mt-2 border-t border-white/10 pt-4">

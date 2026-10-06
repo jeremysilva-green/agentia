@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { isPlanId, FUNDADOR_SEAT_LIMIT, type PlanId } from "@/lib/plans";
 import { enforceBasicoPropertyLimit } from "@/lib/actions/properties";
+import { DLOCAL_GO_PLANS, deactivateDlocalGoSubscription } from "@/lib/dlocalGo";
 
 export type CancelSubscriptionState = { error?: string } | undefined;
 
@@ -36,7 +37,7 @@ export async function selectPlan(planId: PlanId): Promise<SelectPlanState> {
 
   const { data: subscription } = await supabase
     .from("subscriptions")
-    .select("id, plan")
+    .select("id, plan, dlocal_go_subscription_id")
     .eq("agent_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
@@ -57,9 +58,20 @@ export async function selectPlan(planId: PlanId): Promise<SelectPlanState> {
   }
 
   if (planId === "basico") {
+    // Stop dLocal's monthly billing before downgrading locally — if that
+    // fails, don't downgrade, or the agent would keep being charged with no
+    // record of it on our side.
+    if (subscription.dlocal_go_subscription_id && (subscription.plan === "pro" || subscription.plan === "fundador")) {
+      try {
+        await deactivateDlocalGoSubscription(DLOCAL_GO_PLANS[subscription.plan].planId, subscription.dlocal_go_subscription_id);
+      } catch {
+        return { error: "No se pudo cancelar la suscripción con dLocal Go. Intentá de nuevo." };
+      }
+    }
+
     const { error } = await service
       .from("subscriptions")
-      .update({ plan: "basico", status: "active", period_end: null, trial_ends_at: null })
+      .update({ plan: "basico", status: "active", period_end: null, trial_ends_at: null, dlocal_go_subscription_id: null })
       .eq("id", subscription.id);
     if (error) return { error: "No se pudo cambiar de plan. Intentá de nuevo." };
 
@@ -72,7 +84,11 @@ export async function selectPlan(planId: PlanId): Promise<SelectPlanState> {
     return undefined;
   }
 
-  // "pending" until the Pagopar webhook confirms payment — otherwise an
+  if (subscription.dlocal_go_subscription_id) {
+    return { error: "Cancelá tu plan actual antes de cambiar a otro plan pago." };
+  }
+
+  // "pending" until dLocal Go confirms the first charge — otherwise an
   // abandoned checkout would leave the row saying plan="pro" while status
   // is still whatever it was before (e.g. "active" from a free Básico plan).
   const { error } = await service

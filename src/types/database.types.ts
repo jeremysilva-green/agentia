@@ -429,6 +429,7 @@ export interface Database {
           trial_ends_at: string | null;
           pagopar_hash_pedido_actual: string | null;
           pagopar_numero_pedido_actual: string | null;
+          dlocal_go_subscription_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -441,6 +442,7 @@ export interface Database {
           period_end?: string | null;
           trial_ends_at?: string | null;
           pagopar_hash_pedido_actual?: string | null;
+          dlocal_go_subscription_id?: string | null;
           pagopar_numero_pedido_actual?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["subscriptions"]["Insert"]>;
