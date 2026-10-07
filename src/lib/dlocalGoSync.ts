@@ -1,5 +1,12 @@
 import { createServiceClient } from "@/lib/supabase/service";
-import { DLOCAL_GO_PLANS, listDlocalGoExecutions, listDlocalGoSubscriptions, type DlocalGoPlanId } from "@/lib/dlocalGo";
+import {
+  DLOCAL_GO_PLANS,
+  listDlocalGoExecutions,
+  listDlocalGoSubscriptions,
+  type DlocalGoExecution,
+  type DlocalGoPlanId,
+  type DlocalGoSubscription,
+} from "@/lib/dlocalGo";
 import { restoreHiddenPropertiesOnUpgrade } from "@/lib/actions/properties";
 
 const PERIOD_DAYS = 30;
@@ -10,30 +17,57 @@ function addDays(date: Date, days: number): Date {
   return next;
 }
 
-// Links a dLocal subscription to the agent whose checkout created it. Only
-// links when there's exactly one unlinked pending subscription for that plan
-// — with two, guessing could attach a subscription to the wrong agent, so
-// it's left for manual review instead.
-async function linkUnlinkedSubscriptions(planId: DlocalGoPlanId, dlocalIds: string[]) {
+// Links a dLocal subscription to the agent whose checkout created it, in
+// order of how trustworthy the signal is:
+//   1. external_id on one of its executions — confirmed live to be exactly
+//      the agent id we passed on the subscribe link (?external_id=...).
+//      An exact match on our own UUID, not a guess.
+//   2. The checkout form's client_document matches exactly one agent's
+//      profiles.ci.
+// There is deliberately no further fallback. An earlier "exactly one
+// unlinked pending subscription for this plan" fallback was tried and
+// confirmed unsafe TWICE in live testing: it linked a real agent's
+// unrelated pending subscription to someone else's payment both times a
+// duplicate test checkout left a dangling dLocal subscription with no
+// matching local row. Leaving a subscription unlinked for manual review
+// is the safe failure mode; guessing is not.
+async function linkSubscription(
+  planId: DlocalGoPlanId,
+  dlocalSub: DlocalGoSubscription,
+  executions: DlocalGoExecution[]
+): Promise<string | null> {
   const service = createServiceClient();
-  const { data: linked } = await service.from("subscriptions").select("dlocal_go_subscription_id").not("dlocal_go_subscription_id", "is", null);
-  const linkedIds = new Set((linked ?? []).map((row) => row.dlocal_go_subscription_id));
 
-  for (const dlocalId of dlocalIds) {
-    if (linkedIds.has(dlocalId)) continue;
-
+  async function linkToAgent(agentId: string): Promise<string | null> {
     const { data: candidates } = await service
       .from("subscriptions")
       .select("id")
+      .eq("agent_id", agentId)
       .eq("plan", planId)
       .eq("status", "pending")
-      .is("dlocal_go_subscription_id", null);
+      .is("dlocal_go_subscription_id", null)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (!candidates?.length) return null;
+    await service.from("subscriptions").update({ dlocal_go_subscription_id: dlocalSub.id }).eq("id", candidates[0].id);
+    return candidates[0].id;
+  }
 
-    if (candidates?.length === 1) {
-      await service.from("subscriptions").update({ dlocal_go_subscription_id: dlocalId }).eq("id", candidates[0].id);
-      linkedIds.add(dlocalId);
+  const externalId = executions.find((e) => e.external_id)?.external_id;
+  if (externalId) {
+    const linkedId = await linkToAgent(externalId);
+    if (linkedId) return linkedId;
+  }
+
+  if (dlocalSub.client_document) {
+    const { data: profiles } = await service.from("profiles").select("id").eq("ci", dlocalSub.client_document);
+    if (profiles?.length === 1) {
+      const linkedId = await linkToAgent(profiles[0].id);
+      if (linkedId) return linkedId;
     }
   }
+
+  return null;
 }
 
 export type DlocalGoSyncSummary = { subscriptionsChecked: number; paymentsCreated: number; unlinked: number };
@@ -48,29 +82,31 @@ export async function syncDlocalGoSubscriptions(): Promise<DlocalGoSyncSummary> 
   for (const planKey of Object.keys(DLOCAL_GO_PLANS) as DlocalGoPlanId[]) {
     const { planId } = DLOCAL_GO_PLANS[planKey];
     const dlocalSubs = await listDlocalGoSubscriptions(planId);
-    await linkUnlinkedSubscriptions(
-      planKey,
-      dlocalSubs.map((s) => s.id)
-    );
 
     for (const dlocalSub of dlocalSubs) {
       summary.subscriptionsChecked += 1;
 
-      const { data: subscription } = await service
+      const executions = (await listDlocalGoExecutions(planId, dlocalSub.id)).sort((a, b) =>
+        a.created_at.localeCompare(b.created_at)
+      );
+
+      let { data: subscription } = await service
         .from("subscriptions")
         .select("id, agent_id, plan, status")
         .eq("dlocal_go_subscription_id", dlocalSub.id)
         .maybeSingle();
+
       if (!subscription) {
-        summary.unlinked += 1;
-        continue;
+        const linkedSubscriptionId = await linkSubscription(planKey, dlocalSub, executions);
+        if (!linkedSubscriptionId) {
+          summary.unlinked += 1;
+          continue;
+        }
+        ({ data: subscription } = await service.from("subscriptions").select("id, agent_id, plan, status").eq("id", linkedSubscriptionId).single());
       }
+      if (!subscription) continue;
       // A cancelled or switched subscription must not be re-activated by an old execution.
       if (subscription.plan !== planKey) continue;
-
-      const executions = (await listDlocalGoExecutions(planId, dlocalSub.id)).sort((a, b) =>
-        a.created_at.localeCompare(b.created_at)
-      );
 
       for (const execution of executions) {
         const { data: existing } = await service

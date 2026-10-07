@@ -6,12 +6,20 @@
 const DLOCAL_GO_BASE =
   process.env.DLOCAL_GO_ENV === "production" ? "https://api.dlocalgo.com" : "https://api-sbx.dlocalgo.com";
 
-// Production plan ids and subscribe tokens, from GET /v1/subscription/plan/all.
-// Sandbox plans have different ids and would need their own entries here.
-export const DLOCAL_GO_PLANS = {
+// Plan ids and subscribe tokens, from GET /v1/subscription/plan/all —
+// sandbox and production are separate dLocal Go accounts with their own
+// plans, so each needs its own mapping here.
+const PRODUCTION_PLANS = {
   pro: { planId: 25309, subscribeToken: "yBfmoPAoyHP3SInj2Vz1sQbTYSOJHLr1" },
   fundador: { planId: 25311, subscribeToken: "tIteWr0dYA5URqWwTvmOWnkXNNSzG3VL" },
 } as const;
+
+const SANDBOX_PLANS = {
+  pro: { planId: 9127, subscribeToken: "BTXe8BkFQ6yCIdbqC9nCsIqNJXzhe4U0" },
+  fundador: { planId: 9126, subscribeToken: "JeSsQlVx7IiKBbWXUwEeQvzTRycKLrb7" },
+} as const;
+
+export const DLOCAL_GO_PLANS = process.env.DLOCAL_GO_ENV === "production" ? PRODUCTION_PLANS : SANDBOX_PLANS;
 
 export type DlocalGoPlanId = keyof typeof DLOCAL_GO_PLANS;
 
@@ -40,6 +48,11 @@ export type DlocalGoSubscription = {
   id: string;
   status: "CREATED" | "CONFIRMED";
   scheduled_date?: string;
+  // The checkout form's own document/email fields — used to match a
+  // subscription back to one of our agents (see linkUnlinkedSubscriptions),
+  // since dLocal subscriptions don't carry our external_id.
+  client_document?: string;
+  client_email?: string;
 };
 
 export type DlocalGoExecution = {
@@ -49,6 +62,11 @@ export type DlocalGoExecution = {
   checkout_currency: string;
   created_at: string;
   updated_at: string;
+  // The agent id we passed as ?external_id= on the subscribe link —
+  // confirmed present on the execution object (not the plain subscription
+  // listing), and the most reliable signal we have for linking a dLocal
+  // subscription back to one of our agents.
+  external_id?: string;
 };
 
 export async function listDlocalGoSubscriptions(planId: number): Promise<DlocalGoSubscription[]> {
@@ -57,7 +75,16 @@ export async function listDlocalGoSubscriptions(planId: number): Promise<DlocalG
   });
   if (!res.ok) throw new Error(`dLocal Go subscription list failed: HTTP ${res.status}`);
   const data = await res.json();
-  return data.data ?? data.subscriptions ?? [];
+  const list: Array<{
+    id: number | string;
+    status: "CREATED" | "CONFIRMED";
+    scheduled_date?: string;
+    client_document?: string;
+    client_email?: string;
+  }> = data.data ?? data.subscriptions ?? [];
+  // dLocal returns id as a number — normalize to string, since that's what
+  // we store in and compare against our own text column.
+  return list.map((s) => ({ ...s, id: String(s.id) }));
 }
 
 export async function listDlocalGoExecutions(planId: number, subscriptionId: string): Promise<DlocalGoExecution[]> {
@@ -67,7 +94,8 @@ export async function listDlocalGoExecutions(planId: number, subscriptionId: str
   );
   if (!res.ok) throw new Error(`dLocal Go execution list failed: HTTP ${res.status}`);
   const data = await res.json();
-  return data.data ?? data.executions ?? [];
+  const list: Array<DlocalGoExecution & { subscription?: { client_document?: string } }> = data.data ?? data.executions ?? [];
+  return list;
 }
 
 export async function deactivateDlocalGoSubscription(planId: number, subscriptionId: string): Promise<void> {

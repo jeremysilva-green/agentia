@@ -2,15 +2,15 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { PLANS, type PlanId } from "@/lib/plans";
 import type { CrearDocumentoParams } from "./facturasend";
 
-// ⚠️ CONFIRM BEFORE THE FIRST REAL PRODUCTION INVOICE:
-// FacturaSend's own example JSON only shows condicion.entregas[].tipo: 1
-// for a cash payment, and iva: 5 for an unrelated line item — neither is
-// actually confirmed for "card payment" / "SaaS subscription service".
-// Check facturasend.com.py/documentacion/tablas-y-definiciones/ (or ask
-// your accountant) before trusting these two values with real money.
 const CONDICION_ENTREGA_TIPO_TARJETA = 3;
 const IVA_TIPO = 1;
 const IVA_RATE = 10;
+
+// Confirmed live against a real FacturaSend/SIFEN submission (real CDC
+// issued) — tipo=99 ("Otro") + a generic description is accepted;
+// FacturaSend only requires SOME value here, not the real card brand,
+// which dLocal Go's subscription API doesn't expose to us anyway.
+const INFO_TARJETA_GENERICA = { tipo: 99, tipoDescripcion: "Tarjeta", medioPago: 2 };
 
 /**
  * Atomically increments and returns the next sequential invoice number.
@@ -92,6 +92,19 @@ export async function buildInvoicePayload(paymentId: string): Promise<BuildInvoi
   const numero = await nextInvoiceNumber();
   const planId = (payment.plan ?? "basico") as PlanId;
   const amount = payment.amount;
+  // Confirmed live: FacturaSend wants yyyy-MM-ddTHH:mm:ss, not a full ISO
+  // string — toISOString() always appends milliseconds + "Z", which it
+  // rejects with "Invalid time value".
+  const fecha = new Date().toISOString().split(".")[0];
+  // Confirmed live: for a "No Contribuyente" (CI-only) receiver,
+  // tipoOperacion must be 2 (B2C) or 4 (B2F) — 1 is rejected outright.
+  // Contribuyentes (real RUC) keep 1, matching the original assumption.
+  const tipoOperacion = ruc ? 1 : 2;
+  // Confirmed live: numeroCasa is required and FacturaSend rejects an empty
+  // value — we don't collect a separate house-number field today, so pull
+  // the first number out of the free-text address, falling back to "S/N"
+  // (sin número) rather than blocking the invoice entirely.
+  const numeroCasa = address.match(/\d+/)?.[0] ?? "S/N";
 
   const payload: CrearDocumentoParams = {
     tipoDocumento: 1, // Factura electrónica
@@ -99,7 +112,7 @@ export async function buildInvoicePayload(paymentId: string): Promise<BuildInvoi
     punto: "001",
     numero,
     descripcion: `Suscripción Agentia — ${PLANS[planId].name}`,
-    fecha: new Date().toISOString(),
+    fecha,
     tipoEmision: 1,
     tipoTransaccion: 1,
     tipoImpuesto: 1,
@@ -108,8 +121,9 @@ export async function buildInvoicePayload(paymentId: string): Promise<BuildInvoi
       contribuyente: Boolean(ruc),
       ruc: ruc ?? undefined,
       razonSocial: profile.full_name,
-      tipoOperacion: 1,
+      tipoOperacion,
       direccion: address,
+      numeroCasa,
       departamento: sifenDepartamentoId,
       departamentoDescripcion: sifenDepartamentoDesc ?? "",
       distrito: sifenDistritoId,
@@ -122,12 +136,16 @@ export async function buildInvoicePayload(paymentId: string): Promise<BuildInvoi
       documentoNumero: profile.ci ?? ruc ?? "0",
       email: undefined,
       celular: profile.phone ?? undefined,
-      codigo: agentProfile.id as string,
+      // Confirmed live: FacturaSend rejects this field unless it's 3-15
+      // characters — our agent ids are full UUIDs, so it's omitted rather
+      // than truncated into something meaningless.
     },
     usuario: {
       documentoTipo: 1,
       documentoNumero: "0",
       nombre: "Agentia",
+      // Confirmed live: FacturaSend rejects an empty cargo outright.
+      cargo: "Administrador",
     },
     factura: { presencia: 1 },
     condicion: {
@@ -139,6 +157,7 @@ export async function buildInvoicePayload(paymentId: string): Promise<BuildInvoi
           moneda: "PYG",
           monedaDescripcion: "Guarani",
           cambio: 0,
+          infoTarjeta: INFO_TARJETA_GENERICA,
         },
       ],
     },

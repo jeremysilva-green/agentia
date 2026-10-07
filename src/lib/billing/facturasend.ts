@@ -37,6 +37,17 @@ export interface ClienteDTE {
   codigo?: string; // our agent_profiles.id, for cross-referencing in FacturaSend's console
 }
 
+// Required when condicion.entregas[].tipo = 3 (tarjeta) — confirmed live
+// against facturasend.com.py/documentacion/estructura-json-de-un-de/.
+// Only tipo/tipoDescripcion/medioPago are required; the rest (card last 4,
+// cardholder, processor RUC) are optional and we don't currently have them
+// from dLocal Go's subscription API, so they're omitted rather than guessed.
+export interface InfoTarjetaDTE {
+  tipo: number; // 1 Visa · 2 Mastercard · 3 Amex · 4 Maestro · 5 Panal · 6 Cabal · 99 Otro
+  tipoDescripcion: string;
+  medioPago: number; // 1 POS · 2 Pago Electrónico · 9 Otro
+}
+
 export interface ItemDTE {
   codigo: string;
   descripcion: string;
@@ -54,7 +65,10 @@ export interface CrearDocumentoParams {
   punto: string;
   numero: number;
   descripcion: string;
-  fecha: string; // ISO 8601
+  // Confirmed live: FacturaSend rejects a standard ISO 8601 string
+  // (milliseconds + "Z") with "Invalid time value" — it wants exactly
+  // yyyy-MM-ddTHH:mm:ss, no milliseconds, no timezone suffix.
+  fecha: string;
   tipoEmision: number;
   tipoTransaccion: number;
   tipoImpuesto: number;
@@ -70,6 +84,7 @@ export interface CrearDocumentoParams {
       moneda: string;
       monedaDescripcion: string;
       cambio: number;
+      infoTarjeta?: InfoTarjetaDTE;
     }>;
   };
   items: ItemDTE[];
