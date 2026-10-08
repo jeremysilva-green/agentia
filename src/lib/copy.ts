@@ -230,6 +230,18 @@ export const copy = {
     commissionPending: "Pendiente de pago",
     commissionPaid: "Comisión pagada",
   },
+  catalog: {
+    createButton: "Crear catálogo",
+    creating: "Generando...",
+    linkReady: "¡Catálogo listo!",
+    copyLink: "Copiar enlace",
+    linkCopied: "¡Copiado!",
+    shareWhatsapp: "Compartir por WhatsApp",
+    pageTitlePrefix: "Catálogo de",
+    propertiesCount: (count: number) => `${count} ${count === 1 ? "propiedad publicada" : "propiedades publicadas"}`,
+    viewProperty: "Ver propiedad",
+    empty: "Este agente todavía no tiene propiedades publicadas.",
+  },
   profile: {
     title: "Mi perfil",
     subtitle: "Actualizá tu foto, teléfono y alias.",

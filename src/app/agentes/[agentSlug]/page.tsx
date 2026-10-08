@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AvatarUploader } from "@/components/panel/AvatarUploader";
 import { AgentProfileAvatar } from "@/components/property/AgentProfileAvatar";
 import { ClientRequestTabs } from "@/components/marketplace/ClientRequestTabs";
+import { CreateCatalogButton } from "@/components/property/CreateCatalogButton";
 import { RateAgentWidget } from "@/components/property/RateAgentWidget";
 import { PortfolioTracker } from "@/components/property/PortfolioTracker";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
@@ -113,7 +114,8 @@ export default async function AgentPortfolioPage({
         {agent.bio && <p className="max-w-3xl text-white/70">{agent.bio}</p>}
 
         {!isOwner && (
-          <div className="flex justify-center sm:justify-end">
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start sm:justify-end">
+            <CreateCatalogButton agentId={agent.id} agentSlug={agentSlug} />
             <ClientRequestTabs agentId={agent.id} />
           </div>
         )}

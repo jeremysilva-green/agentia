@@ -1043,6 +1043,41 @@ export interface Database {
           },
         ];
       };
+      affiliate_catalogs: {
+        Row: {
+          id: string;
+          code: string;
+          user_id: string;
+          agent_id: string;
+          click_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          user_id: string;
+          agent_id: string;
+          click_count?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["affiliate_catalogs"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_catalogs_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "affiliate_catalogs_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       enhancement_prompt_templates: {
         Row: {
           enhancement_type: string;
