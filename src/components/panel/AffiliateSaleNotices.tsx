@@ -40,13 +40,13 @@ export function AffiliateSaleNotices({
 
         return (
           <div key={notice.id} className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                 <PartyPopper size={16} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium text-slate-900">{notice.property_title}</p>
+                  <p className="break-words font-medium text-slate-900">{notice.property_title}</p>
                   <Badge tone="success" className="border-emerald-200! bg-emerald-50! text-emerald-700!">
                     {copy.affiliatePanel.sold}
                   </Badge>
