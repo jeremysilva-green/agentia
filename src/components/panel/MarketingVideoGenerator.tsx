@@ -10,6 +10,9 @@ import type { ListingVideoInput } from "@/lib/marketing-video/types";
 
 type Phase = "idle" | "loading" | "rendering" | "uploading" | "done";
 
+// Compact variant, meant to sit directly under the "Editar" button on each
+// property card in the properties list — no header/description, just the
+// button and its states.
 export function MarketingVideoGenerator({
   propertyId,
   agentId,
@@ -38,7 +41,7 @@ export function MarketingVideoGenerator({
 
     try {
       // Dynamically imported so mediabunny/the renderer never bloat the
-      // edit page's main bundle — only loaded when this button is clicked.
+      // properties page's main bundle — only loaded when this button is clicked.
       const { renderListingVideo } = await import("@/lib/marketing-video/renderListingVideo");
 
       const onProgress = (p: RenderProgress) => {
@@ -74,48 +77,40 @@ export function MarketingVideoGenerator({
 
   const buttonLabel = hasExistingVideo ? "Regenerar video" : "Generar video";
 
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <Video size={18} className="text-emerald-600" />
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Video promocional</h2>
-        {isStale && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">Desactualizado</span>
-        )}
+  if (phase === "done") {
+    return (
+      <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+        <CheckCircle2 size={14} />
+        ¡Video listo!{" "}
+        <Link href="/panel/redes-sociales" className="underline">
+          Ver
+        </Link>
       </div>
-      <p className="text-sm text-slate-500">
-        Generá un video de 10 segundos con las fotos de esta propiedad, listo para compartir en Instagram, TikTok y WhatsApp.
-      </p>
+    );
+  }
 
-      {phase === "done" ? (
-        <div className="flex items-center gap-2 text-sm font-medium text-emerald-700">
-          <CheckCircle2 size={16} />
-          ¡Video generado!{" "}
-          <Link href="/panel/redes-sociales" className="underline">
-            Ver en Redes Sociales
-          </Link>
-        </div>
-      ) : (
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={phase !== "idle"}
-          onClick={handleGenerate}
-          className="w-fit border-black! bg-black! text-white! hover:bg-neutral-800!"
-        >
-          {phase === "idle" ? (
-            <Video size={16} />
-          ) : (
-            <Loader2 size={16} className="animate-spin" />
-          )}
-          {phase === "idle" && buttonLabel}
-          {phase === "loading" && "Preparando..."}
-          {phase === "rendering" && `Generando video... ${progress}%`}
-          {phase === "uploading" && "Subiendo..."}
-        </Button>
+  return (
+    <div className="flex flex-col gap-1">
+      {isStale && (
+        <span className="w-fit rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+          Video desactualizado
+        </span>
       )}
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        disabled={phase !== "idle"}
+        onClick={handleGenerate}
+        className="w-full border-black! bg-black! text-white! hover:bg-neutral-800!"
+      >
+        {phase === "idle" ? <Video size={14} /> : <Loader2 size={14} className="animate-spin" />}
+        {phase === "idle" && buttonLabel}
+        {phase === "loading" && "Preparando..."}
+        {phase === "rendering" && `Generando... ${progress}%`}
+        {phase === "uploading" && "Subiendo..."}
+      </Button>
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
 }

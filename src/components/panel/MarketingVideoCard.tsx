@@ -68,7 +68,7 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4">
       <div className="relative overflow-hidden rounded-xl bg-slate-900" style={{ aspectRatio: "9 / 16" }}>
         <video src={url} muted loop playsInline preload="metadata" controls className="h-full w-full object-cover" />
       </div>

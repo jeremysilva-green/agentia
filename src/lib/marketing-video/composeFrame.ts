@@ -14,7 +14,7 @@ const WHITE = "#FFFFFF";
 // ~300-380px wide; keep all text out of the bottom ~400px and right ~140px
 // (Reels/TikTok's own UI overlays that zone).
 const LOGO_TOP = 200;
-const LOGO_SIZE = 340;
+const LOGO_WIDTH = 340;
 const CONTENT_RIGHT_MARGIN = 140;
 const CONTENT_LEFT_MARGIN = 80;
 const CONTENT_MAX_WIDTH = VIDEO_WIDTH - CONTENT_LEFT_MARGIN - CONTENT_RIGHT_MARGIN;
@@ -62,7 +62,7 @@ export function composeFrame(
   ctx.fillRect(0, scrimTop, VIDEO_WIDTH, VIDEO_HEIGHT - scrimTop);
 
   // Logo, top center.
-  drawLogo(ctx, (VIDEO_WIDTH - LOGO_SIZE) / 2, LOGO_TOP, LOGO_SIZE, WHITE);
+  drawLogo(ctx, VIDEO_WIDTH / 2, LOGO_TOP, LOGO_WIDTH);
 
   // Listing info block, lower-middle, built bottom-up so it always lands
   // just above the unsafe zone regardless of how many lines it needs.

@@ -1,5 +1,6 @@
 import { VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_TOTAL_FRAMES, MAX_IMAGES, type ListingVideoInput, type RenderListingVideoOptions, type Segment } from "./types";
 import { loadMarketingVideoFonts } from "./fonts";
+import { loadLogoImage } from "./logo";
 import { prerenderBlurredBackground } from "./background";
 import { canUseWebCodecs, encodeWithWebCodecs } from "./encodeWebCodecs";
 import { pickMediaRecorderMimeType, encodeWithMediaRecorder } from "./encodeMediaRecorder";
@@ -54,7 +55,7 @@ export async function renderListingVideo(
   const { onProgress } = options;
   onProgress?.({ phase: "loading" });
 
-  await loadMarketingVideoFonts();
+  await Promise.all([loadMarketingVideoFonts(), loadLogoImage()]);
 
   const urls = imageUrls.slice(0, MAX_IMAGES);
   if (urls.length === 0) throw new Error("La propiedad no tiene fotos.");
