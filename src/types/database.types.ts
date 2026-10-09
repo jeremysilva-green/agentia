@@ -1008,6 +1008,47 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["generation_requests"]["Insert"]>;
         Relationships: [];
       };
+      marketing_videos: {
+        Row: {
+          id: string;
+          property_id: string;
+          agent_id: string;
+          storage_path: string;
+          caption: string;
+          size_bytes: number | null;
+          listing_updated_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          agent_id: string;
+          storage_path: string;
+          caption?: string;
+          size_bytes?: number | null;
+          listing_updated_at: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["marketing_videos"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "marketing_videos_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: true;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "marketing_videos_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       agent_social_shares: {
         Row: {
           id: string;
@@ -1036,6 +1077,41 @@ export interface Database {
           },
           {
             foreignKeyName: "agent_social_shares_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      affiliate_catalogs: {
+        Row: {
+          id: string;
+          code: string;
+          user_id: string;
+          agent_id: string;
+          click_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          user_id: string;
+          agent_id: string;
+          click_count?: number;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["affiliate_catalogs"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_catalogs_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "affiliate_catalogs_agent_id_fkey";
             columns: ["agent_id"];
             isOneToOne: false;
             referencedRelation: "profiles";

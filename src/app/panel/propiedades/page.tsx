@@ -8,6 +8,12 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { NuevaPropiedadButton } from "@/components/panel/NuevaPropiedadButton";
+import { MarketingVideoGenerator } from "@/components/panel/MarketingVideoGenerator";
+import { getAgentContext } from "@/lib/data/panel";
+import { listMarketingVideosForAgent } from "@/lib/data/marketingVideos";
+import { isVideoStale } from "@/lib/marketing-video/isStale";
+import { buildListingVideoCaption } from "@/lib/marketing-video/caption";
+import { getPublicStorageUrl } from "@/lib/storage";
 
 const statusLabel: Record<string, string> = {
   available: "Disponible",
@@ -25,19 +31,24 @@ const statusTone: Record<string, "success" | "warning" | "neutral" | "danger"> =
 
 export default async function PropiedadesPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/ingresar");
+  const ctx = await getAgentContext();
+  if (!ctx) redirect("/ingresar");
+  const user = { id: ctx.userId };
 
-  const [{ data: properties }, atLimit] = await Promise.all([
+  const eligibleForVideo = ctx.subscription?.plan === "pro" || ctx.subscription?.plan === "fundador";
+
+  const [{ data: properties }, atLimit, videos] = await Promise.all([
     supabase
       .from("properties")
       .select("*, property_images(id, storage_path, position)")
       .eq("agent_id", user.id)
       .order("created_at", { ascending: false }),
     isAtPropertyLimit(),
+    eligibleForVideo ? listMarketingVideosForAgent(user.id) : Promise.resolve([]),
   ]);
+
+  const videoByPropertyId = new Map(videos.map((v) => [v.property_id, v]));
+  const agentSlug = ctx.agentProfile?.slug ?? "";
 
   return (
     <div className="flex flex-col gap-6">
@@ -109,6 +120,32 @@ export default async function PropiedadesPage() {
                     Editar
                   </Button>
                 </Link>
+
+                {eligibleForVideo && property.property_images.length > 0 && (() => {
+                  const video = videoByPropertyId.get(property.id);
+                  const imageUrls = [...property.property_images]
+                    .sort((a, b) => a.position - b.position)
+                    .map((img) => getPublicStorageUrl("property-photos", img.storage_path));
+
+                  return (
+                    <MarketingVideoGenerator
+                      propertyId={property.id}
+                      agentId={user.id}
+                      listing={{
+                        title: property.title,
+                        price: property.price,
+                        currency: property.currency,
+                        listingType: property.listing_type,
+                        city: property.city,
+                        address: property.address,
+                      }}
+                      imageUrls={imageUrls}
+                      caption={buildListingVideoCaption(property, agentSlug, property.id)}
+                      hasExistingVideo={Boolean(video)}
+                      isStale={video ? isVideoStale(video, property) : false}
+                    />
+                  );
+                })()}
               </div>
             </Card>
           );

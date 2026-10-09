@@ -400,6 +400,19 @@ export async function deleteProperty(propertyId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Sesión expirada." };
 
+  // marketing_videos cascades on the row (FK on delete cascade), but that
+  // only removes the DB record — the MP4 itself would otherwise orphan in
+  // the marketing-videos bucket, so it's deleted explicitly here first.
+  const { data: video } = await supabase
+    .from("marketing_videos")
+    .select("storage_path")
+    .eq("property_id", propertyId)
+    .maybeSingle();
+  if (video) {
+    const service = createServiceClient();
+    await service.storage.from("marketing-videos").remove([video.storage_path]);
+  }
+
   const { error } = await supabase
     .from("properties")
     .delete()
