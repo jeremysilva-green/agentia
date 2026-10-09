@@ -37,7 +37,6 @@ function buildSegments(images: HTMLImageElement[], backgrounds: HTMLCanvasElemen
       background: backgrounds[i],
       startFrame: frame,
       endFrame: frame + length,
-      zoomOrigin: i % 2 === 0 ? "top-left" : "bottom-right", // alternate so consecutive clips don't feel repetitive
     });
     frame += length;
   }

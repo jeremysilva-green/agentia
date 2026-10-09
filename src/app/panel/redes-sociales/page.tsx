@@ -4,7 +4,7 @@ import { Lock } from "lucide-react";
 import { getAgentSocialSharesForAgent } from "@/lib/data/agentSocialShares";
 import { listMarketingVideosForAgent } from "@/lib/data/marketingVideos";
 import { AgentSocialSharesTable } from "@/components/panel/AgentSocialSharesTable";
-import { MarketingVideoCard } from "@/components/panel/MarketingVideoCard";
+import { MarketingVideosGrid } from "@/components/panel/MarketingVideosGrid";
 import { getAgentContext } from "@/lib/data/panel";
 import { getSiteUrl } from "@/lib/siteUrl";
 
@@ -54,18 +54,14 @@ export default async function RedesSocialesPage() {
           </div>
         ) : videos.length === 0 ? (
           <p className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-sm text-white/50">
-            Todavía no generaste ningún video. Generá uno desde la página de edición de cada propiedad con &quot;Generar
-            video&quot;.{" "}
+            Todavía no generaste ningún video. Generá uno desde &quot;Propiedades&quot;, con el botón &quot;Generar
+            video&quot; debajo de cada propiedad.{" "}
             <Link href="/panel/propiedades" className="underline">
               Ver mis propiedades
             </Link>
           </p>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {videos.map((video) => (
-              <MarketingVideoCard key={video.id} video={video} />
-            ))}
-          </div>
+          <MarketingVideosGrid videos={videos} />
         )}
       </div>
     </div>

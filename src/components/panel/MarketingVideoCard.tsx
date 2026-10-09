@@ -88,7 +88,7 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
       </div>
 
       <div className="flex items-start gap-2 rounded-lg bg-slate-50 p-2.5">
-        <p className="flex-1 text-xs text-slate-600">{video.caption}</p>
+        <p className="min-w-0 flex-1 break-words text-xs text-slate-600">{video.caption}</p>
         <button
           type="button"
           onClick={handleCopyCaption}
@@ -99,43 +99,45 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => handleShare("instagram")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <Camera size={13} />
-          Reels
-        </button>
-        <button
-          type="button"
-          onClick={() => handleShare("tiktok")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-        >
-          TikTok
-        </button>
-        <button
-          type="button"
-          onClick={() => handleShare("whatsapp")}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <MessageCircle size={13} />
-          WhatsApp
-        </button>
-        <button
-          type="button"
-          onClick={() => downloadFile(url, filename)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-        >
-          <Download size={13} />
-          Descargar
-        </button>
+      <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => handleShare("instagram")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <Camera size={13} />
+            Reels
+          </button>
+          <button
+            type="button"
+            onClick={() => handleShare("tiktok")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          >
+            TikTok
+          </button>
+          <button
+            type="button"
+            onClick={() => handleShare("whatsapp")}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <MessageCircle size={13} />
+            WhatsApp
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadFile(url, filename)}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          >
+            <Download size={13} />
+            Descargar
+          </button>
+        </div>
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
           disabled={isPending}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
         >
           <Trash2 size={13} />
           Eliminar

@@ -39,10 +39,10 @@ export function composeFrame(
   // Background: static (no zoom), already blurred + darkened once per photo.
   ctx.drawImage(segment.background, 0, 0);
 
-  // Foreground: contain-fit, Ken Burns zoom/pan applied around canvas center.
-  const { scale, panX, panY } = kenBurnsTransform(localProgress, segment.zoomOrigin, VIDEO_WIDTH, VIDEO_HEIGHT);
+  // Foreground: contain-fit, Ken Burns zoom anchored at the exact canvas center.
+  const { scale } = kenBurnsTransform(localProgress);
   ctx.save();
-  ctx.translate(VIDEO_WIDTH / 2 + panX, VIDEO_HEIGHT / 2 + panY);
+  ctx.translate(VIDEO_WIDTH / 2, VIDEO_HEIGHT / 2);
   ctx.scale(scale, scale);
   ctx.translate(-VIDEO_WIDTH / 2, -VIDEO_HEIGHT / 2);
   drawContainFit(ctx, segment.image, segment.image.naturalWidth, segment.image.naturalHeight, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);

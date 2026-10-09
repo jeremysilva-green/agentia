@@ -29,5 +29,4 @@ export type Segment = {
   background: HTMLCanvasElement; // pre-blurred, once per photo — never per frame
   startFrame: number;
   endFrame: number; // exclusive
-  zoomOrigin: "top-left" | "bottom-right";
 };
