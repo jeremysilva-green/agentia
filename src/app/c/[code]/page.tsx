@@ -90,7 +90,7 @@ export default async function CatalogPage({ params }: { params: Promise<{ code: 
             {copy.catalog.empty}
           </p>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {properties.map((property) => {
               const imageUrls = [...property.property_images]
                 .sort((a, b) => a.position - b.position)
@@ -98,7 +98,7 @@ export default async function CatalogPage({ params }: { params: Promise<{ code: 
               const price = new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(property.price);
 
               return (
-                <div key={property.id} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div key={property.id} className="flex min-w-0 flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
                   <PropertyGallery imageUrls={imageUrls} title={property.title} />
                   <div className="flex flex-col gap-1 px-1">
                     <h2 className="font-display text-sm font-semibold leading-tight text-white">{property.title}</h2>
