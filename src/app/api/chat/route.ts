@@ -11,6 +11,23 @@ const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOOL_ROUNDS = 3;
 const CONVERSATION_STALE_MS = 24 * 60 * 60 * 1000;
 
+// Two independent layers, since neither alone is enough: visitorId is
+// client-supplied (anyone can mint a new one per request, so it can't be
+// trusted as an abuse key on its own), while an IP-only limit can't stop
+// one visitor from exhausting a single real conversation. IP window is
+// deliberately looser than the per-conversation cap — it exists to catch
+// scripted/rapid abuse, not to constrain a normal multi-property visitor
+// browsing from one connection (e.g. shared office/home wifi).
+const CHAT_RATE_LIMIT_MAX_REQUESTS = 20;
+const CHAT_RATE_LIMIT_WINDOW_SECONDS = 5 * 60;
+const MAX_USER_MESSAGES_PER_CONVERSATION = 15;
+
+function getClientIp(request: Request): string {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  return request.headers.get("x-real-ip") ?? "unknown";
+}
+
 const SAVE_LEAD_TOOL: Anthropic.Tool = {
   name: "save_lead_contact",
   description:
@@ -75,6 +92,20 @@ export async function POST(request: Request) {
 
   const service = createServiceClient();
 
+  const clientIp = getClientIp(request);
+  const { data: withinRateLimit, error: rateLimitError } = await service.rpc("check_chat_rate_limit", {
+    p_ip: clientIp,
+    p_max_requests: CHAT_RATE_LIMIT_MAX_REQUESTS,
+    p_window_seconds: CHAT_RATE_LIMIT_WINDOW_SECONDS,
+  });
+  // Fail open on an infra error (e.g. the RPC itself unreachable) — a
+  // broken rate limiter must never be the reason a real buyer can't chat.
+  if (!rateLimitError && withinRateLimit === false) {
+    return NextResponse.json({
+      reply: "Estás escribiendo muy rápido. Esperá un minuto y probá de nuevo.",
+    });
+  }
+
   const { data: property } = await service
     .from("properties")
     .select(
@@ -115,6 +146,14 @@ export async function POST(request: Request) {
   const isStale =
     conversation != null && Date.now() - new Date(conversation.updated_at).getTime() > CONVERSATION_STALE_MS;
   const history = (!isStale && (conversation?.messages as unknown as MessageParam[] | null)) || [];
+
+  const userMessageCount = history.filter((m) => m.role === "user").length;
+  if (userMessageCount >= MAX_USER_MESSAGES_PER_CONVERSATION) {
+    return NextResponse.json({
+      reply: `Llegamos al límite de este chat. Escribile directo a ${agentName} por WhatsApp y seguimos la conversación ahí.`,
+    });
+  }
+
   const messages: MessageParam[] = [...history, { role: "user", content: userMessage }];
 
   const system = buildSystemPrompt({
