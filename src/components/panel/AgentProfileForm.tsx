@@ -147,6 +147,8 @@ export function AgentProfileForm({
             name="sifenCityId"
             label="Ciudad"
             showAllOption={false}
+            searchable
+            searchPlaceholder="Buscar ciudad..."
             defaultValue={sifenCityId ?? ""}
             options={sifenCities.map((c) => ({
               value: c.id,
