@@ -1210,6 +1210,10 @@ export interface Database {
         Args: Record<string, never>;
         Returns: number;
       };
+      check_chat_rate_limit: {
+        Args: { p_ip: string; p_max_requests: number; p_window_seconds: number };
+        Returns: boolean;
+      };
       next_shop_process_id: {
         Args: Record<string, never>;
         Returns: number;
