@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Search } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { normalizeText } from "@/lib/text";
 
 export function SingleSelectDropdown({
   name,
@@ -11,6 +12,8 @@ export function SingleSelectDropdown({
   allLabel = "",
   defaultValue = "",
   showAllOption = true,
+  searchable = false,
+  searchPlaceholder = "Buscar...",
   buttonClassName,
   panelClassName,
   onChange,
@@ -22,6 +25,12 @@ export function SingleSelectDropdown({
   allLabel?: string;
   defaultValue?: string;
   showAllOption?: boolean;
+  // Opt-in: adds a filter input at the top of the panel. Only set this for
+  // genuinely long option lists (e.g. the ~6,800-row sifen_cities picker) —
+  // the other callers of this component (property type, listing type,
+  // marketplace city filters) have a handful of options and don't need it.
+  searchable?: boolean;
+  searchPlaceholder?: string;
   buttonClassName?: string;
   panelClassName?: string;
   onChange?: (value: string) => void;
@@ -29,7 +38,9 @@ export function SingleSelectDropdown({
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(defaultValue);
+  const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -39,13 +50,28 @@ export function SingleSelectDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (open && searchable) searchInputRef.current?.focus();
+  }, [open, searchable]);
+
   function select(next: string) {
     setValue(next);
     setOpen(false);
     onChange?.(next);
   }
 
+  function toggleOpen() {
+    setOpen((v) => {
+      const next = !v;
+      if (next && searchable) setQuery("");
+      return next;
+    });
+  }
+
   const current = options.find((o) => o.value === value);
+  const normalizedQuery = normalizeText(query);
+  const visibleOptions =
+    searchable && normalizedQuery ? options.filter((o) => normalizeText(o.label).includes(normalizedQuery)) : options;
 
   return (
     <div ref={containerRef} className="relative self-start w-full">
@@ -53,7 +79,7 @@ export function SingleSelectDropdown({
 
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggleOpen}
         className={cn(
           "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-snow px-3 text-sm font-medium text-slate-700 outline-none transition-colors hover:bg-bone/30 focus:border-white focus:ring-2 focus:ring-white/40",
           error && "border-red-400 focus:border-red-500 focus:ring-red-100",
@@ -68,11 +94,25 @@ export function SingleSelectDropdown({
       {open && (
         <div
           className={cn(
-            "absolute left-0 top-full z-20 mt-1.5 max-h-72 w-56 overflow-y-auto rounded-xl border border-bone bg-snow p-1.5 shadow-lg",
+            "absolute left-0 top-full z-20 mt-1.5 flex max-h-72 w-56 flex-col rounded-xl border border-bone bg-snow p-1.5 shadow-lg",
             panelClassName
           )}
         >
-          {showAllOption && (
+          {searchable && (
+            <div className="relative mb-1 shrink-0">
+              <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="h-8 w-full rounded-lg border border-slate-200 bg-white pl-7 pr-2 text-xs text-slate-700 outline-none focus:border-emerald-500"
+              />
+            </div>
+          )}
+          <div className="overflow-y-auto">
+          {showAllOption && !query && (
             <>
               <button
                 type="button"
@@ -92,7 +132,7 @@ export function SingleSelectDropdown({
               <div className="my-1 border-t border-slate-100" />
             </>
           )}
-          {options.map((option) => (
+          {visibleOptions.map((option) => (
             <button
               key={option.value}
               type="button"
@@ -110,6 +150,10 @@ export function SingleSelectDropdown({
               {option.label}
             </button>
           ))}
+          {searchable && visibleOptions.length === 0 && (
+            <p className="px-2.5 py-2 text-xs text-slate-400">Sin resultados.</p>
+          )}
+          </div>
         </div>
       )}
     </div>
