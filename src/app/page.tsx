@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Home,
   MessageCircle,
@@ -134,6 +135,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Promo banner */}
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+        <div className="relative aspect-[1920/815] w-full overflow-hidden rounded-2xl">
+          <Image src="/promo1.jpg" alt="Ficha técnica lista para compartir en un solo click" fill className="object-cover" sizes="(max-width: 896px) 100vw, 896px" />
+        </div>
+      </section>
+
       {/* Para agentes */}
       <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
         <div className="mb-8 flex items-center justify-center gap-2">
@@ -161,6 +169,17 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Promo banner */}
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+        <div className="mb-3 flex items-center justify-center gap-1.5">
+          <Sparkles size={14} className="text-emerald-400" />
+          <span className="font-display text-xs font-semibold uppercase tracking-wide text-emerald-400">Plan Pro</span>
+        </div>
+        <div className="relative aspect-[1920/815] w-full overflow-hidden rounded-2xl">
+          <Image src="/promo2.jpg" alt="Mejorá tus fotos con I.A." fill className="object-cover" sizes="(max-width: 896px) 100vw, 896px" />
+        </div>
+      </section>
+
       {/* Para afiliados */}
       <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
         <div className="mb-8 flex items-center justify-center gap-2">
@@ -185,6 +204,17 @@ export default function HomePage() {
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Promo banner */}
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+        <div className="mb-3 flex items-center justify-center gap-1.5">
+          <Sparkles size={14} className="text-emerald-400" />
+          <span className="font-display text-xs font-semibold uppercase tracking-wide text-emerald-400">Plan Pro</span>
+        </div>
+        <div className="relative aspect-[1920/815] w-full overflow-hidden rounded-2xl">
+          <Image src="/promo3.jpg" alt="Generá reels al instante" fill className="object-cover" sizes="(max-width: 896px) 100vw, 896px" />
         </div>
       </section>
 
