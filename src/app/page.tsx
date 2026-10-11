@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Home,
   MessageCircle,
@@ -131,6 +132,13 @@ export default function HomePage() {
               <p className="text-sm leading-relaxed text-white/60">{step.description}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Promo banner */}
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+        <div className="relative aspect-[1920/815] w-full overflow-hidden rounded-2xl">
+          <Image src="/promo1.jpg" alt="Ficha técnica lista para compartir en un solo click" fill className="object-cover" sizes="(max-width: 896px) 100vw, 896px" />
         </div>
       </section>
 
