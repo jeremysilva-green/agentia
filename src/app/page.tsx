@@ -207,6 +207,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Promo banner */}
+      <section className="relative mx-auto max-w-4xl px-4 pb-16 sm:px-6">
+        <div className="relative aspect-[1920/815] w-full overflow-hidden rounded-2xl">
+          <Image src="/promo3.jpg" alt="Generá reels al instante" fill className="object-cover" sizes="(max-width: 896px) 100vw, 896px" />
+        </div>
+      </section>
+
       {/* Planes */}
       <section id="planes" className="relative mx-auto max-w-6xl scroll-mt-20 px-4 pb-16 sm:px-6">
         <h2 className="mb-6 text-center font-display text-2xl font-semibold text-white sm:text-3xl">Planes</h2>
