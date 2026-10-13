@@ -5,11 +5,13 @@ import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StarRating } from "@/components/ui/StarRating";
 import { getMilestone } from "@/lib/ratings";
+import { formatShortName } from "@/lib/text";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { AgentCardData } from "@/types/domain";
 
 export function AgentCard({ agent, dict }: { agent: AgentCardData; dict: Dictionary["home"]["agentCard"] }) {
   const displayName = agent.profile.full_name || agent.profile.username;
+  const shortDisplayName = agent.profile.full_name ? formatShortName(agent.profile.full_name) : displayName;
   const milestone = getMilestone(agent.rating_avg, agent.rating_count);
 
   return (
@@ -39,7 +41,7 @@ export function AgentCard({ agent, dict }: { agent: AgentCardData; dict: Diction
         <div className="flex flex-1 flex-col items-center gap-1.5 p-2.5">
           <div>
             <h3 className="flex items-center justify-center gap-1 font-display text-xs font-semibold text-prussian">
-              <span className="truncate">{displayName}</span>
+              <span className="truncate">{shortDisplayName}</span>
               <BadgeCheck size={13} className="shrink-0 fill-emerald-600 text-white" />
             </h3>
             {agent.city && (
