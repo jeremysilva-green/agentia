@@ -183,7 +183,7 @@ export default async function PropertyDetailPage({
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
-            {agentPhone && (
+            {agentPhone && !isOwner && (
               <ChatWidget
                 propertyId={propertyId}
                 agentName={agentName}
