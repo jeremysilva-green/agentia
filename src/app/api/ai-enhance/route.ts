@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { hasActiveProAccess } from "@/lib/plans";
 
 const DAILY_CAP = 20;
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20MB server-side ceiling, well under OpenAI's 50MB limit
@@ -25,14 +26,17 @@ export async function POST(request: Request) {
   const service = createServiceClient();
 
   // Server-side plan gate — never trust the page-level redirect alone.
+  // Checks status too, not just plan: an agent who picks Pro/Fundador
+  // starts at status "pending" until dLocal Go confirms the first charge,
+  // and shouldn't get paid-tier access before that actually happens.
   const { data: subscription } = await service
     .from("subscriptions")
-    .select("plan")
+    .select("plan, status")
     .eq("agent_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (subscription?.plan !== "pro" && subscription?.plan !== "fundador") {
+  if (!hasActiveProAccess(subscription)) {
     return NextResponse.json({ error: "Esta función está disponible para planes Pro y Fundador." }, { status: 403 });
   }
 

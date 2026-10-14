@@ -4,6 +4,7 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { getAgentContext } from "@/lib/data/panel";
 import { createClient } from "@/lib/supabase/server";
 import { AiEnhanceWidget } from "@/components/panel/AiEnhanceWidget";
+import { hasActiveProAccess } from "@/lib/plans";
 
 const DEFAULT_MONTHLY_ALLOWANCE = 100;
 
@@ -11,8 +12,7 @@ export default async function MejorarConIaPage() {
   const ctx = await getAgentContext();
   if (!ctx) redirect("/ingresar");
 
-  const plan = ctx.subscription?.plan;
-  const eligible = plan === "pro" || plan === "fundador";
+  const eligible = hasActiveProAccess(ctx.subscription);
 
   if (!eligible) {
     return (
