@@ -7,12 +7,13 @@ import { AgentSocialSharesTable } from "@/components/panel/AgentSocialSharesTabl
 import { MarketingVideosGrid } from "@/components/panel/MarketingVideosGrid";
 import { getAgentContext } from "@/lib/data/panel";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { hasActiveProAccess } from "@/lib/plans";
 
 export default async function RedesSocialesPage() {
   const ctx = await getAgentContext();
   if (!ctx) redirect("/ingresar");
 
-  const eligibleForVideo = ctx.subscription?.plan === "pro" || ctx.subscription?.plan === "fundador";
+  const eligibleForVideo = hasActiveProAccess(ctx.subscription);
 
   const [rows, videos] = await Promise.all([
     getAgentSocialSharesForAgent(ctx.userId),

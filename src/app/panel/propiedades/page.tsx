@@ -14,6 +14,7 @@ import { listMarketingVideosForAgent } from "@/lib/data/marketingVideos";
 import { isVideoStale } from "@/lib/marketing-video/isStale";
 import { buildListingVideoCaption } from "@/lib/marketing-video/caption";
 import { getPublicStorageUrl } from "@/lib/storage";
+import { hasActiveProAccess } from "@/lib/plans";
 
 const statusLabel: Record<string, string> = {
   available: "Disponible",
@@ -35,7 +36,7 @@ export default async function PropiedadesPage() {
   if (!ctx) redirect("/ingresar");
   const user = { id: ctx.userId };
 
-  const eligibleForVideo = ctx.subscription?.plan === "pro" || ctx.subscription?.plan === "fundador";
+  const eligibleForVideo = hasActiveProAccess(ctx.subscription);
 
   const [{ data: properties }, atLimit, videos] = await Promise.all([
     supabase

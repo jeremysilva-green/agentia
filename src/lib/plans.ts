@@ -80,3 +80,19 @@ export const FUNDADOR_SEAT_LIMIT = 100;
 export function isPlanId(value: unknown): value is PlanId {
   return value === "basico" || value === "pro" || value === "fundador";
 }
+
+// Every Pro/Fundador-gated feature (AI photo enhance, marketing video,
+// etc.) must check this, not just subscription.plan — an agent who picks
+// a paid plan starts at status "pending" until dLocal Go confirms the
+// first charge (see selectPlan() in actions/subscription.ts), and should
+// not get paid-tier access before that actually happens. "trialing" is
+// included since trial agents already get full paid-tier access during
+// their trial window elsewhere in the app (see the suscripcion page).
+export function hasActiveProAccess(
+  subscription: { plan?: string | null; status?: string | null } | null | undefined
+): boolean {
+  if (!subscription) return false;
+  const planOk = subscription.plan === "pro" || subscription.plan === "fundador";
+  const statusOk = subscription.status === "active" || subscription.status === "trialing";
+  return planOk && statusOk;
+}
