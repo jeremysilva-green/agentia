@@ -603,7 +603,7 @@ export function PropertyForm({
             <p className="text-sm font-semibold text-slate-800">Comisión y referidos</p>
             <p className="text-xs text-slate-500">
               {kind === "proyecto_en_pozo"
-                ? "En proyectos, la comisión la paga la desarrolladora y suele ser distinta al 5,5%."
+                ? "En proyectos, la comisión la paga la desarrolladora y suele ser distinta al 5%."
                 : "Como no hay precio público, el referido ve un monto fijo."}
             </p>
           </div>

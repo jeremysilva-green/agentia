@@ -4,6 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/cn";
 
+// Builds a stable string key from an array so it can be compared by value
+// below — `defaultValues` is a new array reference on every render even
+// when its contents haven't changed. \u0000 is used as a separator (vs. a
+// plain comma) so a value that itself contains a comma can't collide with
+// another value's boundary.
+function arrayKey(values: string[]): string {
+  return values.join("\u0000");
+}
+
 export function MultiSelectDropdown({
   name,
   label,
@@ -34,6 +43,23 @@ export function MultiSelectDropdown({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // `defaultValues` only seeds initial state via useState above — it's not
+  // otherwise a controlled prop, so a caller that mutates the selection
+  // from outside (e.g. a "quick pick" preset button that isn't one of this
+  // component's own checkboxes) would silently desync: the caller's own
+  // display updates, but this component's internal `selected` — which is
+  // what actually renders the submitted hidden inputs — doesn't. Re-synced
+  // here whenever the defaultValues *content* changes, using React's
+  // "adjust state during render" pattern (not an effect — this project's
+  // lint config flags synchronous setState-in-effect) so `open` and every
+  // other piece of local state is left untouched.
+  const defaultValuesKey = arrayKey(defaultValues);
+  const [prevDefaultValuesKey, setPrevDefaultValuesKey] = useState(defaultValuesKey);
+  if (defaultValuesKey !== prevDefaultValuesKey) {
+    setPrevDefaultValuesKey(defaultValuesKey);
+    setSelected(defaultValuesKey === "" ? [] : defaultValuesKey.split("\u0000"));
+  }
 
   const allSelected = selected.length === 0;
 

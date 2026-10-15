@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { propertySchema, type PropertyInput } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
-import { fieldErrorsFrom } from "@/lib/formErrors";
+import { fieldErrorsFrom, firstIssueMessage } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
 
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
@@ -381,7 +381,7 @@ export async function createProperty(
 
   const parsed = readPropertyForm(formData);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
+    return { error: firstIssueMessage(parsed.error), fieldErrors: fieldErrorsFrom(parsed.error) };
   }
 
   if (parsed.data.status === "available") {
@@ -449,7 +449,7 @@ export async function updateProperty(
 
   const parsed = readPropertyForm(formData);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0]?.message ?? "Datos inválidos", fieldErrors: fieldErrorsFrom(parsed.error) };
+    return { error: firstIssueMessage(parsed.error), fieldErrors: fieldErrorsFrom(parsed.error) };
   }
 
   if (parsed.data.status === "available") {
