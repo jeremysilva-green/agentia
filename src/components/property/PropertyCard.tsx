@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { getCoverageSummaryLabel } from "@/lib/constants/coverageCities";
 import type { PropertyWithImages } from "@/types/domain";
 
 const statusTone = {
@@ -70,7 +71,7 @@ export async function PropertyCard({
             {statusLabel[property.status]}
           </Badge>
           {isModelo && (
-            <Badge className="absolute right-3 top-3 border-transparent! bg-emerald-700! text-white!">
+            <Badge className="absolute right-3 top-3 border-transparent! bg-blue-600! text-white!">
               Construimos en tu terreno
             </Badge>
           )}
@@ -83,7 +84,7 @@ export async function PropertyCard({
           <p className="mt-1 flex items-center gap-1 text-xs text-slate-600">
             <MapPin size={12} />
             {isModelo && coverageCities.length > 0
-              ? `Cobertura: ${coverageCities.map((c) => c.city).join(", ")}`
+              ? `Cobertura: ${getCoverageSummaryLabel(coverageCities.map((c) => c.city))}`
               : property.city}
           </p>
         </Link>
