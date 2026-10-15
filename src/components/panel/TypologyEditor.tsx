@@ -34,7 +34,7 @@ export function TypologyEditor({ defaultRows = [] }: { defaultRows?: TypologyRow
     <div className="flex flex-col gap-3">
       <p className="text-sm font-medium text-slate-700">Tipologías</p>
       {rows.map((row, i) => (
-        <div key={i} className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr_auto] items-end gap-2 rounded-lg border border-slate-200 bg-white p-2">
+        <div key={i} className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 sm:grid-cols-3 sm:items-end md:grid-cols-6">
           <input type="hidden" name="typologyName" value={row.name} />
           <input type="hidden" name="typologyBedrooms" value={row.bedrooms} />
           <input type="hidden" name="typologyAreaM2" value={row.areaM2} />
@@ -46,7 +46,7 @@ export function TypologyEditor({ defaultRows = [] }: { defaultRows?: TypologyRow
             value={row.name}
             onChange={(e) => updateRow(i, "name", e.target.value)}
             placeholder="2 dormitorios"
-            className="bg-white!"
+            className="bg-white! col-span-2 sm:col-span-1"
           />
           <Input
             id={`typologyBedrooms-${i}`}
@@ -90,9 +90,10 @@ export function TypologyEditor({ defaultRows = [] }: { defaultRows?: TypologyRow
             size="sm"
             onClick={() => removeRow(i)}
             disabled={rows.length === 1}
-            className="h-10"
+            className="col-span-2 h-10 sm:col-span-3 md:col-span-1"
           >
             <Trash2 size={14} />
+            <span className="sm:hidden">Eliminar tipología</span>
           </Button>
         </div>
       ))}

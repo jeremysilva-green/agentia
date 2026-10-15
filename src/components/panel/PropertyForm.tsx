@@ -282,20 +282,25 @@ export function PropertyForm({
               placeholder="sin puntos ni comas"
               className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
             />
-            <div className="flex flex-col gap-1 pt-1 text-xs text-slate-500">
-              <div className="flex items-center justify-between">
-                <span>Comisión Agente ({AGENT_COMMISSION_PCT}%)</span>
-                <span className="font-medium text-slate-700">{formatMoney(agentCommission)}</span>
+            {/* Proyecto en Pozo sets its own commission % below, in "Comisión
+                y referidos" — the standard 5.5%/1% preview doesn't apply
+                there and would be misleading shown twice. */}
+            {kind === "standard" && (
+              <div className="flex flex-col gap-1 pt-1 text-xs text-slate-500">
+                <div className="flex items-center justify-between">
+                  <span>Comisión Agente ({AGENT_COMMISSION_PCT}%)</span>
+                  <span className="font-medium text-slate-700">{formatMoney(agentCommission)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Comisión Referido ({AFFILIATE_COMMISSION_PCT}%)</span>
+                  <span className="font-medium text-slate-700">{formatMoney(affiliateCommission)}</span>
+                </div>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-1">
+                  <span className="font-medium text-slate-700">Tu comisión total</span>
+                  <span className="font-semibold text-emerald-700">{formatMoney(netCommission)}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Comisión Referido ({AFFILIATE_COMMISSION_PCT}%)</span>
-                <span className="font-medium text-slate-700">{formatMoney(affiliateCommission)}</span>
-              </div>
-              <div className="flex items-center justify-between border-t border-slate-200 pt-1">
-                <span className="font-medium text-slate-700">Tu comisión total</span>
-                <span className="font-semibold text-emerald-700">{formatMoney(netCommission)}</span>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>
@@ -701,7 +706,7 @@ export function PropertyForm({
         </div>
       )}
 
-      {kind !== "modelo" && (
+      {kind === "standard" && (
         <div className="grid gap-4 sm:grid-cols-4">
           <Input
             id="bedrooms"
