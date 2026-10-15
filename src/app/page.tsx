@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, type CSSProperties } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/cn";
 import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
 import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
@@ -35,6 +36,33 @@ function RoomIllustration() {
       <rect x="70" y="190" width="70" height="40" rx="6" fill="#efe6d8" />
       <path d="M90 190c-10-30 10-40 15-60 5 20 25 30 15 60z" fill="#4f9b6e" />
     </svg>
+  );
+}
+
+// Static promo banners, same images/placement intent as the previous
+// homepage (above Para Agentes, Para Afiliados, Planes) — not part of the
+// source design, kept as rounded-corner image banners between sections.
+function PromoBanner({ src, alt, pro }: { src: string; alt: string; pro?: boolean }) {
+  return (
+    <div className={styles.wrap} style={{ paddingTop: 0, paddingBottom: 0 }}>
+      {pro && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <span className={styles.pro}>✦ Plan Pro</span>
+        </div>
+      )}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "1920 / 815",
+          overflow: "hidden",
+          borderRadius: "var(--r)",
+          border: "1px solid var(--line)",
+        }}
+      >
+        <Image src={src} alt={alt} fill style={{ objectFit: "cover" }} sizes="(max-width: 1180px) 100vw, 1180px" />
+      </div>
+    </div>
   );
 }
 
@@ -360,7 +388,6 @@ export default function HomePage() {
     const v = document.getElementById("introVideo") as HTMLVideoElement | null;
     const btn = document.getElementById("playBtn");
     if (!v) return;
-    v.style.display = "block";
     v.muted = false;
     v.controls = true;
     v.play().catch(() => {});
@@ -510,8 +537,8 @@ export default function HomePage() {
                   playsInline
                   muted
                   loop
-                  preload="none"
-                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "none" }}
+                  preload="metadata"
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
                 />
                 <button className={styles.play} id="playBtn" aria-label="Ver video" onClick={handlePlay} type="button">
                   <Icon name="play" style={{ fill: "#fff", stroke: "none", marginLeft: 5 }} />
@@ -597,6 +624,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <PromoBanner src="/promo1.jpg" alt="Ficha técnica lista para compartir en un solo click" />
 
       {/* AGENTS */}
       <section id="agentes" style={{ paddingTop: 40 }}>
@@ -781,6 +810,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      <PromoBanner src="/promo2.jpg" alt="Mejorá tus fotos con I.A." pro />
+
       {/* AFFILIATES */}
       <section className={styles.affSec} id="afiliados">
         <div className={styles.dots} />
@@ -909,6 +940,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <PromoBanner src="/promo3.jpg" alt="Generá reels al instante" pro />
 
       {/* PRICING */}
       <section id="planes">
