@@ -11,6 +11,8 @@ import { ChatWidget } from "@/components/property/ChatWidget";
 import { ShareButton } from "@/components/property/ShareButton";
 import { AgentShareButton } from "@/components/property/AgentShareButton";
 import { LeadTracker } from "@/components/property/LeadTracker";
+import { TypologiesTable } from "@/components/property/TypologiesTable";
+import { ModeloReferralCard } from "@/components/property/ModeloReferralCard";
 import { Badge } from "@/components/ui/Badge";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { copy } from "@/lib/copy";
@@ -34,10 +36,19 @@ export async function generateMetadata({
 
   const siteUrl = getSiteUrl();
   const imageUrl = `${siteUrl}/api/property-card/${propertyId}`;
-  const description = `${property.city} · ${new Intl.NumberFormat("es-PY", {
-    style: "currency",
-    currency: property.currency,
-  }).format(property.price)}`;
+  // Modelo listings have no public price — property.price is the private
+  // precio contado and must never reach a crawler-visible description.
+  const description =
+    property.listing_kind === "modelo"
+      ? `Construimos en tu terreno · Cuota desde ${new Intl.NumberFormat("es-PY", {
+          style: "currency",
+          currency: property.currency,
+          maximumFractionDigits: 0,
+        }).format(property.model_installment_from ?? 0)}/mes`
+      : `${property.city} · ${new Intl.NumberFormat("es-PY", {
+          style: "currency",
+          currency: property.currency,
+        }).format(property.price)}`;
 
   return {
     title: `${property.title} — ${copy.brand}`,
@@ -97,6 +108,18 @@ export default async function PropertyDetailPage({
   const canonicalUrl = `${siteUrl}/agentes/${agentSlug}/propiedades/${propertyId}`;
   const agentPhone = agentProfile?.profiles?.phone;
   const agentName = agentProfile?.profiles?.full_name || agentProfile?.profiles?.username || "el agente";
+  const isModelo = property.listing_kind === "modelo";
+  const isProyectoEnPozo = property.listing_kind === "proyecto_en_pozo";
+  const coverageCities = property.property_coverage_cities ?? [];
+  const typologies = property.property_typologies ?? [];
+  const referralRewardLabel =
+    property.referral_reward_type === "fixed" && property.referral_reward_value != null
+      ? new Intl.NumberFormat("es-PY", {
+          style: "currency",
+          currency: property.currency,
+          maximumFractionDigits: 0,
+        }).format(property.referral_reward_value)
+      : null;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-neutral-900">
@@ -117,26 +140,63 @@ export default async function PropertyDetailPage({
               {statusLabel[property.status]}
             </Badge>
           </div>
+          {isModelo && (
+            <Badge className="self-start border-transparent! bg-emerald-700! text-white!">
+              Construimos en tu terreno
+            </Badge>
+          )}
+          {isProyectoEnPozo && property.construction_stage !== "terminada" && (
+            <Badge className="self-start border-transparent! bg-amber-100! text-amber-800!">
+              {property.construction_stage === "en_pozo" ? "En pozo (preventa)" : "En construcción"}
+            </Badge>
+          )}
           <p className="flex items-center gap-1 text-sm text-slate-300">
             <MapPin size={14} />
-            {property.address ? `${property.address}, ` : ""}
-            {property.city}
+            {isModelo
+              ? `Cobertura: ${coverageCities.map((c) => c.city).join(", ") || "—"}`
+              : `${property.address ? `${property.address}, ` : ""}${property.city}`}
           </p>
         </div>
 
         <PropertyGallery imageUrls={imageUrls} title={property.title} />
         <PropertyVideo url={property.youtube_url} />
+        {isProyectoEnPozo && <TypologiesTable typologies={typologies} currency={property.currency} />}
       </div>
 
       <div className="flex min-w-0 flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2">
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm sm:text-left">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{copy.property.price}</p>
-          <p className="font-display text-2xl font-semibold text-prussian">
-            {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(
-              property.price
-            )}
-            {property.listing_type === "rent" && <span className="text-sm font-normal text-slate-500"> /mes</span>}
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            {isModelo ? "Cuota desde" : isProyectoEnPozo ? "Desde" : copy.property.price}
           </p>
+          <p className="font-display text-2xl font-semibold text-prussian">
+            {isModelo ? (
+              <>
+                {new Intl.NumberFormat("es-PY", {
+                  style: "currency",
+                  currency: property.currency,
+                  maximumFractionDigits: 0,
+                }).format(property.model_installment_from ?? 0)}
+                <span className="text-sm font-normal text-slate-500"> /mes</span>
+              </>
+            ) : (
+              <>
+                {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(
+                  property.price
+                )}
+                {property.listing_type === "rent" && <span className="text-sm font-normal text-slate-500"> /mes</span>}
+              </>
+            )}
+          </p>
+          {isModelo && property.model_financing_type && (
+            <p className="mt-1 text-xs font-medium text-emerald-700">
+              Financiación{" "}
+              {property.model_financing_type === "che_roga_pora"
+                ? "Che Róga Porã"
+                : property.model_financing_type === "bancaria"
+                  ? "bancaria"
+                  : "propia"}
+            </p>
+          )}
 
           {(property.bedrooms != null || property.bathrooms != null || property.area_m2 != null || property.garage) && (
             <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600 sm:justify-start">
@@ -195,6 +255,15 @@ export default async function PropertyDetailPage({
             {isOwner && <AgentShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
           </div>
         </div>
+
+        {isModelo && referralRewardLabel && !isOwner && (
+          <ModeloReferralCard
+            propertyId={propertyId}
+            propertyPath={canonicalUrl.replace(siteUrl, "")}
+            rewardAmountLabel={referralRewardLabel}
+            triggerLabel={property.commission_trigger_label}
+          />
+        )}
       </div>
 
       {property.lat != null && property.lng != null && (

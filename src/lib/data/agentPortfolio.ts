@@ -31,12 +31,26 @@ export async function getAgentProperties(
   const supabase = await createClient();
   let query = supabase
     .from("properties")
-    .select("*, property_images(*)")
+    .select("*, property_images(*), property_typologies(*), property_coverage_cities(*)")
     .eq("agent_id", agentId)
     .eq("published", true)
     .order("created_at", { ascending: false });
 
-  if (filters.city) query = query.eq("city", filters.city);
+  if (filters.city) {
+    // A Modelo listing's `city` column is only a fallback (the first
+    // covered city) — its real coverage lives in property_coverage_cities,
+    // so an exact-match filter alone would miss it whenever the filtered
+    // city is covered but isn't that fallback value.
+    const { data: coverageMatches } = await supabase
+      .from("property_coverage_cities")
+      .select("property_id")
+      .eq("city", filters.city);
+    const coverageIds = (coverageMatches ?? []).map((row) => row.property_id);
+    query =
+      coverageIds.length > 0
+        ? query.or(`city.eq.${filters.city},id.in.(${coverageIds.join(",")})`)
+        : query.eq("city", filters.city);
+  }
   if (filters.listingType) query = query.eq("listing_type", filters.listingType);
   if (filters.propertyType && filters.propertyType.length > 0) {
     query = query.in("property_type", filters.propertyType);
@@ -94,7 +108,9 @@ export const getPropertyForPublicView = cache(async (propertyId: string) => {
   const supabase = await createClient();
   const { data: property } = await supabase
     .from("properties")
-    .select("*, property_images(*), agent_profiles(*, profiles(username, full_name, phone, avatar_url))")
+    .select(
+      "*, property_images(*), property_typologies(*), property_coverage_cities(*), agent_profiles(*, profiles(username, full_name, phone, avatar_url))"
+    )
     .eq("id", propertyId)
     .eq("published", true)
     .single();

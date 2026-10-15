@@ -3,7 +3,7 @@
 // official government list at https://municipios.gov.py/municipios/
 // (2026-08-29) — update from that source if it changes.
 
-const CITIES_BY_DEPARTMENT: Record<string, string[]> = {
+export const CITIES_BY_DEPARTMENT: Record<string, string[]> = {
   Capital: ["Asunción"],
   Central: [
     "Areguá",

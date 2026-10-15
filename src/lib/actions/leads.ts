@@ -62,7 +62,7 @@ async function generateDealReportPdf(details: {
   buyerName: string;
   referralCode: string;
   salePrice: number;
-  commissionPct: number;
+  commissionPct: number | null;
   commissionAmount: number;
   closedAt: Date;
 }) {
@@ -96,7 +96,9 @@ async function generateDealReportPdf(details: {
   y -= 8;
   line(`Precio de venta: ${money(details.salePrice)}`, 13, true);
   line(
-    `Comisión de afiliado (${details.commissionPct}%): ${money(details.commissionAmount)}`,
+    details.commissionPct != null
+      ? `Comisión de afiliado (${details.commissionPct}%): ${money(details.commissionAmount)}`
+      : `Comisión de afiliado (monto fijo): ${money(details.commissionAmount)}`,
     14,
     true,
     rgb(0.02, 0.4, 0.25)
@@ -124,7 +126,7 @@ export async function closeLeadDeal(
   const { data: lead } = await supabase
     .from("leads")
     .select(
-      "id, buyer_name, referral_code, commission_confirmed_at, property_id, affiliate_link_id, properties!inner(title, agent_id, currency, agent_profiles(profiles(full_name, username, phone))), affiliate_links(profiles(full_name, username))"
+      "id, buyer_name, referral_code, commission_confirmed_at, property_id, affiliate_link_id, properties!inner(title, agent_id, currency, referral_reward_type, referral_reward_value, agent_profiles(profiles(full_name, username, phone))), affiliate_links(profiles(full_name, username))"
     )
     .eq("id", leadId)
     .single();
@@ -140,6 +142,8 @@ export async function closeLeadDeal(
       title: string;
       agent_id: string;
       currency: string;
+      referral_reward_type: "percentage" | "fixed" | null;
+      referral_reward_value: number | null;
       agent_profiles: { profiles: { full_name: string | null; username: string; phone: string | null } | null } | null;
     } | null;
     affiliate_links: { profiles: { full_name: string | null; username: string } | null } | null;
@@ -156,8 +160,15 @@ export async function closeLeadDeal(
   const agentProfile = detail.properties.agent_profiles?.profiles;
   const affiliateProfile = detail.affiliate_links?.profiles;
   const closedAt = new Date();
-  const commissionPct = AFFILIATE_COMMISSION_PCT;
-  const commissionAmount = Math.round(salePrice * (commissionPct / 100));
+  // Proyecto en Pozo / Modelo listings can configure a fixed referral reward
+  // instead of a percentage of sale price (Modelo has no public sale price
+  // to compute a percentage from at all) — null for every standard listing,
+  // which keeps today's 1%-of-sale-price computation exactly as before.
+  const isFixedReward = detail.properties.referral_reward_type === "fixed";
+  const commissionPct = isFixedReward ? null : (detail.properties.referral_reward_value ?? AFFILIATE_COMMISSION_PCT);
+  const commissionAmount = isFixedReward
+    ? (detail.properties.referral_reward_value ?? 0)
+    : Math.round(salePrice * (commissionPct! / 100));
 
   const pdfBytes = await generateDealReportPdf({
     propertyTitle: detail.properties.title,
@@ -247,6 +258,7 @@ type CommissionAgreementContext = {
   saleValueLabel: string;
   referralLink: string;
   operationDate: string;
+  commissionKind: "percentage" | "fixed";
   commissionPct: number;
   commissionAmountLabel: string;
   alreadyAccepted: boolean;
@@ -326,6 +338,11 @@ async function loadCommissionAgreementContext(
 
   const currency = detail.properties?.currency ?? "PYG";
   const money = (amount: number) => `${currency} ${amount.toLocaleString("es-PY")}`;
+  // closeLeadDeal only ever leaves commission_pct null for a fixed-reward
+  // close (Proyecto en Pozo/Modelo) — by this point commission_confirmed_at
+  // is already set, so null here unambiguously means "fixed," never
+  // "unset."
+  const commissionKind: "percentage" | "fixed" = detail.commission_pct != null ? "percentage" : "fixed";
 
   return {
     agentName: agentProfile?.full_name || agentProfile?.username || "Agente",
@@ -342,6 +359,7 @@ async function loadCommissionAgreementContext(
       month: "long",
       year: "numeric",
     }),
+    commissionKind,
     commissionPct: detail.commission_pct ?? AFFILIATE_COMMISSION_PCT,
     commissionAmountLabel: money(detail.commission_amount ?? 0),
     alreadyAccepted: Boolean(detail.commission_agreement_accepted_at),
@@ -387,6 +405,7 @@ export async function acceptCommissionAgreement(leadId: string): Promise<{ error
     saleValueLabel: context.saleValueLabel,
     referralLink: context.referralLink,
     operationDate: context.operationDate,
+    commissionKind: context.commissionKind,
     commissionPct: context.commissionPct,
     commissionAmountLabel: context.commissionAmountLabel,
     acceptedAt,

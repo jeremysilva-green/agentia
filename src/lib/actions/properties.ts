@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { propertySchema } from "@/lib/validations/property";
+import { propertySchema, type PropertyInput } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
 import { fieldErrorsFrom } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
@@ -18,7 +18,12 @@ const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu695
 // this file can't write to it at all. Never throws: a failure here (missing
 // slug, DB error, webhook unreachable) is logged but must never block the
 // property save itself, so every step is wrapped and swallowed internally.
-async function queueInstagramPost(propertyId: string, agentId: string) {
+async function queueInstagramPost(propertyId: string, agentId: string, listingKind: string) {
+  // Proyecto en Pozo / Modelo listings aren't understood by this pipeline's
+  // post image (the property-card route still needs its own kind-aware
+  // price branch regardless of this guard — see route.tsx) and would leak
+  // a Modelo listing's private precio contado into a public Instagram post.
+  if (listingKind !== "standard") return;
   try {
     const service = createServiceClient();
 
@@ -86,13 +91,13 @@ export async function notifyFirstPhotoAdded(propertyId: string) {
 
   const { data: property } = await supabase
     .from("properties")
-    .select("id")
+    .select("id, listing_kind")
     .eq("id", propertyId)
     .eq("agent_id", user.id)
     .maybeSingle();
   if (!property) return;
 
-  await queueInstagramPost(propertyId, user.id);
+  await queueInstagramPost(propertyId, user.id, property.listing_kind);
 }
 
 export type PropertyActionState = { error?: string; fieldErrors?: Record<string, string> } | undefined;
@@ -209,6 +214,13 @@ export async function restoreHiddenPropertiesOnUpgrade(agentId: string): Promise
 }
 
 function readPropertyForm(formData: FormData) {
+  const coverageCities = formData.getAll("coverageCities").map(String);
+  // Modelo listings hide the city/address block entirely (replaced by Zona
+  // de cobertura) — city stays NOT NULL at the DB level, so it's defaulted
+  // here to the first covered city, a real meaningful value every
+  // kind-unaware consumer (chatbot, marketing-video types, etc.) can use.
+  const city = formData.get("city") || (coverageCities[0] ?? undefined);
+
   return propertySchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description"),
@@ -217,7 +229,7 @@ function readPropertyForm(formData: FormData) {
     price: formData.get("price"),
     currency: formData.get("currency") || undefined,
     priceIncludesIva: formData.get("priceIncludesIva") === "on",
-    city: formData.get("city"),
+    city,
     address: formData.get("address") || undefined,
     mapsUrl: formData.get("mapsUrl") || undefined,
     youtubeUrl: formData.get("youtubeUrl") || undefined,
@@ -229,7 +241,61 @@ function readPropertyForm(formData: FormData) {
     garage: formData.get("garage") || "false",
     negotiationType: formData.getAll("negotiationType"),
     negotiationDetails: formData.get("negotiationDetails") || undefined,
+
+    listingKind: formData.get("listingKind") || "standard",
+    constructionStage: formData.get("constructionStage") || "terminada",
+
+    developerName: formData.get("developerName") || undefined,
+    estimatedDeliveryDate: formData.get("estimatedDeliveryDate") || undefined,
+    constructionProgressPct: formData.get("constructionProgressPct") || undefined,
+    totalUnits: formData.get("totalUnits") || undefined,
+    paymentPlanDepositPct: formData.get("paymentPlanDepositPct") || undefined,
+    paymentPlanInstallmentsText: formData.get("paymentPlanInstallmentsText") || undefined,
+    paymentPlanBalancePct: formData.get("paymentPlanBalancePct") || undefined,
+    paymentPlanFinancingOptions: formData.getAll("paymentPlanFinancingOptions"),
+    typologyName: formData.getAll("typologyName"),
+    typologyBedrooms: formData.getAll("typologyBedrooms"),
+    typologyAreaM2: formData.getAll("typologyAreaM2"),
+    typologyPriceFrom: formData.getAll("typologyPriceFrom"),
+    typologyUnitsAvailable: formData.getAll("typologyUnitsAvailable"),
+
+    coverageCities,
+    modelConstructionTermMonths: formData.get("modelConstructionTermMonths") || undefined,
+    modelIncludesLand: formData.get("modelIncludesLand") || undefined,
+    modelMaterialsText: formData.get("modelMaterialsText") || undefined,
+    modelFinancingType: formData.get("modelFinancingType") || undefined,
+    modelInstallmentFrom: formData.get("modelInstallmentFrom") || undefined,
+    modelDownPaymentText: formData.get("modelDownPaymentText") || undefined,
+    modelQualifyingRequirements: formData.get("modelQualifyingRequirements") || undefined,
+
+    commissionTriggerLabel: formData.get("commissionTriggerLabel") || undefined,
+    commissionAgentPct: formData.get("commissionAgentPct") || undefined,
+    referralRewardType: formData.get("referralRewardType") || undefined,
+    referralRewardValue: formData.get("referralRewardValue") || undefined,
+    referralAttributionDays: formData.get("referralAttributionDays") || undefined,
   });
+}
+
+// Typology rows are only meaningful for proyecto_en_pozo and are read as
+// four parallel arrays (TypologyEditor emits one hidden input set per row,
+// all sharing the same name) — zipped back into objects by index here.
+function zipTypologies(parsed: {
+  typologyName: string[];
+  typologyBedrooms: string[];
+  typologyAreaM2: string[];
+  typologyPriceFrom: string[];
+  typologyUnitsAvailable: string[];
+}) {
+  return parsed.typologyName
+    .map((name, i) => ({
+      name: name.trim(),
+      bedrooms: parsed.typologyBedrooms[i] ? Number(parsed.typologyBedrooms[i]) : null,
+      area_m2: parsed.typologyAreaM2[i] ? Number(parsed.typologyAreaM2[i]) : null,
+      price_from: parsed.typologyPriceFrom[i] ? Number(parsed.typologyPriceFrom[i]) : null,
+      units_available: parsed.typologyUnitsAvailable[i] ? Number(parsed.typologyUnitsAvailable[i]) : null,
+      position: i,
+    }))
+    .filter((row) => row.name !== "");
 }
 
 async function resolveMapCoordinates(mapsUrl: string | undefined) {
@@ -246,6 +312,61 @@ async function resolveMapCoordinates(mapsUrl: string | undefined) {
   }
 
   return { lat: coordinates.lat, lng: coordinates.lng, mapsUrl, error: null };
+}
+
+// Shared by createProperty/updateProperty — every field here is nullable at
+// the DB level and unused by the standard path, so this is safe to spread
+// into both the insert and update payloads regardless of listing_kind.
+function listingKindFields(data: PropertyInput) {
+  return {
+    listing_kind: data.listingKind,
+    construction_stage: data.constructionStage,
+    developer_name: data.developerName ?? null,
+    estimated_delivery_date: data.estimatedDeliveryDate ?? null,
+    construction_progress_pct: data.constructionProgressPct ?? null,
+    total_units: data.totalUnits ?? null,
+    payment_plan_deposit_pct: data.paymentPlanDepositPct ?? null,
+    payment_plan_installments_text: data.paymentPlanInstallmentsText ?? null,
+    payment_plan_balance_pct: data.paymentPlanBalancePct ?? null,
+    payment_plan_financing_options: data.paymentPlanFinancingOptions,
+    model_materials_text: data.modelMaterialsText ?? null,
+    model_construction_term_months: data.modelConstructionTermMonths ?? null,
+    model_includes_land: data.modelIncludesLand ?? null,
+    model_financing_type: data.modelFinancingType ?? null,
+    model_installment_from: data.modelInstallmentFrom ?? null,
+    model_down_payment_text: data.modelDownPaymentText ?? null,
+    model_qualifying_requirements: data.modelQualifyingRequirements ?? null,
+    commission_trigger_label: data.commissionTriggerLabel ?? null,
+    commission_agent_pct: data.commissionAgentPct ?? null,
+    referral_reward_type: data.referralRewardType ?? null,
+    referral_reward_value: data.referralRewardValue ?? null,
+    referral_attribution_days: data.referralAttributionDays ?? null,
+  };
+}
+
+// Replaces property_typologies/property_coverage_cities wholesale — safe
+// here (unlike property_images) since nothing references these child rows'
+// ids by stable identity across edits.
+async function saveListingKindChildren(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  propertyId: string,
+  data: PropertyInput
+) {
+  if (data.listingKind === "proyecto_en_pozo") {
+    await supabase.from("property_typologies").delete().eq("property_id", propertyId);
+    const rows = zipTypologies(data).map((row) => ({ ...row, property_id: propertyId }));
+    if (rows.length > 0) await supabase.from("property_typologies").insert(rows);
+  } else {
+    await supabase.from("property_typologies").delete().eq("property_id", propertyId);
+  }
+
+  if (data.listingKind === "modelo") {
+    await supabase.from("property_coverage_cities").delete().eq("property_id", propertyId);
+    const rows = data.coverageCities.map((city) => ({ property_id: propertyId, city }));
+    if (rows.length > 0) await supabase.from("property_coverage_cities").insert(rows);
+  } else {
+    await supabase.from("property_coverage_cities").delete().eq("property_id", propertyId);
+  }
 }
 
 export async function createProperty(
@@ -297,11 +418,14 @@ export async function createProperty(
       negotiation_type: parsed.data.negotiationType,
       negotiation_details: parsed.data.negotiationDetails ?? null,
       sold_at: parsed.data.status === "sold" ? new Date().toISOString() : null,
+      ...listingKindFields(parsed.data),
     })
     .select("id")
     .single();
 
   if (error || !data) return { error: "No se pudo crear la propiedad. Intentá de nuevo." };
+
+  await saveListingKindChildren(supabase, data.id, parsed.data);
 
   // Instagram post is queued once the first photo is actually uploaded (see
   // notifyFirstPhotoAdded, called from PropertyPhotoManager) — not here.
@@ -377,11 +501,14 @@ export async function updateProperty(
       negotiation_type: parsed.data.negotiationType,
       negotiation_details: parsed.data.negotiationDetails ?? null,
       sold_at: soldAt,
+      ...listingKindFields(parsed.data),
     })
     .eq("id", propertyId)
     .eq("agent_id", user.id);
 
   if (error) return { error: "No se pudo guardar los cambios." };
+
+  await saveListingKindChildren(supabase, propertyId, parsed.data);
 
   // Instagram post is only queued on creation (see createProperty) — an
   // agent typically saves again right after adding photos, which was

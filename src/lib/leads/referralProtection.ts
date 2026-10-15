@@ -28,7 +28,11 @@ export async function upsertLeadFromChatClick({
 }): Promise<{ referralCode: string; leadId: string } | { error: string }> {
   const service = createServiceClient();
 
-  const { data: property } = await service.from("properties").select("agent_id").eq("id", propertyId).single();
+  const { data: property } = await service
+    .from("properties")
+    .select("agent_id, referral_attribution_days")
+    .eq("id", propertyId)
+    .single();
   if (!property) return { error: "Propiedad no encontrada." };
 
   let incomingAffiliateLinkId: string | null = null;
@@ -61,8 +65,11 @@ export async function upsertLeadFromChatClick({
     return { referralCode: existing.referral_code, leadId: existing.id };
   }
 
+  // Proyecto en Pozo / Modelo listings can configure a longer window (bank
+  // credit approval, construction timelines) — null for every standard
+  // listing, which keeps the global default exactly as before.
   const protectedUntil = new Date(now);
-  protectedUntil.setDate(protectedUntil.getDate() + REFERRAL_PROTECTION_DAYS);
+  protectedUntil.setDate(protectedUntil.getDate() + (property.referral_attribution_days ?? REFERRAL_PROTECTION_DAYS));
 
   const { data: created, error } = await service
     .from("leads")

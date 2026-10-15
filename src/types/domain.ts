@@ -4,6 +4,8 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type AgentProfile = Database["public"]["Tables"]["agent_profiles"]["Row"];
 export type Property = Database["public"]["Tables"]["properties"]["Row"];
 export type PropertyImage = Database["public"]["Tables"]["property_images"]["Row"];
+export type PropertyTypology = Database["public"]["Tables"]["property_typologies"]["Row"];
+export type PropertyCoverageCity = Database["public"]["Tables"]["property_coverage_cities"]["Row"];
 export type AffiliateLink = Database["public"]["Tables"]["affiliate_links"]["Row"];
 export type LeadEvent = Database["public"]["Tables"]["lead_events"]["Row"];
 export type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -37,6 +39,8 @@ export type AgentCardData = AgentProfile & {
 
 export type PropertyWithImages = Property & {
   property_images: PropertyImage[];
+  property_typologies?: PropertyTypology[];
+  property_coverage_cities?: PropertyCoverageCity[];
 };
 
 export type LeadPipelineRow = Lead & {

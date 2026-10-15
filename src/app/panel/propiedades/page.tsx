@@ -122,7 +122,7 @@ export default async function PropiedadesPage() {
                   </Button>
                 </Link>
 
-                {eligibleForVideo && property.property_images.length > 0 && (() => {
+                {eligibleForVideo && property.listing_kind === "standard" && property.property_images.length > 0 && (() => {
                   const video = videoByPropertyId.get(property.id);
                   const imageUrls = [...property.property_images]
                     .sort((a, b) => a.position - b.position)

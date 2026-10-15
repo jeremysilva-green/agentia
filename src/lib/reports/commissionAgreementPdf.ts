@@ -62,6 +62,9 @@ export type CommissionAgreementDetails = {
   saleValueLabel: string;
   referralLink: string;
   operationDate: string;
+  // Defaults to "percentage" so every pre-existing call site (none of which
+  // pass this field) keeps generating today's exact wording unchanged.
+  commissionKind?: "percentage" | "fixed";
   commissionPct: number;
   commissionAmountLabel: string;
   acceptedAt: Date;
@@ -147,7 +150,9 @@ export async function generateCommissionAgreementPdf(details: CommissionAgreemen
 
   heading("2. Comisión");
   paragraph(
-    `Por la operación concretada, EL AGENTE reconoce a favor de EL AFILIADO una comisión equivalente al ${details.commissionPct}% del valor total de la compraventa, correspondiente a ${details.commissionAmountLabel}.`
+    details.commissionKind === "fixed"
+      ? `Por la operación concretada, EL AGENTE reconoce a favor de EL AFILIADO una comisión de monto fijo equivalente a ${details.commissionAmountLabel}.`
+      : `Por la operación concretada, EL AGENTE reconoce a favor de EL AFILIADO una comisión equivalente al ${details.commissionPct}% del valor total de la compraventa, correspondiente a ${details.commissionAmountLabel}.`
   );
   paragraph(
     "EL AGENTE se compromete a efectuar el pago de dicha comisión dentro de un plazo razonable contado desde la formalización de la compraventa."

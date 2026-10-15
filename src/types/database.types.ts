@@ -136,6 +136,28 @@ export interface Database {
           negotiation_type: string[];
           negotiation_details: string | null;
           sold_at: string | null;
+          listing_kind: "standard" | "proyecto_en_pozo" | "modelo";
+          construction_stage: "terminada" | "en_construccion" | "en_pozo";
+          developer_name: string | null;
+          estimated_delivery_date: string | null;
+          construction_progress_pct: number | null;
+          total_units: number | null;
+          payment_plan_deposit_pct: number | null;
+          payment_plan_installments_text: string | null;
+          payment_plan_balance_pct: number | null;
+          payment_plan_financing_options: string[];
+          model_materials_text: string | null;
+          model_construction_term_months: number | null;
+          model_includes_land: "no_terreno_cliente" | "si_incluido" | "opcional" | null;
+          model_financing_type: "che_roga_pora" | "bancaria" | "propia" | null;
+          model_installment_from: number | null;
+          model_down_payment_text: string | null;
+          model_qualifying_requirements: string | null;
+          commission_trigger_label: string | null;
+          commission_agent_pct: number | null;
+          referral_reward_type: "percentage" | "fixed" | null;
+          referral_reward_value: number | null;
+          referral_attribution_days: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -165,6 +187,28 @@ export interface Database {
           negotiation_type?: string[];
           negotiation_details?: string | null;
           sold_at?: string | null;
+          listing_kind?: "standard" | "proyecto_en_pozo" | "modelo";
+          construction_stage?: "terminada" | "en_construccion" | "en_pozo";
+          developer_name?: string | null;
+          estimated_delivery_date?: string | null;
+          construction_progress_pct?: number | null;
+          total_units?: number | null;
+          payment_plan_deposit_pct?: number | null;
+          payment_plan_installments_text?: string | null;
+          payment_plan_balance_pct?: number | null;
+          payment_plan_financing_options?: string[];
+          model_materials_text?: string | null;
+          model_construction_term_months?: number | null;
+          model_includes_land?: "no_terreno_cliente" | "si_incluido" | "opcional" | null;
+          model_financing_type?: "che_roga_pora" | "bancaria" | "propia" | null;
+          model_installment_from?: number | null;
+          model_down_payment_text?: string | null;
+          model_qualifying_requirements?: string | null;
+          commission_trigger_label?: string | null;
+          commission_agent_pct?: number | null;
+          referral_reward_type?: "percentage" | "fixed" | null;
+          referral_reward_value?: number | null;
+          referral_attribution_days?: number | null;
         };
         Update: Partial<Database["public"]["Tables"]["properties"]["Insert"]>;
         Relationships: [
@@ -195,6 +239,62 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: "property_images_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_typologies: {
+        Row: {
+          id: string;
+          property_id: string;
+          name: string;
+          bedrooms: number | null;
+          area_m2: number | null;
+          price_from: number | null;
+          units_available: number | null;
+          position: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          name: string;
+          bedrooms?: number | null;
+          area_m2?: number | null;
+          price_from?: number | null;
+          units_available?: number | null;
+          position?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["property_typologies"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "property_typologies_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_coverage_cities: {
+        Row: {
+          id: string;
+          property_id: string;
+          city: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          city: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["property_coverage_cities"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "property_coverage_cities_property_id_fkey";
             columns: ["property_id"];
             isOneToOne: false;
             referencedRelation: "properties";

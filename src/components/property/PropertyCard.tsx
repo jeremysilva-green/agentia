@@ -41,6 +41,8 @@ export async function PropertyCard({
     : null;
 
   const propertyPath = `/agentes/${agentSlug}/propiedades/${property.id}`;
+  const isModelo = property.listing_kind === "modelo";
+  const coverageCities = property.property_coverage_cities ?? [];
 
   return (
     <Card className="group flex h-full flex-col overflow-hidden border-emerald-500! hover:border-emerald-600!">
@@ -67,6 +69,11 @@ export async function PropertyCard({
           >
             {statusLabel[property.status]}
           </Badge>
+          {isModelo && (
+            <Badge className="absolute right-3 top-3 border-transparent! bg-emerald-700! text-white!">
+              Construimos en tu terreno
+            </Badge>
+          )}
         </div>
       </Link>
 
@@ -75,17 +82,33 @@ export async function PropertyCard({
           <h3 className="truncate font-display text-sm font-semibold text-prussian">{property.title}</h3>
           <p className="mt-1 flex items-center gap-1 text-xs text-slate-600">
             <MapPin size={12} />
-            {property.city}
+            {isModelo && coverageCities.length > 0
+              ? `Cobertura: ${coverageCities.map((c) => c.city).join(", ")}`
+              : property.city}
           </p>
         </Link>
 
         <div className="flex items-center justify-between gap-2 border-t border-emerald-100 px-4 py-3">
           <p className="text-sm font-semibold text-prussian">
-            {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(
-              property.price
-            )}
-            {property.listing_type === "rent" && (
-              <span className="block text-xs font-normal text-slate-600">/mes</span>
+            {isModelo ? (
+              <>
+                Cuota desde{" "}
+                {new Intl.NumberFormat("es-PY", {
+                  style: "currency",
+                  currency: property.currency,
+                  maximumFractionDigits: 0,
+                }).format(property.model_installment_from ?? 0)}
+                <span className="block text-xs font-normal text-slate-600">/mes</span>
+              </>
+            ) : (
+              <>
+                {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(
+                  property.price
+                )}
+                {property.listing_type === "rent" && (
+                  <span className="block text-xs font-normal text-slate-600">/mes</span>
+                )}
+              </>
             )}
           </p>
           {isOwner ? (

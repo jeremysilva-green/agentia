@@ -123,7 +123,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
 
   const { data: property } = await service
     .from("properties")
-    .select("*, property_images(*)")
+    .select("*, property_images(*), property_coverage_cities(*)")
     .eq("id", propertyId)
     .eq("published", true)
     .single();
@@ -150,11 +150,17 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
   const px = (value: number) => Math.round(value * scale);
 
   const status = STATUS_STYLES[property.status] ?? STATUS_STYLES.available;
+  const isModelo = property.listing_kind === "modelo";
+  // Modelo listings have no public price — property.price is the private
+  // precio contado and must never render into this publicly-fetched image.
   const price = new Intl.NumberFormat("es-PY", {
     style: "currency",
     currency: property.currency,
     maximumFractionDigits: 0,
-  }).format(property.price);
+  }).format(isModelo ? property.model_installment_from ?? 0 : property.price);
+  const cityLine = isModelo
+    ? (property.property_coverage_cities ?? []).map((c) => c.city).join(", ") || property.city
+    : property.city;
 
   // Stray \r (from text pasted out of Windows/Word, \r\n line endings)
   // corrupts Satori's text-wrapping badly — confirmed by reproducing it in
@@ -298,7 +304,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                   <div style={{ display: "flex", fontFamily: "ClashSemibold", fontSize: px(72), color: "#ffffff", lineHeight: 1 }}>
                     {price}
                   </div>
-                  {property.listing_type === "rent" && (
+                  {(isModelo || property.listing_type === "rent") && (
                     <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(30), color: "#e2e8f0", paddingBottom: px(8) }}>
                       /mes
                     </div>
@@ -332,7 +338,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
               <div style={{ display: "flex", alignItems: "center", gap: px(10), marginTop: px(14) }}>
                 <MapPinIcon size={px(28)} color={GREEN} />
                 <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(34), color: "#64748b" }}>
-                  {property.city}
+                  {cityLine}
                 </div>
               </div>
 

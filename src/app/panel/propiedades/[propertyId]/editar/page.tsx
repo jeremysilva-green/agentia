@@ -18,13 +18,19 @@ export default async function EditarPropiedadPage({
   } = await supabase.auth.getUser();
   if (!user) redirect("/ingresar");
 
-  const [{ data: property }, { data: images }] = await Promise.all([
+  const [{ data: property }, { data: images }, { data: typologies }, { data: coverageCities }] = await Promise.all([
     supabase.from("properties").select("*").eq("id", propertyId).eq("agent_id", user.id).single(),
     supabase
       .from("property_images")
       .select("*")
       .eq("property_id", propertyId)
       .order("position", { ascending: true }),
+    supabase
+      .from("property_typologies")
+      .select("*")
+      .eq("property_id", propertyId)
+      .order("position", { ascending: true }),
+    supabase.from("property_coverage_cities").select("*").eq("property_id", propertyId),
   ]);
 
   if (!property) notFound();
@@ -48,7 +54,13 @@ export default async function EditarPropiedadPage({
       </Card>
 
       <Card className="border-slate-400! bg-slate-300! p-6 sm:p-8">
-        <PropertyForm action={boundUpdate} defaultValues={property} submitLabel="Guardar cambios" />
+        <PropertyForm
+          action={boundUpdate}
+          defaultValues={property}
+          defaultTypologies={typologies ?? []}
+          defaultCoverageCities={coverageCities ?? []}
+          submitLabel="Guardar cambios"
+        />
       </Card>
     </div>
   );

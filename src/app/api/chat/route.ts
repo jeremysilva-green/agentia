@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   const { data: property } = await service
     .from("properties")
     .select(
-      "id, title, description, price, price_includes_iva, currency, city, address, property_type, bedrooms, bathrooms, area_m2, garage, negotiation_type, negotiation_details, agent_id, agent_profiles(profiles(full_name, username, phone))"
+      "id, title, description, price, price_includes_iva, currency, city, address, property_type, bedrooms, bathrooms, area_m2, garage, negotiation_type, negotiation_details, agent_id, listing_kind, model_installment_from, model_qualifying_requirements, property_coverage_cities(city), agent_profiles(profiles(full_name, username, phone))"
     )
     .eq("id", propertyId)
     .eq("published", true)
@@ -174,6 +174,10 @@ export async function POST(request: Request) {
     garage: detail.garage,
     negotiationType: detail.negotiation_type,
     negotiationDetails: detail.negotiation_details,
+    isModelo: detail.listing_kind === "modelo",
+    modelInstallmentFrom: detail.model_installment_from,
+    modelQualifyingRequirements: detail.model_qualifying_requirements,
+    coverageCities: (detail.property_coverage_cities ?? []).map((c) => c.city),
   });
 
   const client = new Anthropic();

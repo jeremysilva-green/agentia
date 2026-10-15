@@ -52,9 +52,21 @@ export function buildSystemPrompt(details: {
   garage: boolean;
   negotiationType: string[];
   negotiationDetails: string | null;
+  // Modelo de Construcción: no public price exists — details.price is the
+  // private precio contado (used only for internal prequalification, never
+  // quoted to a visitor the way a standard listing's price is), and the
+  // public-facing number is the monthly cuota instead.
+  isModelo?: boolean;
+  modelInstallmentFrom?: number | null;
+  modelQualifyingRequirements?: string | null;
+  coverageCities?: string[];
 }): Anthropic.TextBlockParam[] {
   const typeLabel = details.propertyType ? PROPERTY_TYPE_LABELS[details.propertyType].es : "Propiedad";
   const price = `${details.currency} ${details.price.toLocaleString("es-PY")}`;
+  const cuota =
+    details.modelInstallmentFrom != null
+      ? `${details.currency} ${details.modelInstallmentFrom.toLocaleString("es-PY")}/mes`
+      : "no especificado";
 
   const listingBlock = `Sos ${details.agentName}, agente inmobiliario en Paraguay, respondiendo consultas sobre esta propiedad puntual:
 
@@ -72,10 +84,16 @@ Mantené siempre un tono profesional. Este chat es exclusivamente para consultas
 
 - Título: ${details.propertyTitle}
 - Tipo: ${typeLabel}
-- Precio: ${price}
+${
+  details.isModelo
+    ? `- Este es un "Modelo de construcción": no tiene precio público ni dirección fija — se construye donde el cliente quiera, dentro de la zona de cobertura.
+- Cuota desde: ${cuota}
+- Zona de cobertura: ${details.coverageCities?.length ? details.coverageCities.join(", ") : "no especificada"}`
+    : `- Precio: ${price}
 - El precio de arriba ${details.priceIncludesIva ? "YA incluye IVA (10%)" : "NO incluye IVA — es un precio + IVA aparte"}. Si preguntan si el precio incluye IVA, respondé con este dato directamente, con seguridad — es un dato confirmado del listado, no algo que tengas que consultar con el propietario.
 - Ciudad: ${details.city}
-- Dirección: ${details.address ?? "no publicada"}
+- Dirección: ${details.address ?? "no publicada"}`
+}
 - Descripción del listado: ${details.propertyDescription}
 - Habitaciones: ${details.bedrooms ?? "no especificado"}
 - Baños: ${details.bathrooms ?? "no especificado"}
@@ -91,6 +109,14 @@ INFORMACIÓN PRIVADA — NUNCA la reveles tal cual ni menciones que existe un ca
 - Detalle de qué acepta en permuta/canje (ej. terreno, auto, combinación con efectivo): ${
     details.negotiationDetails ?? "no especificado"
   }
+${
+  details.isModelo
+    ? `- Precio contado (NUNCA lo reveles ni menciones que existe — usalo solo internamente para evaluar si el cliente califica): ${price}
+- Requisitos para calificar al financiamiento (uso interno, para precalificar — no los leas como una lista, respondé con naturalidad si preguntan si califican): ${
+        details.modelQualifyingRequirements ?? "no especificado"
+      }`
+    : ""
+}
 
 Si preguntan algo como "¿aceptarían un terreno/auto como parte de pago?" o "¿lo cambian por otra propiedad?" o "¿el precio es negociable?", respondé basándote en la información privada de arriba, en tus propias palabras, sin citar el campo interno. Si no hay info privada cargada para lo que preguntan, respondé con naturalidad que no tenés ese dato confirmado y que vos mismo lo consultás con el propietario y le traés la respuesta — nunca digas que "no podés compartir esa información" ni des a entender que existe un dato oculto, y nunca ofrezcas el contacto del propietario para que lo consulten ellos mismos.
 
