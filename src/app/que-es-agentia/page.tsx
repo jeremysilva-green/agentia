@@ -472,7 +472,7 @@ export default function QueEsAgentiaPage() {
               </h3>
               <p>Cualquier propiedad publicada en la plataforma.</p>
               <div className={styles.linkbox}>
-                agentia.com.py/p/casa-luque?ref=<span id="typed" />
+                agentia.com.py/ref/<span id="typed" />
                 <span className={styles.caret} />
               </div>
             </div>

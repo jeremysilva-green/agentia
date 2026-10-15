@@ -235,6 +235,11 @@
   }
 }
 .card {
+  /* Grid items default to a content-based min-width, not 0 — without this,
+     a card whose content happens to be wide (e.g. a long line that can't
+     wrap) forces its whole grid track wider than the viewport instead of
+     the overflow actually being contained by the card's own layout. */
+  min-width: 0;
   background: var(--ink-2);
   border: 1px solid var(--line);
   border-radius: var(--r);
@@ -494,6 +499,7 @@
   }
 }
 .step {
+  min-width: 0;
   background: var(--ink-2);
   border: 1px solid var(--line);
   border-radius: var(--r);
@@ -594,6 +600,7 @@
   }
 }
 .cmp .col {
+  min-width: 0;
   border-radius: var(--r);
   padding: 32px;
   border: 1px solid var(--line);
@@ -665,8 +672,16 @@
   .tools {
     grid-template-columns: repeat(2, 1fr);
   }
+  .tool {
+    text-align: center;
+  }
+  .tool .ico {
+    display: block;
+    margin: 0 auto;
+  }
 }
 .tool {
+  min-width: 0;
   background: var(--ink-2);
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -687,6 +702,10 @@
   font-size: 20px;
   font-weight: 600;
   margin-top: 16px;
+  /* "Automatizaciones" is a single word with nowhere to break — without
+     this it gets clipped by the card rather than wrapping onto a second
+     line on narrow cards. */
+  overflow-wrap: break-word;
 }
 .tool p {
   font-size: 14px;
