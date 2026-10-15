@@ -22,6 +22,17 @@ export function parsePropertyTypeParam(value: string | string[] | undefined): Pr
   return values.filter(isPropertyType);
 }
 
+// Proyecto en Pozo is now a listing_kind, not a property_type — no
+// `properties` row can have this value anymore (see migration
+// 0066_listing_kinds.sql), so it's excluded from every UI that lets someone
+// pick among properties' types (the listing form, marketplace/portfolio
+// filters). It stays in PROPERTY_TYPE_VALUES itself because
+// client_requests.property_type — an independent, unrelated column — still
+// legitimately uses it.
+export const LISTABLE_PROPERTY_TYPE_VALUES = PROPERTY_TYPE_VALUES.filter(
+  (value) => value !== "proyecto_en_pozo"
+);
+
 export const PROPERTY_TYPE_LABELS: Record<PropertyType, { es: string; en: string }> = {
   casa: { es: "Casa", en: "House" },
   departamento: { es: "Departamento", en: "Apartment" },

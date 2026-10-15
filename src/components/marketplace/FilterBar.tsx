@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { SingleSelectDropdown } from "@/components/ui/SingleSelectDropdown";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
-import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
+import { LISTABLE_PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { cn } from "@/lib/cn";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 
@@ -84,7 +84,7 @@ export function FilterBar({ dict, locale }: { dict: Dictionary["home"]["filters"
             label={dict.propertyType}
             allLabel={dict.all}
             defaultValues={searchParams.getAll("propertyType")}
-            options={PROPERTY_TYPE_VALUES.map((value) => ({
+            options={LISTABLE_PROPERTY_TYPE_VALUES.map((value) => ({
               value,
               label: PROPERTY_TYPE_LABELS[value][locale],
             }))}

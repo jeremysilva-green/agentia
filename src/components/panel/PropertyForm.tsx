@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { TypologyEditor, type TypologyRow } from "@/components/panel/TypologyEditor";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { COVERAGE_QUICK_PICKS } from "@/lib/constants/coverageCities";
-import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
+import { LISTABLE_PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
 import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import {
@@ -227,7 +227,7 @@ export function PropertyForm({
           defaultValue={defaultValues?.property_type ?? ""}
           options={[
             { value: "", label: "Sin especificar" },
-            ...PROPERTY_TYPE_VALUES.filter((type) => type !== "proyecto_en_pozo").map((type) => ({
+            ...LISTABLE_PROPERTY_TYPE_VALUES.map((type) => ({
               value: type,
               label: PROPERTY_TYPE_LABELS[type].es,
             })),

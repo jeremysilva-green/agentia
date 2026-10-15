@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { MultiSelectDropdown } from "@/components/ui/MultiSelectDropdown";
 import { SingleSelectDropdown } from "@/components/ui/SingleSelectDropdown";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
-import { PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
+import { LISTABLE_PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import { copy } from "@/lib/copy";
 
 export function PropertyFilterBar() {
@@ -51,7 +51,7 @@ export function PropertyFilterBar() {
           label={copy.home.filters.propertyType}
           allLabel={copy.home.filters.all}
           defaultValues={searchParams.getAll("propertyType")}
-          options={PROPERTY_TYPE_VALUES.map((value) => ({
+          options={LISTABLE_PROPERTY_TYPE_VALUES.map((value) => ({
             value,
             label: PROPERTY_TYPE_LABELS[value].es,
           }))}

@@ -4,6 +4,11 @@ import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@
 import { normalizeText } from "@/lib/text";
 
 const LISTING_TYPE_LABELS: Record<"rent" | "sale", string> = { sale: "venta", rent: "alquiler" };
+const LISTING_KIND_LABELS: Record<"standard" | "proyecto_en_pozo" | "modelo", string> = {
+  standard: "propiedad",
+  proyecto_en_pozo: "proyecto en pozo",
+  modelo: "modelo de construcción",
+};
 
 export async function getAgentBySlug(slug: string) {
   const supabase = await createClient();
@@ -74,6 +79,9 @@ export async function getAgentProperties(
   const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
     normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
   );
+  const matchingListingKinds = (
+    Object.keys(LISTING_KIND_LABELS) as ("standard" | "proyecto_en_pozo" | "modelo")[]
+  ).filter((kind) => normalizeText(LISTING_KIND_LABELS[kind]).includes(normalizedQuery));
 
   return properties.filter(
     (p) =>
@@ -81,7 +89,8 @@ export async function getAgentProperties(
       normalizeText(p.description).includes(normalizedQuery) ||
       normalizeText(p.city).includes(normalizedQuery) ||
       (p.property_type !== null && matchingPropertyTypes.includes(p.property_type)) ||
-      matchingListingTypes.includes(p.listing_type)
+      matchingListingTypes.includes(p.listing_type) ||
+      matchingListingKinds.includes(p.listing_kind)
   );
 }
 
