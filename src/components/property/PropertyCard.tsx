@@ -46,15 +46,15 @@ export async function PropertyCard({
   const coverageCities = property.property_coverage_cities ?? [];
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden border-emerald-500! hover:border-emerald-600!">
-      <Link href={propertyPath}>
-        <div className="relative aspect-video overflow-hidden bg-slate-100">
+    <Card className="group flex h-full flex-col gap-0 overflow-hidden border-slate-100! bg-white! p-0 hover:border-slate-200!">
+      <Link href={propertyPath} className="block">
+        <div className="relative aspect-[1.27/1] overflow-hidden bg-slate-100">
           {coverUrl ? (
             <Image
               src={coverUrl}
               alt={property.title}
               fill
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               sizes="360px"
             />
           ) : (
@@ -63,7 +63,7 @@ export async function PropertyCard({
           <Badge
             tone={statusTone[property.status]}
             className={cn(
-              "absolute left-3 top-3",
+              "absolute left-3 top-3 shadow-sm",
               property.status === "available" && "border-transparent! bg-emerald-600! text-white!",
               property.status === "sold" && "border-transparent! bg-red-600! text-white!"
             )}
@@ -71,17 +71,17 @@ export async function PropertyCard({
             {statusLabel[property.status]}
           </Badge>
           {isModelo && (
-            <Badge className="absolute right-3 top-3 border-transparent! bg-blue-600! text-white!">
+            <Badge className="absolute right-3 top-3 border-transparent! bg-blue-600! text-white! shadow-sm">
               Construimos en tu terreno
             </Badge>
           )}
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col bg-emerald-50">
-        <Link href={propertyPath} className="flex-1 p-4 pb-3">
-          <h3 className="truncate font-display text-sm font-semibold text-prussian">{property.title}</h3>
-          <p className="mt-1 flex items-center gap-1 text-xs text-slate-600">
+      <div className="flex flex-1 flex-col">
+        <Link href={propertyPath} className="flex-1 px-4 pt-3.5 pb-2.5">
+          <h3 className="truncate font-display text-base font-semibold text-prussian">{property.title}</h3>
+          <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
             <MapPin size={12} />
             {isModelo && coverageCities.length > 0
               ? `Cobertura: ${getCoverageSummaryLabel(coverageCities.map((c) => c.city))}`
@@ -89,7 +89,7 @@ export async function PropertyCard({
           </p>
         </Link>
 
-        <div className="flex items-center justify-between gap-2 border-t border-emerald-100 px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-4 py-3">
           <p className="text-sm font-semibold text-prussian">
             {isModelo ? (
               <>
@@ -99,7 +99,7 @@ export async function PropertyCard({
                   currency: property.currency,
                   maximumFractionDigits: 0,
                 }).format(property.model_installment_from ?? 0)}
-                <span className="block text-xs font-normal text-slate-600">/mes</span>
+                <span className="block text-xs font-normal text-slate-500">/mes</span>
               </>
             ) : (
               <>
@@ -107,7 +107,7 @@ export async function PropertyCard({
                   property.price
                 )}
                 {property.listing_type === "rent" && (
-                  <span className="block text-xs font-normal text-slate-600">/mes</span>
+                  <span className="block text-xs font-normal text-slate-500">/mes</span>
                 )}
               </>
             )}

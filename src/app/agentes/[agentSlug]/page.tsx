@@ -58,6 +58,11 @@ export default async function AgentPortfolioPage({
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === agent.id;
+  let isUserRole = false;
+  if (user && !isOwner) {
+    const { data: viewerProfile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    isUserRole = viewerProfile?.role === "user";
+  }
 
   const availableCount = properties.filter((p) => p.status === "available").length;
   const soldCount = properties.filter((p) => p.status === "sold").length;
@@ -115,7 +120,7 @@ export default async function AgentPortfolioPage({
 
         {!isOwner && (
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start sm:justify-end">
-            <CreateCatalogButton agentId={agent.id} agentSlug={agentSlug} />
+            {isUserRole && <CreateCatalogButton agentId={agent.id} agentSlug={agentSlug} />}
             <ClientRequestTabs agentId={agent.id} />
           </div>
         )}

@@ -139,7 +139,7 @@ export default async function PropertyDetailPage({
   const priceLabelPlain = priceSuffix ? `${priceFormatted} ${priceSuffix}` : priceFormatted;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0e0e0e]">
+    <div className="relative min-h-screen overflow-hidden bg-[#161616]">
       <InteractiveBackground dotColor="rgb(255 255 255 / 0.05)" spotColor="rgb(255 255 255 / 0)" />
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-3">
         <LeadTracker propertyId={propertyId} refCode={ref} />

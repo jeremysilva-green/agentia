@@ -12,7 +12,7 @@ export function ReadMoreText({ text }: { text: string }) {
       <div className="relative overflow-hidden transition-[max-height] duration-500" style={{ maxHeight: open ? 1200 : 150 }}>
         <p className="max-w-2xl whitespace-pre-line break-words text-[15px] leading-relaxed text-white/70">{text}</p>
         {!open && (
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0e0e0e] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#161616] to-transparent" />
         )}
       </div>
       <button
