@@ -705,8 +705,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <PromoBanner src="/promo2.jpg" alt="Mejorá tus fotos con I.A." pro />
-
       {/* AFFILIATES */}
       <section className={styles.affSec} id="afiliados">
         <div className={styles.dots} />
