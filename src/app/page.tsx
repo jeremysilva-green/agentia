@@ -3,38 +3,25 @@
 import { Fragment, useEffect, type CSSProperties } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { cn } from "@/lib/cn";
 import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
 import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
 import styles from "./HomePage.module.css";
 
+// react-compare-slider computes some of its inline styles differently
+// between the server and client render (confirmed via a real hydration
+// warning diff — kebab-case vs camelCase CSS property keys), so it's loaded
+// client-only. It's a drag-interactive widget with nothing meaningful to
+// server-render anyway.
+const ReactCompareSlider = dynamic(() => import("react-compare-slider").then((mod) => mod.ReactCompareSlider), {
+  ssr: false,
+});
+
 function Icon({ name, className, style }: { name: string; className?: string; style?: CSSProperties }) {
   return (
     <svg className={cn(styles.ico, className)} style={style}>
       <use href={`#i-${name}`} />
-    </svg>
-  );
-}
-
-// Reused for both the before/after slider's two layers — a plain static
-// illustration, not a real photo, matching the rest of this page's mockup
-// aesthetic (the property "sheet" card, the reel phone shots).
-function RoomIllustration() {
-  return (
-    <svg className={styles.room} viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
-      <rect width="400" height="300" fill="#e9e2d6" />
-      <rect y="210" width="400" height="90" fill="#b98d62" />
-      <rect x="40" y="40" width="130" height="120" rx="4" fill="#bfe3f2" />
-      <path d="M105 40v120M40 100h130" stroke="#fff" strokeWidth="5" />
-      <rect x="34" y="34" width="142" height="132" rx="6" fill="none" stroke="#fff" strokeWidth="7" />
-      <rect x="200" y="150" width="170" height="60" rx="14" fill="#2f6f57" />
-      <rect x="208" y="125" width="154" height="40" rx="14" fill="#3b8a6c" />
-      <rect x="220" y="208" width="10" height="16" fill="#3a2a1d" />
-      <rect x="340" y="208" width="10" height="16" fill="#3a2a1d" />
-      <circle cx="300" cy="70" r="26" fill="#f4d58d" />
-      <path d="M300 20v24M300 96v14" stroke="#c9a961" strokeWidth="3" />
-      <rect x="70" y="190" width="70" height="40" rx="6" fill="#efe6d8" />
-      <path d="M90 190c-10-30 10-40 15-60 5 20 25 30 15 60z" fill="#4f9b6e" />
     </svg>
   );
 }
@@ -200,42 +187,6 @@ export default function HomePage() {
       document.querySelectorAll<HTMLElement>("#bars i").forEach((b, i) => setTimeout(() => (b.style.height = (b.dataset.h || "0") + "%"), i * 120))
     );
 
-    // Before/after: auto sweep then draggable
-    const ba = document.getElementById("ba");
-    let dragging = false;
-    let auto = true;
-    const setCut = (v: number) => ba?.style.setProperty("--cut", Math.min(Math.max(v, 0), 100) + "%");
-    const fromEv = (e: PointerEvent) => {
-      const r = ba!.getBoundingClientRect();
-      return ((e.clientX - r.left) / r.width) * 100;
-    };
-    const onDown = (e: PointerEvent) => {
-      dragging = true;
-      auto = false;
-      ba?.setPointerCapture(e.pointerId);
-      setCut(fromEv(e));
-    };
-    const onMove = (e: PointerEvent) => {
-      if (dragging) setCut(fromEv(e));
-    };
-    const onUp = () => {
-      dragging = false;
-    };
-    ba?.addEventListener("pointerdown", onDown);
-    ba?.addEventListener("pointermove", onMove);
-    ba?.addEventListener("pointerup", onUp);
-    const baObs = once(ba, () => {
-      if (reduce) return;
-      const t0 = performance.now();
-      const f = (n: number) => {
-        if (!auto) return;
-        const t = (n - t0) / 1000;
-        setCut(50 + Math.sin(t * 1.1) * 38);
-        requestAnimationFrame(f);
-      };
-      requestAnimationFrame(f);
-    });
-
     // Counters
     function count(el: Element) {
       const to = +(el.getAttribute("data-count") || 0);
@@ -368,13 +319,9 @@ export default function HomePage() {
       io.disconnect();
       chatObs?.disconnect();
       barsObs?.disconnect();
-      baObs?.disconnect();
       panelObs?.disconnect();
       netObs?.disconnect();
       if (toastInterval) clearInterval(toastInterval);
-      ba?.removeEventListener("pointerdown", onDown);
-      ba?.removeEventListener("pointermove", onMove);
-      ba?.removeEventListener("pointerup", onUp);
       tiles.forEach((t) => t.removeEventListener("pointermove", tileHandler));
     };
   }, []);
@@ -648,16 +595,25 @@ export default function HomePage() {
           </div>
 
           <div className={styles.aiRow}>
-            <div className={cn(styles.ba, styles.rv, styles.l)} id="ba">
-              <div className={cn(styles.layer, styles.before)} id="baBefore">
-                <RoomIllustration />
-              </div>
-              <div className={cn(styles.layer, styles.after)} id="baAfter">
-                <RoomIllustration />
-              </div>
-              <span className={cn(styles.lab, styles.b)}>Antes</span>
-              <span className={cn(styles.lab, styles.a)}>Con IA</span>
-              <div className={styles.handle} />
+            <div className={cn(styles.ba, styles.rv, styles.l)}>
+              {/* Same real before/after mechanism and photos as the actual
+                  "Mejorar con IA" feature page (src/app/panel/servicios) —
+                  not a mockup. */}
+              <ReactCompareSlider
+                style={{ height: "100%" }}
+                itemOne={
+                  <div style={{ position: "relative", height: "100%", width: "100%" }}>
+                    <Image src="/servicios/antes.png" alt="Antes" fill style={{ objectFit: "cover" }} sizes="520px" />
+                    <span className={cn(styles.lab, styles.b)}>Antes</span>
+                  </div>
+                }
+                itemTwo={
+                  <div style={{ position: "relative", height: "100%", width: "100%" }}>
+                    <Image src="/servicios/despues.png" alt="Con IA" fill style={{ objectFit: "cover" }} sizes="520px" />
+                    <span className={cn(styles.lab, styles.a)}>Con IA</span>
+                  </div>
+                }
+              />
             </div>
             <div className={cn(styles.rv, styles.r, styles.d2)}>
               <span className={styles.pro}>✦ Plan Pro</span>
