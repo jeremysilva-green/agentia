@@ -586,9 +586,6 @@ export default function HomePage() {
               </div>
               <h4>Autorización con firma digital</h4>
               <p>El propietario firma la autorización de venta desde su celular.</p>
-              <svg className={styles.sign} viewBox="0 0 220 60" preserveAspectRatio="none">
-                <path d="M15 40c15-25 25-25 25-5s15-25 25-15 5 25 20 10 15-20 25-5 10 15 25 0 20-10 30-5 20 5 35-5" />
-              </svg>
             </div>
           </div>
 

@@ -302,11 +302,6 @@
     transform: none;
   }
 }
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
 .hero .lead {
   font-size: clamp(17px, 2vw, 21px);
   color: #c9c9c9;
