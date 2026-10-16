@@ -526,16 +526,8 @@
 }
 .sheet .img {
   aspect-ratio: 4 / 3;
-  background: linear-gradient(160deg, #cfe9dd, #86c9a8 40%, #2f7f5b);
   position: relative;
   overflow: hidden;
-}
-.sheet .img svg {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
 }
 .sheet .price {
   position: absolute;

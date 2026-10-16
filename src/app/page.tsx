@@ -532,15 +532,7 @@ export default function HomePage() {
                 <div className={styles.oneclick}>Ficha en 1 clic ⚡</div>
                 <div className={styles.img}>
                   <span className={styles.price}>USD 185.000</span>
-                  <svg viewBox="0 0 300 180">
-                    <path d="M30 180V90l90-60 90 60v90z" fill="#fff" />
-                    <path d="M20 95 120 25l100 70" stroke="#0E0E0E" strokeWidth="8" fill="none" strokeLinejoin="round" />
-                    <rect x="95" y="120" width="40" height="60" fill="#0A8F5C" />
-                    <rect x="155" y="105" width="35" height="30" fill="#bfe3f2" />
-                    <rect x="50" y="105" width="30" height="30" fill="#bfe3f2" />
-                    <rect x="200" y="120" width="80" height="60" fill="#f2f2f2" />
-                    <path d="M200 120l40-30 40 30" fill="#ddd" />
-                  </svg>
+                  <Image src="/casa.jpg" alt="Casa moderna en Luque" fill style={{ objectFit: "cover" }} sizes="420px" />
                 </div>
                 <div className={styles.body}>
                   <h4>Casa moderna en Luque</h4>
@@ -563,7 +555,7 @@ export default function HomePage() {
                       <b>Tu nombre</b>
                       <span>Agente Agentia</span>
                     </div>
-                    <div className={styles.wa}>WhatsApp</div>
+                    <div className={styles.wa}>Compartir</div>
                   </div>
                 </div>
               </div>
