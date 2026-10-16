@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { MapPin, User, BedDouble, Bath, Ruler, Car } from "lucide-react";
+import { MapPin, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getPropertyForPublicView } from "@/lib/data/agentPortfolio";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyVideo } from "@/components/property/PropertyVideo";
 import { PropertyMap } from "@/components/property/PropertyMap";
 import { ChatWidget } from "@/components/property/ChatWidget";
+import { AgendarModal } from "@/components/property/AgendarModal";
 import { ShareButton } from "@/components/property/ShareButton";
 import { AgentShareButton } from "@/components/property/AgentShareButton";
+import { PublicShareButton } from "@/components/property/PublicShareButton";
 import { LeadTracker } from "@/components/property/LeadTracker";
 import { TypologiesTable } from "@/components/property/TypologiesTable";
 import { ModeloReferralCard } from "@/components/property/ModeloReferralCard";
+import { ReferralTeaserCard } from "@/components/property/ReferralTeaserCard";
+import { FactsGrid } from "@/components/property/FactsGrid";
+import { ReadMoreText } from "@/components/property/ReadMoreText";
+import { MobileStickyBar } from "@/components/property/MobileStickyBar";
 import { Badge } from "@/components/ui/Badge";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { copy } from "@/lib/copy";
@@ -121,160 +127,167 @@ export default async function PropertyDetailPage({
         }).format(property.referral_reward_value)
       : null;
 
+  // Computed once, reused by both the price card and the mobile sticky bar.
+  const priceFormatted = isModelo
+    ? new Intl.NumberFormat("es-PY", {
+        style: "currency",
+        currency: property.currency,
+        maximumFractionDigits: 0,
+      }).format(property.model_installment_from ?? 0)
+    : new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(property.price);
+  const priceSuffix = isModelo || property.listing_type === "rent" ? "/mes" : "";
+  const priceLabelPlain = priceSuffix ? `${priceFormatted} ${priceSuffix}` : priceFormatted;
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-neutral-900">
-      <InteractiveBackground dotColor="rgb(255 255 255 / 0.14)" spotColor="rgb(52 211 153 / 0.9)" />
+    <div className="relative min-h-screen overflow-hidden bg-[#0e0e0e]">
+      <InteractiveBackground dotColor="rgb(255 255 255 / 0.05)" spotColor="rgb(255 255 255 / 0)" />
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-3">
-      <LeadTracker propertyId={propertyId} refCode={ref} />
+        <LeadTracker propertyId={propertyId} refCode={ref} />
 
-      <div className="flex min-w-0 flex-col gap-6 lg:col-span-2 lg:col-start-1 lg:row-start-1">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-start justify-between gap-3">
-            <h1 className="font-display text-2xl font-semibold text-white">{property.title}</h1>
-            <Badge
-              tone={property.status === "available" ? "success" : "neutral"}
-              className={
-                property.status === "available" ? "border-emerald-200! bg-emerald-50! text-emerald-700!" : undefined
-              }
-            >
-              {statusLabel[property.status]}
-            </Badge>
-          </div>
-          {isModelo && (
-            <Badge className="self-start border-transparent! bg-emerald-700! text-white!">
-              Construimos en tu terreno
-            </Badge>
-          )}
-          {isProyectoEnPozo && property.construction_stage !== "terminada" && (
-            <Badge className="self-start border-transparent! bg-amber-100! text-amber-800!">
-              {property.construction_stage === "en_pozo" ? "En pozo (preventa)" : "En construcción"}
-            </Badge>
-          )}
-          <p className="flex items-center gap-1 text-sm text-slate-300">
-            <MapPin size={14} />
-            {isModelo
-              ? `Cobertura: ${coverageCities.map((c) => c.city).join(", ") || "—"}`
-              : `${property.address ? `${property.address}, ` : ""}${property.city}`}
-          </p>
-        </div>
-
-        <PropertyGallery imageUrls={imageUrls} title={property.title} />
-        <PropertyVideo url={property.youtube_url} />
-        {isProyectoEnPozo && <TypologiesTable typologies={typologies} currency={property.currency} />}
-      </div>
-
-      <div className="flex min-w-0 flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center shadow-sm sm:text-left">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            {isModelo ? "Cuota desde" : isProyectoEnPozo ? "Desde" : copy.property.price}
-          </p>
-          <p className="font-display text-2xl font-semibold text-prussian">
-            {isModelo ? (
-              <>
-                {new Intl.NumberFormat("es-PY", {
-                  style: "currency",
-                  currency: property.currency,
-                  maximumFractionDigits: 0,
-                }).format(property.model_installment_from ?? 0)}
-                <span className="text-sm font-normal text-slate-500"> /mes</span>
-              </>
-            ) : (
-              <>
-                {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(
-                  property.price
+        <div className="flex min-w-0 flex-col gap-6 lg:col-span-2 lg:col-start-1 lg:row-start-1">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="font-display text-2xl font-semibold text-white">{property.title}</h1>
+              <Badge
+                tone={property.status === "available" ? "success" : "neutral"}
+                className={
+                  property.status === "available"
+                    ? "border-emerald-500/30! bg-emerald-500/10! text-emerald-400!"
+                    : "border-white/10! bg-white/5! text-white/60!"
+                }
+              >
+                {property.status === "available" && (
+                  <span className="relative mr-1.5 flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
                 )}
-                {property.listing_type === "rent" && <span className="text-sm font-normal text-slate-500"> /mes</span>}
-              </>
-            )}
-          </p>
-          {isModelo && property.model_financing_type && (
-            <p className="mt-1 text-xs font-medium text-emerald-700">
-              Financiación{" "}
-              {property.model_financing_type === "che_roga_pora"
-                ? "Che Róga Porã"
-                : property.model_financing_type === "bancaria"
-                  ? "bancaria"
-                  : "propia"}
-            </p>
-          )}
-
-          {(property.bedrooms != null || property.bathrooms != null || property.area_m2 != null || property.garage) && (
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-600 sm:justify-start">
-              {property.bedrooms != null && (
-                <span className="flex items-center gap-1.5">
-                  <BedDouble size={16} className="text-slate-400" />
-                  {property.bedrooms} hab.
-                </span>
-              )}
-              {property.bathrooms != null && (
-                <span className="flex items-center gap-1.5">
-                  <Bath size={16} className="text-slate-400" />
-                  {property.bathrooms} baños
-                </span>
-              )}
-              {property.area_m2 != null && (
-                <span className="flex items-center gap-1.5">
-                  <Ruler size={16} className="text-slate-400" />
-                  {property.area_m2} m²
-                </span>
-              )}
-              {property.garage && (
-                <span className="flex items-center gap-1.5">
-                  <Car size={16} className="text-slate-400" />
-                  Garage
-                </span>
-              )}
+                {statusLabel[property.status]}
+              </Badge>
             </div>
-          )}
-
-          <p className="mt-4 whitespace-pre-line break-words border-t border-slate-100 pt-4 text-sm text-slate-600">
-            {property.description}
-          </p>
-
-          <div className="mt-4 flex flex-col items-center gap-2 border-t border-slate-100 pt-4">
-            <span className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-500">
-              {agentProfile?.profiles?.avatar_url ? (
-                <Image src={agentProfile.profiles.avatar_url} alt={agentName} fill className="object-cover" sizes="56px" />
-              ) : (
-                <User size={22} />
-              )}
-            </span>
-            <p className="font-display text-sm font-medium text-prussian">{agentName}</p>
-          </div>
-
-          <div className="mt-4 flex flex-col gap-2">
-            {agentPhone && !isOwner && (
-              <ChatWidget
-                propertyId={propertyId}
-                agentName={agentName}
-                agentAvatarUrl={agentProfile?.profiles?.avatar_url ?? null}
-                refCode={ref}
-              />
+            {isModelo && (
+              <Badge className="self-start border-transparent! bg-emerald-700! text-white!">
+                Construimos en tu terreno
+              </Badge>
             )}
-            {isUserRole && <ShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
-            {isOwner && <AgentShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
+            {isProyectoEnPozo && property.construction_stage !== "terminada" && (
+              <Badge className="self-start border-transparent! bg-amber-500/15! text-amber-300!">
+                {property.construction_stage === "en_pozo" ? "En pozo (preventa)" : "En construcción"}
+              </Badge>
+            )}
+            <p className="flex items-center gap-1.5 text-sm text-white/50">
+              <MapPin size={14} className="text-emerald-400" />
+              {isModelo
+                ? `Cobertura: ${coverageCities.map((c) => c.city).join(", ") || "—"}`
+                : `${property.address ? `${property.address}, ` : ""}${property.city}`}
+            </p>
           </div>
+
+          <PropertyGallery imageUrls={imageUrls} title={property.title} />
+          <PropertyVideo url={property.youtube_url} />
+
+          <FactsGrid
+            areaM2={property.area_m2}
+            bedrooms={property.bedrooms}
+            bathrooms={property.bathrooms}
+            garage={property.garage}
+            propertyType={property.property_type}
+          />
+
+          {property.description && <ReadMoreText text={property.description} />}
+
+          {isProyectoEnPozo && <TypologiesTable typologies={typologies} currency={property.currency} />}
         </div>
 
-        {isModelo && referralRewardLabel && !isOwner && (
-          <ModeloReferralCard
-            propertyId={propertyId}
-            propertyPath={canonicalUrl.replace(siteUrl, "")}
-            rewardAmountLabel={referralRewardLabel}
-            triggerLabel={property.commission_trigger_label}
-          />
+        <div className="flex min-w-0 flex-col gap-4 lg:col-start-3 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 lg:self-start">
+          <div
+            id="priceCard"
+            className="relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900 p-5 shadow-xl"
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-emerald-600/20 blur-3xl"
+            />
+            <div className="relative">
+              <p className="text-xs font-semibold tracking-wide text-white/40 uppercase">
+                {isModelo ? "Cuota desde" : isProyectoEnPozo ? "Desde" : copy.property.price}
+              </p>
+              <p className="font-display mt-1 text-3xl font-semibold text-white">
+                {priceFormatted}
+                {priceSuffix && <span className="text-base font-normal text-white/40"> {priceSuffix}</span>}
+              </p>
+              {isModelo && property.model_financing_type && (
+                <p className="mt-1.5 text-xs font-medium text-emerald-400">
+                  Financiación{" "}
+                  {property.model_financing_type === "che_roga_pora"
+                    ? "Che Róga Porã"
+                    : property.model_financing_type === "bancaria"
+                      ? "bancaria"
+                      : "propia"}
+                </p>
+              )}
+
+              <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-4">
+                <span className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-700 text-white">
+                  {agentProfile?.profiles?.avatar_url ? (
+                    <Image
+                      src={agentProfile.profiles.avatar_url}
+                      alt={agentName}
+                      fill
+                      className="object-cover"
+                      sizes="48px"
+                    />
+                  ) : (
+                    <User size={20} />
+                  )}
+                  <span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-neutral-900 bg-emerald-400" />
+                </span>
+                <p className="font-display text-sm font-medium text-white">{agentName}</p>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-2.5">
+                {agentPhone && !isOwner && (
+                  <ChatWidget
+                    propertyId={propertyId}
+                    agentName={agentName}
+                    agentAvatarUrl={agentProfile?.profiles?.avatar_url ?? null}
+                    refCode={ref}
+                  />
+                )}
+                {!isOwner && <AgendarModal propertyId={propertyId} refCode={ref} />}
+                {isUserRole && <ShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
+                {isOwner && <AgentShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
+                {!isOwner && !isUserRole && <PublicShareButton title={property.title} url={canonicalUrl} />}
+              </div>
+            </div>
+          </div>
+
+          {isModelo && referralRewardLabel && !isOwner && (
+            <ModeloReferralCard
+              propertyId={propertyId}
+              propertyPath={canonicalUrl.replace(siteUrl, "")}
+              rewardAmountLabel={referralRewardLabel}
+              triggerLabel={property.commission_trigger_label}
+            />
+          )}
+          {!isModelo && !isOwner && (
+            <ReferralTeaserCard propertyId={propertyId} propertyPath={canonicalUrl.replace(siteUrl, "")} />
+          )}
+        </div>
+
+        {property.lat != null && property.lng != null && (
+          <div className="flex min-w-0 flex-col gap-3 lg:col-span-2 lg:col-start-1 lg:row-start-2">
+            <h2 className="text-sm font-semibold tracking-wide text-slate-300 uppercase">{copy.property.location}</h2>
+            <PropertyMap
+              lat={property.lat}
+              lng={property.lng}
+              label={isModelo ? undefined : `${property.address ? `${property.address}, ` : ""}${property.city}`}
+            />
+          </div>
         )}
       </div>
 
-      {property.lat != null && property.lng != null && (
-        <div className="flex min-w-0 flex-col gap-2 lg:col-span-2 lg:col-start-1 lg:row-start-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-300">
-            {copy.property.location}
-          </h2>
-          <PropertyMap lat={property.lat} lng={property.lng} />
-        </div>
-      )}
-      </div>
+      <MobileStickyBar priceLabel={priceLabelPlain} targetId="priceCard" />
     </div>
   );
 }

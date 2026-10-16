@@ -5,6 +5,7 @@ import { buildSystemPrompt } from "@/lib/chatbot/systemPrompt";
 import { upsertLeadFromChatClick } from "@/lib/leads/referralProtection";
 import { isPropertyType } from "@/lib/constants/propertyTypes";
 import { DAY_OF_WEEK_VALUES, isDayOfWeek } from "@/lib/constants/dayOfWeek";
+import { isPlausiblePhone } from "@/lib/phone";
 import type { MessageParam } from "@anthropic-ai/sdk/resources/messages";
 
 const MODEL = "claude-haiku-4-5-20251001";
@@ -69,14 +70,6 @@ function extractText(content: Anthropic.ContentBlock[]): string {
     .map((block) => block.text)
     .join("\n")
     .trim();
-}
-
-// A truthy string isn't enough — confirmed via testing that a forced tool
-// call with no real contact info in context makes the model fill in a
-// literal "<UNKNOWN>" placeholder rather than refuse. Require an actual
-// phone-shaped value (at least 6 digits) so that never becomes a real lead.
-function isPlausiblePhone(value: string | undefined): value is string {
-  return typeof value === "string" && value.replace(/\D/g, "").length >= 6;
 }
 
 export async function POST(request: Request) {

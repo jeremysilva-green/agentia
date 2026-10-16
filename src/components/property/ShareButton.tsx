@@ -43,7 +43,7 @@ export function ShareButton({ propertyId, propertyUrl }: { propertyId: string; p
           type="button"
           variant="secondary"
           size="lg"
-          className="w-full hover:bg-emerald-600! hover:text-white! hover:border-emerald-600!"
+          className="w-full border-white/15! bg-white/5! text-white! hover:border-emerald-400! hover:text-emerald-300!"
           onClick={handleShare}
           disabled={isPending}
         >
