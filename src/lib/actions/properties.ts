@@ -8,6 +8,7 @@ import { propertySchema, type PropertyInput } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
 import { fieldErrorsFrom, firstIssueMessage } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { MODELO_REFERRAL_REWARD_PCT } from "@/lib/constants/commission";
 
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
 
@@ -338,8 +339,11 @@ function listingKindFields(data: PropertyInput) {
     model_qualifying_requirements: data.modelQualifyingRequirements ?? null,
     commission_trigger_label: data.commissionTriggerLabel ?? null,
     commission_agent_pct: data.commissionAgentPct ?? null,
-    referral_reward_type: data.referralRewardType ?? null,
-    referral_reward_value: data.referralRewardValue ?? null,
+    // Modelo's referral reward is fixed at MODELO_REFERRAL_REWARD_PCT, not
+    // agent-configurable — enforced here rather than trusting the submitted
+    // form fields, which the modelo form no longer even renders as editable.
+    referral_reward_type: data.listingKind === "modelo" ? "percentage" : (data.referralRewardType ?? null),
+    referral_reward_value: data.listingKind === "modelo" ? MODELO_REFERRAL_REWARD_PCT : (data.referralRewardValue ?? null),
     referral_attribution_days: data.referralAttributionDays ?? null,
   };
 }

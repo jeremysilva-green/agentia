@@ -11,7 +11,7 @@ import { TypologyEditor, type TypologyRow } from "@/components/panel/TypologyEdi
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { COVERAGE_QUICK_PICKS } from "@/lib/constants/coverageCities";
 import { LISTABLE_PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
-import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT, MODELO_REFERRAL_REWARD_PCT } from "@/lib/constants/commission";
 import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import {
   PROYECTO_EN_POZO_COMMISSION_TRIGGERS,
@@ -614,6 +614,7 @@ export function PropertyForm({
               type="number"
               min="0"
               max="100"
+              step="0.01"
               label={kind === "modelo" ? "Tu comisión por contrato (% o Gs.)" : "Tu comisión (%)"}
               value={values.commissionAgentPct}
               onChange={setField("commissionAgentPct")}
@@ -629,30 +630,44 @@ export function PropertyForm({
               buttonClassName="bg-white!"
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
-              <p className="text-sm font-medium text-slate-700">Recompensa para el referido</p>
-              <PillTabs
-                options={[
-                  { value: "percentage", label: "% de tu comisión" },
-                  { value: "fixed", label: "Monto fijo" },
-                ]}
-                value={referralRewardType}
-                onChange={(v) => setReferralRewardType(v as "percentage" | "fixed")}
-                className="self-start"
-              />
-              <input type="hidden" name="referralRewardType" value={referralRewardType} />
-            </div>
-            <Input
-              id="referralRewardValue"
-              name="referralRewardValue"
-              type="number"
-              min="0"
-              label={referralRewardType === "fixed" ? "Monto para el referido (Gs.)" : "Porcentaje para el referido"}
-              value={values.referralRewardValue}
-              onChange={setField("referralRewardValue")}
-              className="bg-white!"
-            />
+          <div className={`grid gap-4 ${kind === "modelo" ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
+            {kind === "modelo" ? (
+              <div className="flex flex-col gap-1.5">
+                <p className="text-sm font-medium text-slate-700">Recompensa para el referido</p>
+                <div className="flex h-10 items-center rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm text-slate-600">
+                  {MODELO_REFERRAL_REWARD_PCT}% del precio de venta (fijo)
+                </div>
+                <input type="hidden" name="referralRewardType" value="percentage" />
+                <input type="hidden" name="referralRewardValue" value={MODELO_REFERRAL_REWARD_PCT} />
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-sm font-medium text-slate-700">Recompensa para el referido</p>
+                  <PillTabs
+                    options={[
+                      { value: "percentage", label: "% de tu comisión" },
+                      { value: "fixed", label: "Monto fijo" },
+                    ]}
+                    value={referralRewardType}
+                    onChange={(v) => setReferralRewardType(v as "percentage" | "fixed")}
+                    className="self-start"
+                  />
+                  <input type="hidden" name="referralRewardType" value={referralRewardType} />
+                </div>
+                <Input
+                  id="referralRewardValue"
+                  name="referralRewardValue"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  label={referralRewardType === "fixed" ? "Monto para el referido (Gs.)" : "Porcentaje para el referido"}
+                  value={values.referralRewardValue}
+                  onChange={setField("referralRewardValue")}
+                  className="bg-white!"
+                />
+              </>
+            )}
             <SingleSelectDropdown
               name="referralAttributionDays"
               label="Ventana de atribución"
@@ -667,9 +682,11 @@ export function PropertyForm({
             />
           </div>
           <p className="text-xs text-slate-500">
-            {referralRewardType === "fixed"
-              ? `El referido cobra ${currency} ${(Number(values.referralRewardValue) || 0).toLocaleString("es-PY")} cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" con alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`
-              : `El referido cobra cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" de una unidad vendida a alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`}
+            {kind === "modelo"
+              ? `El referido cobra el ${MODELO_REFERRAL_REWARD_PCT}% del precio de venta (se descuenta de tu comisión) cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" con alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`
+              : referralRewardType === "fixed"
+                ? `El referido cobra ${currency} ${(Number(values.referralRewardValue) || 0).toLocaleString("es-PY")} cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" con alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`
+                : `El referido cobra cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" de una unidad vendida a alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`}
           </p>
         </div>
       )}
