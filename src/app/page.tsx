@@ -107,8 +107,6 @@ const affCards = [
   { icon: "shield", title: "Riesgo cero", text: "Sin stock, sin oficina, sin costos fijos." },
 ];
 
-const reelList = ["Formato vertical 9:16", "Tu logo y el precio incluidos", "Un clic para generar y compartir"];
-
 export default function HomePage() {
   useEffect(() => {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -771,66 +769,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className={styles.reelRow}>
-            <div className={cn(styles.phone, styles.rv, styles.z)}>
-              <div className={styles.notch} />
-              <div className={styles.reel}>
-                <div className={styles.pbar}>
-                  <i />
-                </div>
-                <div className={styles.rl}>
-                  <Icon name="home" style={{ width: 18, height: 18, strokeWidth: 2.4 }} />
-                  AGENTIA
-                </div>
-                <div className={styles.shot}>
-                  <svg viewBox="0 0 90 190" preserveAspectRatio="xMidYMid slice">
-                    <rect width="90" height="190" fill="#bfe3f2" />
-                    <rect y="120" width="90" height="70" fill="#7bbf8f" />
-                    <path d="M10 130V80l35-25 35 25v50z" fill="#fff" />
-                    <rect x="38" y="100" width="14" height="30" fill="#0A8F5C" />
-                  </svg>
-                </div>
-                <div className={styles.shot}>
-                  <svg viewBox="0 0 90 190" preserveAspectRatio="xMidYMid slice">
-                    <rect width="90" height="190" fill="#e9e2d6" />
-                    <rect y="130" width="90" height="60" fill="#b98d62" />
-                    <rect x="10" y="100" width="70" height="35" rx="8" fill="#2f6f57" />
-                    <circle cx="65" cy="45" r="14" fill="#f4d58d" />
-                  </svg>
-                </div>
-                <div className={styles.shot}>
-                  <svg viewBox="0 0 90 190" preserveAspectRatio="xMidYMid slice">
-                    <rect width="90" height="190" fill="#dfe8ea" />
-                    <rect x="10" y="40" width="70" height="60" fill="#bfe3f2" stroke="#fff" strokeWidth="3" />
-                    <rect y="125" width="90" height="65" fill="#cfcfcf" />
-                    <rect x="20" y="110" width="50" height="22" rx="4" fill="#fff" />
-                  </svg>
-                </div>
-                <div className={styles.ov}>
-                  <small>Casa moderna en Luque</small>
-                  <b>USD 185.000</b>
-                </div>
-              </div>
-            </div>
-            <div className={cn(styles.rv, styles.r, styles.d2)}>
-              <span className={styles.pro}>✦ Plan Pro</span>
-              <h2 className={styles.secTitle} style={{ fontSize: "clamp(32px,4vw,48px)", marginTop: 16 }}>
-                Reels listos para redes, <span className={styles.em}>generados con IA.</span>
-              </h2>
-              <p className={styles.secSub}>
-                Convertí cualquier propiedad en un video vertical para Instagram, TikTok y WhatsApp. Agentes y
-                afiliados tienen contenido listo para compartir.
-              </p>
-              <div className={styles.list}>
-                {reelList.map((item) => (
-                  <div key={item}>
-                    <Icon name="check" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
