@@ -476,10 +476,6 @@ export default function HomePage() {
 
           <div className={cn(styles.stage, styles.rv, styles.z, styles.d5)}>
             <div className={styles.screen} id="screen">
-              <div className={styles.bar}>
-                <i /><i /><i />
-                <div className={styles.url}>agentia.com.py</div>
-              </div>
               <div className={styles.ph} id="vid">
                 <video
                   id="introVideo"

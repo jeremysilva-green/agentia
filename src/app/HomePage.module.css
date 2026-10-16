@@ -361,31 +361,6 @@
   transform-origin: center top;
   transition: transform 0.1s linear;
 }
-.screen .bar {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 14px 16px;
-  border-bottom: 1px solid #ffffff10;
-  background: #121212;
-}
-.screen .bar i {
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #2c2c2c;
-}
-.screen .bar .url {
-  margin-left: 14px;
-  flex: 1;
-  max-width: 340px;
-  font-size: 12px;
-  color: var(--muted);
-  background: #1b1b1b;
-  border-radius: 8px;
-  padding: 6px 12px;
-  text-align: left;
-}
 .screen video,
 .screen .ph {
   display: block;
@@ -396,19 +371,22 @@
 }
 .ph {
   position: relative;
-  display: grid;
-  place-items: center;
   background:
     radial-gradient(circle at 30% 20%, #0a8f5c33, transparent 50%),
     radial-gradient(circle at 80% 80%, #13c47f1f, transparent 50%),
     #111;
 }
 .play {
-  /* The video sibling is position:absolute (needed to cover .ph edge to
-     edge); an absolutely-positioned element paints above an in-flow static
-     one regardless of DOM order, so without this the video — not this
-     button — was the one actually receiving clicks. */
-  position: relative;
+  /* Absolutely centered on .ph directly, rather than relying on .ph's own
+     grid centering — the video sibling is also position:absolute (needed
+     to cover .ph edge to edge) and, being positioned, paints above an
+     in-flow static sibling regardless of DOM order, so without this own
+     position+z-index the video (not this button) was the one actually
+     receiving clicks. */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1;
   width: 84px;
   height: 84px;
