@@ -153,11 +153,9 @@ export default function HomePage() {
       return obs;
     };
 
-    // Scroll-driven effects: progress bar, hero screen tilt, floating
-    // bubble parallax, timeline fill
+    // Scroll-driven effects: progress bar, hero screen tilt, timeline fill
     const prog = document.getElementById("prog");
     const screen = document.getElementById("screen");
-    const floats = document.querySelectorAll<HTMLElement>(`.${styles.float}[data-par]`);
     const timeline = document.getElementById("timeline");
     const tfill = document.getElementById("tfill");
     const tsteps = document.querySelectorAll<HTMLElement>(`.${styles.tstep}`);
@@ -169,9 +167,6 @@ export default function HomePage() {
         const r = screen.getBoundingClientRect();
         const p = Math.min(Math.max(1 - r.top / innerHeight, 0), 1);
         screen.style.transform = `rotateX(${Math.max(18 - p * 30, 0)}deg) scale(${0.94 + Math.min(p, 1) * 0.06})`;
-        floats.forEach((f) => {
-          f.style.transform = `translateY(${y * parseFloat(f.dataset.par || "0")}px)`;
-        });
       }
       if (timeline && tfill) {
         const tr = timeline.getBoundingClientRect();
@@ -480,50 +475,6 @@ export default function HomePage() {
           </div>
 
           <div className={cn(styles.stage, styles.rv, styles.z, styles.d5)}>
-            <div className={cn(styles.float, styles.f1)} data-par="-0.12">
-              <div className={styles.bob} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <div className={styles.fi}>
-                  <Icon name="msg" />
-                </div>
-                <div>
-                  <b>Nuevo lead</b>
-                  <span>desde el chat de tu propiedad</span>
-                </div>
-              </div>
-            </div>
-            <div className={cn(styles.float, styles.f2)} data-par="-0.2">
-              <div className={styles.bob} style={{ display: "flex", gap: 12, alignItems: "center", animationDelay: "-1.5s" }}>
-                <div className={styles.fi}>
-                  <Icon name="cal" />
-                </div>
-                <div>
-                  <b>Visita agendada</b>
-                  <span>Sábado · 10:30</span>
-                </div>
-              </div>
-            </div>
-            <div className={cn(styles.float, styles.f3)} data-par="-0.08">
-              <div className={styles.bob} style={{ display: "flex", gap: 12, alignItems: "center", animationDelay: "-3s" }}>
-                <div className={styles.fi}>
-                  <Icon name="share" />
-                </div>
-                <div>
-                  <b>+12 afiliados</b>
-                  <span>compartiendo tu propiedad</span>
-                </div>
-              </div>
-            </div>
-            <div className={cn(styles.float, styles.f4)} data-par="-0.16">
-              <div className={styles.bob} style={{ display: "flex", gap: 12, alignItems: "center", animationDelay: "-2s" }}>
-                <div className={styles.fi}>
-                  <Icon name="pen" />
-                </div>
-                <div>
-                  <b>Contrato firmado</b>
-                  <span>desde el celular</span>
-                </div>
-              </div>
-            </div>
             <div className={styles.screen} id="screen">
               <div className={styles.bar}>
                 <i /><i /><i />
