@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { countUnreadMlsNotices } from "@/lib/data/mlsNotices";
 import type { AffiliateSectionView, PanelSectionView } from "@/types/domain";
 
 const EPOCH = "1970-01-01T00:00:00.000Z";
@@ -13,7 +14,7 @@ type AgentPanelSection = PanelSectionView["section"];
 export async function getPanelNotifications(agentId: string): Promise<Record<AgentPanelSection, boolean>> {
   const supabase = await createClient();
 
-  const [{ data: views }, leads, solicitudes, chats, agendamientos, acuerdos] = await Promise.all([
+  const [{ data: views }, leads, solicitudes, chats, agendamientos, acuerdos, unreadAvisos] = await Promise.all([
     supabase.from("panel_section_views").select("section, seen_at").eq("agent_id", agentId),
     supabase.from("leads").select("created_at").eq("agent_id", agentId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("client_requests").select("created_at").eq("agent_id", agentId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
@@ -27,6 +28,7 @@ export async function getPanelNotifications(agentId: string): Promise<Record<Age
       .order("owner_signed_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    countUnreadMlsNotices(agentId),
   ]);
 
   const seenAt = new Map((views ?? []).map((v) => [v.section, v.seen_at]));
@@ -39,6 +41,11 @@ export async function getPanelNotifications(agentId: string): Promise<Record<Age
     chats: isNew(chats.data?.updated_at, "chats"),
     agendamientos: isNew(agendamientos.data?.created_at, "agendamientos"),
     acuerdos: isNew(acuerdos.data?.owner_signed_at, "acuerdos"),
+    // Shape-different from every other section here: a count of unread
+    // notices, not a latest-timestamp-vs-seen_at comparison — per-item read
+    // state (mls_notices.read_at) means a single MAX(created_at) check
+    // would wrongly clear the dot while older notices are still unread.
+    avisos: unreadAvisos > 0,
   };
 }
 

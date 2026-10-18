@@ -523,7 +523,7 @@ export interface Database {
           id: string;
           agent_id: string;
           status: "pending" | "trialing" | "active" | "past_due" | "canceled";
-          plan: "basico" | "pro" | "fundador" | null;
+          plan: "basico" | "pro" | "fundador" | "mls" | null;
           period_start: string | null;
           period_end: string | null;
           trial_ends_at: string | null;
@@ -537,7 +537,7 @@ export interface Database {
           id?: string;
           agent_id: string;
           status: "pending" | "trialing" | "active" | "past_due" | "canceled";
-          plan?: "basico" | "pro" | "fundador" | null;
+          plan?: "basico" | "pro" | "fundador" | "mls" | null;
           period_start?: string | null;
           period_end?: string | null;
           trial_ends_at?: string | null;
@@ -575,7 +575,7 @@ export interface Database {
           dlocal_go_tipo: "checkout" | "recurrente" | null;
           amount: number;
           currency: string;
-          plan: "basico" | "pro" | "fundador" | null;
+          plan: "basico" | "pro" | "fundador" | "mls" | null;
           status: "initiated" | "approved" | "rejected" | "error";
           raw_response: Json | null;
           error_message: string | null;
@@ -600,7 +600,7 @@ export interface Database {
           dlocal_go_tipo?: "checkout" | "recurrente" | null;
           amount: number;
           currency?: string;
-          plan?: "basico" | "pro" | "fundador" | null;
+          plan?: "basico" | "pro" | "fundador" | "mls" | null;
           status: "initiated" | "approved" | "rejected" | "error";
           raw_response?: Json | null;
           error_message?: string | null;
@@ -920,12 +920,12 @@ export interface Database {
       panel_section_views: {
         Row: {
           agent_id: string;
-          section: "leads" | "solicitudes" | "chats" | "agendamientos" | "acuerdos";
+          section: "leads" | "solicitudes" | "chats" | "agendamientos" | "acuerdos" | "avisos";
           seen_at: string;
         };
         Insert: {
           agent_id: string;
-          section: "leads" | "solicitudes" | "chats" | "agendamientos" | "acuerdos";
+          section: "leads" | "solicitudes" | "chats" | "agendamientos" | "acuerdos" | "avisos";
           seen_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["panel_section_views"]["Insert"]>;
@@ -1299,6 +1299,145 @@ export interface Database {
           },
         ];
       };
+      mls_rule_versions: {
+        Row: {
+          id: string;
+          version: number;
+          body: string;
+          published_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          version: number;
+          body: string;
+          published_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["mls_rule_versions"]["Insert"]>;
+        Relationships: [];
+      };
+      mls_rule_acceptances: {
+        Row: {
+          id: string;
+          user_id: string;
+          rule_version_id: string;
+          accepted_at: string;
+          ip_address: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          rule_version_id: string;
+          accepted_at?: string;
+          ip_address?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["mls_rule_acceptances"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mls_rule_acceptances_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mls_rule_acceptances_rule_version_id_fkey";
+            columns: ["rule_version_id"];
+            isOneToOne: false;
+            referencedRelation: "mls_rule_versions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mls_memberships: {
+        Row: {
+          id: string;
+          user_id: string;
+          ci: string;
+          agency_name: string | null;
+          status: "active" | "inactive" | "removed";
+          accepted_rule_version_id: string | null;
+          activated_at: string | null;
+          removed_at: string | null;
+          removed_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          ci: string;
+          agency_name?: string | null;
+          status?: "active" | "inactive" | "removed";
+          accepted_rule_version_id?: string | null;
+          activated_at?: string | null;
+          removed_at?: string | null;
+          removed_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["mls_memberships"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mls_memberships_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mls_notices: {
+        Row: {
+          id: string;
+          recipient_user_id: string;
+          type: "membership_activated" | "membership_deactivated";
+          title: string;
+          body: string;
+          listing_id: string | null;
+          registration_id: string | null;
+          showing_id: string | null;
+          closing_id: string | null;
+          event_at: string;
+          created_at: string;
+          read_at: string | null;
+          email_sent_at: string | null;
+          email_error: string | null;
+          receipt_storage_path: string | null;
+        };
+        Insert: {
+          id?: string;
+          recipient_user_id: string;
+          type: "membership_activated" | "membership_deactivated";
+          title: string;
+          body: string;
+          listing_id?: string | null;
+          registration_id?: string | null;
+          showing_id?: string | null;
+          closing_id?: string | null;
+          event_at: string;
+          read_at?: string | null;
+          email_sent_at?: string | null;
+          email_error?: string | null;
+          receipt_storage_path?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["mls_notices"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mls_notices_recipient_user_id_fkey";
+            columns: ["recipient_user_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mls_notices_listing_id_fkey";
+            columns: ["listing_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -1325,6 +1464,10 @@ export interface Database {
       refund_ai_credit: {
         Args: { p_agent_id: string };
         Returns: undefined;
+      };
+      join_mls: {
+        Args: { p_ci: string; p_agency_name: string | null; p_rule_version_id: string; p_ip: string | null };
+        Returns: string;
       };
     };
     Enums: Record<string, never>;

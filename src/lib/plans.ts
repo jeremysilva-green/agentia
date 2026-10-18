@@ -1,4 +1,4 @@
-export type PlanId = "basico" | "pro" | "fundador";
+export type PlanId = "basico" | "pro" | "fundador" | "mls";
 
 export type Plan = {
   id: PlanId;
@@ -71,14 +71,22 @@ export const PLANS: Record<PlanId, Plan> = {
       "Precio exclusivo para los primeros 100 agentes. Todo lo del plan Pro, a precio reducido mientras mantengas activa tu suscripción.",
     features: PRO_FEATURES,
   },
+  mls: {
+    id: "mls",
+    eyebrow: "AGENTIA MLS",
+    name: "Plan MLS",
+    price: 300000,
+    tagline: "Todo lo de Pro, más acceso a la red de cooperación MLS entre agentes de distintas agencias.",
+    features: [...PRO_FEATURES, "Acceso a la red de cooperación MLS"],
+  },
 };
 
-export const PLAN_ORDER: PlanId[] = ["basico", "pro", "fundador"];
+export const PLAN_ORDER: PlanId[] = ["basico", "pro", "fundador", "mls"];
 
 export const FUNDADOR_SEAT_LIMIT = 100;
 
 export function isPlanId(value: unknown): value is PlanId {
-  return value === "basico" || value === "pro" || value === "fundador";
+  return value === "basico" || value === "pro" || value === "fundador" || value === "mls";
 }
 
 // Every Pro/Fundador-gated feature (AI photo enhance, marketing video,
@@ -92,7 +100,18 @@ export function hasActiveProAccess(
   subscription: { plan?: string | null; status?: string | null } | null | undefined
 ): boolean {
   if (!subscription) return false;
-  const planOk = subscription.plan === "pro" || subscription.plan === "fundador";
+  // Plan MLS includes everything Pro has, plus the MLS network — see
+  // hasActiveMlsAccess() for the MLS-specific check.
+  const planOk = subscription.plan === "pro" || subscription.plan === "fundador" || subscription.plan === "mls";
+  const statusOk = subscription.status === "active" || subscription.status === "trialing";
+  return planOk && statusOk;
+}
+
+export function hasActiveMlsAccess(
+  subscription: { plan?: string | null; status?: string | null } | null | undefined
+): boolean {
+  if (!subscription) return false;
+  const planOk = subscription.plan === "mls";
   const statusOk = subscription.status === "active" || subscription.status === "trialing";
   return planOk && statusOk;
 }

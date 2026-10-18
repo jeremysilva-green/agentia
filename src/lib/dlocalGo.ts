@@ -12,11 +12,17 @@ const DLOCAL_GO_BASE =
 const PRODUCTION_PLANS = {
   pro: { planId: 25309, subscribeToken: "yBfmoPAoyHP3SInj2Vz1sQbTYSOJHLr1" },
   fundador: { planId: 25311, subscribeToken: "tIteWr0dYA5URqWwTvmOWnkXNNSzG3VL" },
+  // Confirmed via GET /v1/subscription/plan/all: "Agentia MLS (Multi-Listing)",
+  // PYG 300000/month, active.
+  mls: { planId: 25793, subscribeToken: "f3rUlIJM3BpF3enOJU2zsxeJjRBjwlLF" },
 } as const;
 
 const SANDBOX_PLANS = {
   pro: { planId: 9127, subscribeToken: "BTXe8BkFQ6yCIdbqC9nCsIqNJXzhe4U0" },
   fundador: { planId: 9126, subscribeToken: "JeSsQlVx7IiKBbWXUwEeQvzTRycKLrb7" },
+  // Confirmed via GET /v1/subscription/plan/all: "Agentia MLS (Multi-Listing)",
+  // PYG 300000/month, active.
+  mls: { planId: 9287, subscribeToken: "3o4G9fRvbYKLKjdFnnZ9VEBhXoakN8bW" },
 } as const;
 
 export const DLOCAL_GO_PLANS = process.env.DLOCAL_GO_ENV === "production" ? PRODUCTION_PLANS : SANDBOX_PLANS;

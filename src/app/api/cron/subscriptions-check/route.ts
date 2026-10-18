@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { deactivateSubscription } from "@/lib/subscriptions/deactivate";
 
 const REMINDER_WINDOW_DAYS = 5;
 
@@ -33,13 +34,16 @@ async function runSubscriptionsCheck() {
 
   const { data: lapsed } = await service
     .from("subscriptions")
-    .select("id, agent_id")
+    .select("id, agent_id, plan")
     .eq("status", "active")
     .lt("period_end", today);
 
   for (const subscription of lapsed ?? []) {
-    await service.from("subscriptions").update({ status: "past_due" }).eq("id", subscription.id);
-    await service.from("agent_profiles").update({ is_active: false }).eq("id", subscription.agent_id);
+    await deactivateSubscription(service, {
+      subscriptionId: subscription.id,
+      agentId: subscription.agent_id,
+      plan: subscription.plan,
+    });
   }
 
   return {

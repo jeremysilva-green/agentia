@@ -18,6 +18,7 @@ import {
   Bell,
   FileSignature,
   LayoutDashboard,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
@@ -39,6 +40,8 @@ const agentNavItems: { href: string; label: string; icon: typeof Home; notifyKey
     dataTour: "tour-agendamientos",
   },
   { href: "/panel/acuerdos", label: "Acuerdo Privado", icon: FileSignature, notifyKey: "acuerdos" },
+  { href: "/panel/avisos", label: copy.panel.avisos, icon: Bell, notifyKey: "avisos" },
+  { href: "/panel/mls", label: "MLS", icon: Globe },
   { href: "/panel/suscripcion", label: copy.panel.subscription, icon: CreditCard },
   { href: "/panel/vista-global", label: copy.panel.vistaGlobal, icon: LayoutDashboard },
   { href: "/panel/perfil", label: copy.profile.title, icon: UserRound, dataTour: "tour-perfil" },

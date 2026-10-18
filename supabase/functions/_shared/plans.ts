@@ -4,8 +4,9 @@
 // is free and never reaches these charge paths in normal operation (see
 // selectPlan() in src/lib/actions/subscription.ts), but is included here
 // for type completeness.
-export const PLAN_PRICES_PYG: Record<"basico" | "pro" | "fundador", number> = {
+export const PLAN_PRICES_PYG: Record<"basico" | "pro" | "fundador" | "mls", number> = {
   basico: 0,
   pro: 199000,
   fundador: 149000,
+  mls: 300000,
 };

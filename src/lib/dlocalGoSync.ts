@@ -8,6 +8,8 @@ import {
   type DlocalGoSubscription,
 } from "@/lib/dlocalGo";
 import { restoreHiddenPropertiesOnUpgrade } from "@/lib/actions/properties";
+import { deactivateSubscription } from "@/lib/subscriptions/deactivate";
+import { createMlsNotice } from "@/lib/notices/createMlsNotice";
 
 const PERIOD_DAYS = 30;
 
@@ -15,6 +17,50 @@ function addDays(date: Date, days: number): Date {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
+}
+
+type ServiceClient = ReturnType<typeof createServiceClient>;
+
+// Mirror of deactivateSubscription's MLS branch, for the reactivation case
+// (an agent whose Plan MLS lapsed pays again). Only reactivates a membership
+// that lapsed from "active" (never one that's "removed" — that status is
+// permanent, see 0067's comment) and only if the agent's accepted Reglamento
+// version is still the current one; if a new version published while they
+// were lapsed, leave membership inactive and let their next /panel/mls
+// visit prompt a re-accept, rather than silently reactivating against a
+// stale acceptance.
+async function reactivateMlsMembership(service: ServiceClient, agentId: string): Promise<void> {
+  const { data: membership } = await service
+    .from("mls_memberships")
+    .select("id, status, accepted_rule_version_id")
+    .eq("user_id", agentId)
+    .maybeSingle();
+  if (!membership || membership.status !== "inactive") return;
+
+  const { data: latestVersion } = await service
+    .from("mls_rule_versions")
+    .select("id")
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!latestVersion || membership.accepted_rule_version_id !== latestVersion.id) return;
+
+  const { data: updated } = await service
+    .from("mls_memberships")
+    .update({ status: "active", activated_at: new Date().toISOString() })
+    .eq("id", membership.id)
+    .eq("status", "inactive")
+    .select("id")
+    .maybeSingle();
+  if (!updated) return;
+
+  await createMlsNotice({
+    recipientUserId: agentId,
+    type: "membership_activated",
+    title: "Ya sos miembro del MLS",
+    body: "Tu Plan MLS volvió a estar activo, así que tu membresía del MLS se reactivó automáticamente.",
+    eventAt: new Date(),
+  });
 }
 
 // Links a dLocal subscription to the agent whose checkout created it, in
@@ -170,9 +216,16 @@ export async function syncDlocalGoSubscriptions(): Promise<DlocalGoSyncSummary> 
         if (!wasActive && (subscription.plan === "pro" || subscription.plan === "fundador")) {
           await restoreHiddenPropertiesOnUpgrade(subscription.agent_id);
         }
+
+        if (!wasActive && subscription.plan === "mls") {
+          await reactivateMlsMembership(service, subscription.agent_id);
+        }
       } else if (latest.status === "DECLINED") {
-        await service.from("subscriptions").update({ status: "past_due" }).eq("id", subscription.id);
-        await service.from("agent_profiles").update({ is_active: false }).eq("id", subscription.agent_id);
+        await deactivateSubscription(service, {
+          subscriptionId: subscription.id,
+          agentId: subscription.agent_id,
+          plan: subscription.plan,
+        });
       }
     }
   }

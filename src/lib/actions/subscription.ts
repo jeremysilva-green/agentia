@@ -85,15 +85,34 @@ export async function selectPlan(planId: PlanId): Promise<SelectPlanState> {
   }
 
   if (subscription.dlocal_go_subscription_id) {
-    return { error: "Cancelá tu plan actual antes de cambiar a otro plan pago." };
+    // Plan MLS is pitched as "everything in Pro, plus the network," so
+    // switching into or out of it shouldn't force the usual cancel-first
+    // detour other paid-to-paid switches (e.g. pro<->fundador) still
+    // require. Deactivate the old dLocal Go subscription first — same call
+    // already used for the ->basico path above — then fall through to the
+    // normal pending->active flow for the new plan.
+    const isMlsSwap = planId === "mls" || subscription.plan === "mls";
+    if (!isMlsSwap) {
+      return { error: "Cancelá tu plan actual antes de cambiar a otro plan pago." };
+    }
+    if (subscription.plan === "pro" || subscription.plan === "fundador" || subscription.plan === "mls") {
+      try {
+        await deactivateDlocalGoSubscription(DLOCAL_GO_PLANS[subscription.plan].planId, subscription.dlocal_go_subscription_id);
+      } catch {
+        return { error: "No se pudo cancelar la suscripción anterior. Intentá de nuevo." };
+      }
+    }
   }
 
   // "pending" until dLocal Go confirms the first charge — otherwise an
   // abandoned checkout would leave the row saying plan="pro" while status
   // is still whatever it was before (e.g. "active" from a free Básico plan).
+  // dlocal_go_subscription_id is cleared here too (not just on the ->basico
+  // path) so a swap out of an existing paid plan doesn't leave a stale id
+  // around to confuse the next dlocal-go-sync run.
   const { error } = await service
     .from("subscriptions")
-    .update({ plan: planId, status: "pending" })
+    .update({ plan: planId, status: "pending", dlocal_go_subscription_id: null })
     .eq("id", subscription.id);
   if (error) return { error: "No se pudo actualizar el plan. Intentá de nuevo." };
 
