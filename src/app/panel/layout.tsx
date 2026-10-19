@@ -23,7 +23,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const notifications = await getPanelNotifications(user.id);
 
   return (
-    <div className="panel-dark relative min-h-screen">
+    <div className="panel-dark relative min-h-full">
       <div className="relative z-10 mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 font-sans sm:px-6 lg:flex-row lg:items-start">
         <aside className="lg:w-[264px] lg:shrink-0">
           <PanelNav variant="agent" notifications={notifications} />

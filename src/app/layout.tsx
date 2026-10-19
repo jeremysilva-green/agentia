@@ -48,7 +48,7 @@ export default function RootLayout({
       className={`${inter.variable} ${clashDisplay.variable} ${clashDisplayLight.variable} ${rubik.variable} h-full antialiased`}
       style={{ colorScheme: "light" }}
     >
-      <body className="min-h-full flex flex-col bg-white font-sans text-slate-900">
+      <body className="h-full flex flex-col bg-white font-sans text-slate-900">
         <NavBar />
         <OnboardingTour />
         <main className="flex-1">{children}</main>

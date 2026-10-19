@@ -74,7 +74,7 @@ function StepTracker({ step }: { step: 1 | 2 | 3 }) {
         const done = n < step;
         const current = n === step;
         return (
-          <div key={n} className="flex items-center gap-2.5 text-[13px]">
+          <div key={n} className="flex flex-col items-center gap-1.5 text-center sm:flex-row sm:gap-2.5 sm:text-left">
             <span
               className={cn(
                 "grid h-7 w-7 shrink-0 place-items-center rounded-full border text-[12px] font-semibold",
@@ -87,7 +87,7 @@ function StepTracker({ step }: { step: 1 | 2 | 3 }) {
             >
               {done ? <Check size={14} /> : n}
             </span>
-            <span className={cn("whitespace-nowrap", done || current ? "text-[#e6e6e6]" : "text-[var(--muted)]")}>{label}</span>
+            <span className={cn("text-[11px] leading-tight sm:text-[13px]", done || current ? "text-[#e6e6e6]" : "text-[var(--muted)]")}>{label}</span>
           </div>
         );
       })}
@@ -179,7 +179,7 @@ export function AcuerdosList({ agreements, autoOpenId }: { agreements: PrivateAg
                             </p>
                           </div>
                         </div>
-                        <div className="flex shrink-0 flex-wrap items-center gap-2">
+                        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                           <CopyLinkButton shareCode={agreement.share_code} />
                           <a
                             href={`/imprimir-acuerdo/${agreement.id}`}

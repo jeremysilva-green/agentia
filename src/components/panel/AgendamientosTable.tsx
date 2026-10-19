@@ -15,39 +15,62 @@ function dateFmt(value: string) {
 
 function AgendamientosForMonth({ rows }: { rows: AgendamientoRow[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--ink-2)]">
-      <div className="overflow-x-auto">
-        <table className="w-full table-fixed text-left text-xs">
-          <thead className="border-b border-[var(--line)] bg-white/[0.04] text-[11px] font-bold tracking-wide text-[#8d8d8d] uppercase">
-            <tr>
-              <th className="w-[24%] px-4 py-3 font-bold">{copy.panel.agendamientosClient}</th>
-              <th className="w-[24%] px-4 py-3 font-bold">{copy.panel.agendamientosProperty}</th>
-              <th className="w-[22%] px-4 py-3 font-bold">{copy.panel.agendamientosSchedule}</th>
-              <th className="w-[15%] px-4 py-3 font-bold">{copy.panel.agendamientosStatus}</th>
-              <th className="w-[15%] px-4 py-3 font-bold">{copy.panel.chatDate}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-white/[0.05]">
-            {rows.map((row) => (
-              <tr key={row.id} className="align-top transition-colors hover:bg-white/[0.03]">
-                <td className="px-4 py-3">
-                  <p className="font-medium break-words text-white">{row.client_name}</p>
-                  <p className="text-[var(--muted)]">{row.client_phone}</p>
-                </td>
-                <td className="px-4 py-3 break-words text-[#cfcfcf]">{row.property_title}</td>
-                <td className="px-4 py-3 text-[#cfcfcf]">
-                  {DAY_OF_WEEK_LABELS[row.day_of_week]} {row.start_time.slice(0, 5)}–{row.end_time.slice(0, 5)}
-                </td>
-                <td className="px-4 py-3">
-                  <AgendamientoStatusSelect agendamientoId={row.id} status={row.status} />
-                </td>
-                <td className="px-4 py-3 text-[var(--muted)]">{dateFmt(row.created_at)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <>
+      {/* Mobile: stacked cards */}
+      <div className="flex flex-col gap-3 sm:hidden">
+        {rows.map((row) => (
+          <div key={row.id} className="flex flex-col gap-2.5 rounded-2xl border border-[var(--line)] bg-[var(--ink-2)] p-4 text-xs">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate font-medium text-white">{row.client_name}</p>
+                <p className="truncate text-[var(--muted)]">{row.client_phone}</p>
+              </div>
+              <span className="shrink-0 text-[11px] whitespace-nowrap text-[var(--muted)]">{dateFmt(row.created_at)}</span>
+            </div>
+            <p className="truncate text-[#cfcfcf]">{row.property_title}</p>
+            <p className="text-[#cfcfcf]">
+              {DAY_OF_WEEK_LABELS[row.day_of_week]} {row.start_time.slice(0, 5)}–{row.end_time.slice(0, 5)}
+            </p>
+            <AgendamientoStatusSelect agendamientoId={row.id} status={row.status} />
+          </div>
+        ))}
       </div>
-    </div>
+
+      {/* Desktop: table */}
+      <div className="hidden overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--ink-2)] sm:block">
+        <div className="overflow-x-auto">
+          <table className="w-full table-fixed text-left text-xs">
+            <thead className="border-b border-[var(--line)] bg-white/[0.04] text-[11px] font-bold tracking-wide text-[#8d8d8d] uppercase">
+              <tr>
+                <th className="w-[24%] px-4 py-3 font-bold">{copy.panel.agendamientosClient}</th>
+                <th className="w-[24%] px-4 py-3 font-bold">{copy.panel.agendamientosProperty}</th>
+                <th className="w-[22%] px-4 py-3 font-bold">{copy.panel.agendamientosSchedule}</th>
+                <th className="w-[15%] px-4 py-3 font-bold">{copy.panel.agendamientosStatus}</th>
+                <th className="w-[15%] px-4 py-3 font-bold">{copy.panel.chatDate}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.05]">
+              {rows.map((row) => (
+                <tr key={row.id} className="align-top transition-colors hover:bg-white/[0.03]">
+                  <td className="px-4 py-3">
+                    <p className="font-medium break-words text-white">{row.client_name}</p>
+                    <p className="text-[var(--muted)]">{row.client_phone}</p>
+                  </td>
+                  <td className="px-4 py-3 break-words text-[#cfcfcf]">{row.property_title}</td>
+                  <td className="px-4 py-3 text-[#cfcfcf]">
+                    {DAY_OF_WEEK_LABELS[row.day_of_week]} {row.start_time.slice(0, 5)}–{row.end_time.slice(0, 5)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <AgendamientoStatusSelect agendamientoId={row.id} status={row.status} />
+                  </td>
+                  <td className="px-4 py-3 text-[var(--muted)]">{dateFmt(row.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   );
 }
 
