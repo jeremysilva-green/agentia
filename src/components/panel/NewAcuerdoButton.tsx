@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FileSignature } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Plus } from "lucide-react";
 import { createAgentAgreement } from "@/lib/actions/privateAgreements";
 
 export function NewAcuerdoButton() {
@@ -24,12 +23,17 @@ export function NewAcuerdoButton() {
   }
 
   return (
-    <>
-      <Button size="sm" variant="secondary" onClick={handleClick} disabled={isPending}>
-        <FileSignature size={16} />
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={isPending}
+        className="group inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--em)] px-4.5 text-[14.5px] font-semibold text-white shadow-[0_12px_34px_-12px_var(--em-glow)] transition-colors hover:bg-[var(--em-2)] disabled:opacity-60"
+      >
+        <Plus size={18} className="transition-transform duration-300 group-hover:rotate-90" />
         {isPending ? "Generando..." : "Acuerdo Privado"}
-      </Button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
-    </>
+      </button>
+      {error && <p className="text-xs text-[#ff8a8a]">{error}</p>}
+    </div>
   );
 }

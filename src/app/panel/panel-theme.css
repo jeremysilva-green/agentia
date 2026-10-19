@@ -1,0 +1,239 @@
+/* Dark/emerald theme scoped to /panel only — never touches the global
+   prussian/sage/snow tokens in globals.css, which NavBar/Footer and the
+   rest of the site depend on. */
+
+.panel-dark {
+  --ink: #0e0e0e;
+  --ink-2: #151515;
+  --ink-3: #1c1c1c;
+  --line: #262626;
+  --em: #0a8f5c;
+  --em-2: #13c47f;
+  --em-glow: rgba(19, 196, 127, 0.32);
+  --muted: #9a9a9a;
+  --text: #ededed;
+
+  position: relative;
+  background: var(--ink);
+  color: var(--text);
+}
+
+.panel-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#ffffff10 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.panel-dark::after {
+  content: "";
+  position: absolute;
+  left: -10%;
+  bottom: -30%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, #0a8f5c22, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* scroll-reveal (mirrors the mockups' .rv / .rv.in) */
+.panel-dark .panel-reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.8s ease,
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.panel-dark .panel-reveal-in {
+  opacity: 1;
+  transform: none;
+}
+.panel-dark .panel-reveal-d1 {
+  transition-delay: 0.06s;
+}
+.panel-dark .panel-reveal-d2 {
+  transition-delay: 0.14s;
+}
+.panel-dark .panel-reveal-d3 {
+  transition-delay: 0.22s;
+}
+.panel-dark .panel-reveal-d4 {
+  transition-delay: 0.3s;
+}
+
+/* mouse-tracked spotlight hover glow (mirrors the mockups' spotlight cards) */
+.panel-dark .panel-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+.panel-dark .panel-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 0%), #13c47f1f, transparent 45%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  z-index: 0;
+}
+.panel-dark .panel-spotlight:hover::before {
+  opacity: 1;
+}
+
+/* pulsing live-status dot (mirrors the mockups' ::before ping) */
+@keyframes panel-ping {
+  0% {
+    box-shadow: 0 0 0 0 var(--em-glow);
+  }
+  70% {
+    box-shadow: 0 0 0 9px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.panel-dark .panel-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--em-2);
+  animation: panel-ping 2s infinite;
+}
+/* same pulsing glow, without forcing a dot's size/background — for
+   wrapping an existing shape (e.g. the Acuerdo Privado step tracker's
+   "current" circle). */
+.panel-dark .panel-pulse-dot-ring {
+  animation: panel-ping 2s infinite;
+}
+
+@keyframes panel-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+.panel-dark .panel-spin {
+  animation: panel-spin 5s linear infinite;
+}
+
+/* decorative empty-state illustrations (Solicitudes, Agendamientos, Avisos…) */
+@keyframes panel-ring {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+.panel-dark .panel-illo-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 88px;
+  height: 88px;
+  margin: -44px 0 0 -44px;
+  border-radius: 50%;
+  border: 1.2px solid var(--em-2);
+  animation: panel-ring 3s ease-out infinite;
+  opacity: 0;
+}
+.panel-dark .panel-illo-ring.d2 {
+  animation-delay: 1.5s;
+}
+
+@keyframes panel-bob {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.panel-dark .panel-bob {
+  animation: panel-bob 4s ease-in-out infinite;
+}
+
+@keyframes panel-drop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(14px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(22px);
+    opacity: 0;
+  }
+}
+.panel-dark .panel-drop {
+  animation: panel-drop 3.4s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+.panel-dark .panel-drop.d2 {
+  animation-delay: 1.7s;
+}
+
+@keyframes panel-swing {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  68% {
+    transform: rotate(14deg);
+  }
+  76% {
+    transform: rotate(-12deg);
+  }
+  84% {
+    transform: rotate(8deg);
+  }
+  92% {
+    transform: rotate(-4deg);
+  }
+}
+.panel-dark .panel-swing {
+  transform-origin: 50% 20%;
+  animation: panel-swing 3.2s ease-in-out infinite;
+}
+
+/* pulsing SVG ring (MLS network diagram's hub pulse) */
+@keyframes panel-svg-pulse {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+.panel-dark .panel-svg-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: panel-svg-pulse 3s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-dark .panel-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .panel-dark .panel-pulse-dot,
+  .panel-dark .panel-pulse-dot-ring,
+  .panel-dark .panel-spin,
+  .panel-dark .panel-illo-ring,
+  .panel-dark .panel-bob,
+  .panel-dark .panel-drop,
+  .panel-dark .panel-swing,
+  .panel-dark .panel-svg-pulse {
+    animation: none !important;
+  }
+}

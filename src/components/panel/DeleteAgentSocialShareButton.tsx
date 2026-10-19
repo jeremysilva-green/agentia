@@ -26,7 +26,7 @@ export function DeleteAgentSocialShareButton({ shareId }: { shareId: string }) {
         onClick={() => setConfirmOpen(true)}
         disabled={isPending}
         aria-label="Eliminar enlace"
-        className="inline-flex items-center justify-center rounded-md border border-red-200 p-1.5 text-red-600 hover:bg-red-50 disabled:opacity-60"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#ff5a5a33] bg-[#ff5a5a0d] text-[#ff7a7a] transition-colors hover:border-[#ff5a5a] hover:bg-[#ff5a5a] hover:text-white disabled:opacity-60"
       >
         <Trash2 size={13} />
       </button>

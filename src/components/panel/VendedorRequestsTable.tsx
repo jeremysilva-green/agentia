@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { MessageCircle, Download } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { MessageCircle, Download, Mail, Inbox } from "lucide-react";
+import { PanelBadge } from "@/components/panel/theme/PanelBadge";
+import { EmptyState } from "@/components/panel/theme/EmptyState";
 import { ClientRequestActions } from "@/components/panel/ClientRequestActions";
 import { DeleteClientRequestButton } from "@/components/panel/DeleteClientRequestButton";
 import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
@@ -13,14 +14,9 @@ import { CLIENT_REQUEST_STATUS_LABELS } from "@/lib/constants/clientRequests";
 import { copy } from "@/lib/copy";
 import type { ClientRequest } from "@/types/domain";
 
-const statusTone = { pending: "neutral", approved: "success", rejected: "danger" } as const;
-const statusClassName = {
-  pending: "border-red-200! bg-red-50! text-red-700!",
-  approved: "border-emerald-200! bg-emerald-50! text-emerald-700!",
-  rejected: undefined,
-} as const;
+const statusTone = { pending: "amber", approved: "emerald", rejected: "red" } as const;
 
-const th = "px-3 py-2.5 font-medium";
+const th = "px-3 py-2.5 font-bold";
 const td = "px-3 py-2.5 align-top";
 
 function Actions({ row }: { row: ClientRequest }) {
@@ -33,7 +29,7 @@ function Actions({ row }: { row: ClientRequest }) {
       {row.status === "approved" && row.resulting_property_id && (
         <Link
           href={`/panel/propiedades/${row.resulting_property_id}/editar`}
-          className="text-[11px] font-medium text-emerald-700 hover:underline"
+          className="text-[11px] font-medium text-[var(--em-2)] hover:underline"
         >
           {copy.panel.solicitudesViewDraft} →
         </Link>
@@ -45,7 +41,7 @@ function Actions({ row }: { row: ClientRequest }) {
               href={reportUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 hover:text-slate-900"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#cfcfcf] hover:text-white"
             >
               <Download size={12} />
               {copy.panel.downloadReport}
@@ -61,9 +57,9 @@ function Actions({ row }: { row: ClientRequest }) {
             </a>
           </>
         ) : (
-          <p className="text-[11px] text-slate-400">{copy.panel.solicitudesReportPending}</p>
+          <p className="text-[11px] text-[var(--muted)]">{copy.panel.solicitudesReportPending}</p>
         ))}
-      {row.status === "rejected" && <span className="text-slate-300">—</span>}
+      {row.status === "rejected" && <span className="text-[var(--muted)]">—</span>}
     </div>
   );
 }
@@ -78,21 +74,19 @@ function VendedorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
           const contactMessage = `Hola ${row.full_name}! Te escribo por tu propiedad en ${row.city} que nos ofreciste en Agentia.`;
 
           return (
-            <div key={row.id} className="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-white p-4 text-xs">
+            <div key={row.id} className="flex flex-col gap-3 rounded-2xl border border-[var(--line)] bg-[var(--ink-2)] p-4 text-xs">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-slate-900">{row.full_name}</p>
-                  <p className="truncate text-slate-500">{row.phone}</p>
+                  <p className="truncate font-medium text-white">{row.full_name}</p>
+                  <p className="truncate text-[var(--muted)]">{row.phone}</p>
                 </div>
-                <Badge tone={statusTone[row.status]} className={statusClassName[row.status]}>
-                  {CLIENT_REQUEST_STATUS_LABELS[row.status]}
-                </Badge>
+                <PanelBadge tone={statusTone[row.status]}>{CLIENT_REQUEST_STATUS_LABELS[row.status]}</PanelBadge>
               </div>
 
-              <div className="text-slate-700">
+              <div className="text-[#cfcfcf]">
                 <p>{propertyType ? PROPERTY_TYPE_LABELS[propertyType].es : "—"}</p>
-                <p className="text-slate-500">{row.city}</p>
-                <p className="text-slate-500">
+                <p className="text-[var(--muted)]">{row.city}</p>
+                <p className="text-[var(--muted)]">
                   {row.price != null ? `${row.currency} ${Number(row.price).toLocaleString("es-PY")}` : "—"}
                 </p>
               </div>
@@ -117,10 +111,10 @@ function VendedorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
       </div>
 
       {/* Desktop: table */}
-      <div className="hidden overflow-hidden rounded-2xl border border-emerald-200 bg-white sm:block">
+      <div className="hidden overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--ink-2)] sm:block">
         <div className="max-h-[480px] overflow-y-auto">
           <table className="w-full table-fixed text-left text-xs">
-            <thead className="sticky top-0 z-10 bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
+            <thead className="sticky top-0 z-10 border-b border-[var(--line)] bg-white/[0.04] text-[11px] font-bold tracking-wide text-[#8d8d8d] uppercase">
               <tr>
                 <th className={`${th} w-[25%]`}>{copy.panel.solicitudesContact}</th>
                 <th className={`${th} w-[21%]`}>{copy.panel.solicitudesType}</th>
@@ -129,16 +123,16 @@ function VendedorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
                 <th className={`${th} w-[6%]`} />
               </tr>
             </thead>
-            <tbody className="divide-y divide-emerald-100">
+            <tbody className="divide-y divide-white/[0.05]">
               {rows.map((row) => {
                 const propertyType = row.property_type as PropertyType | null;
                 const contactMessage = `Hola ${row.full_name}! Te escribo por tu propiedad en ${row.city} que nos ofreciste en Agentia.`;
 
                 return (
-                  <tr key={row.id}>
+                  <tr key={row.id} className="transition-colors hover:bg-white/[0.03]">
                     <td className={td}>
-                      <p className="truncate font-medium text-slate-900">{row.full_name}</p>
-                      <p className="truncate text-slate-500">{row.phone}</p>
+                      <p className="truncate font-medium text-white">{row.full_name}</p>
+                      <p className="truncate text-[var(--muted)]">{row.phone}</p>
                       <a
                         href={buildWhatsAppUrl(row.phone, contactMessage)}
                         target="_blank"
@@ -149,17 +143,15 @@ function VendedorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
                         {copy.panel.solicitudesContactWhatsapp}
                       </a>
                     </td>
-                    <td className={td + " text-slate-700"}>
+                    <td className={td + " text-[#cfcfcf]"}>
                       <p className="truncate">{propertyType ? PROPERTY_TYPE_LABELS[propertyType].es : "—"}</p>
-                      <p className="truncate text-slate-500">{row.city}</p>
-                      <p className="truncate text-slate-500">
+                      <p className="truncate text-[var(--muted)]">{row.city}</p>
+                      <p className="truncate text-[var(--muted)]">
                         {row.price != null ? `${row.currency} ${Number(row.price).toLocaleString("es-PY")}` : "—"}
                       </p>
                     </td>
                     <td className={td}>
-                      <Badge tone={statusTone[row.status]} className={statusClassName[row.status]}>
-                        {CLIENT_REQUEST_STATUS_LABELS[row.status]}
-                      </Badge>
+                      <PanelBadge tone={statusTone[row.status]}>{CLIENT_REQUEST_STATUS_LABELS[row.status]}</PanelBadge>
                     </td>
                     <td className={td}>
                       <Actions row={row} />
@@ -178,12 +170,26 @@ function VendedorRequestsForMonth({ rows }: { rows: ClientRequest[] }) {
   );
 }
 
+function VendedorEmptyIllustration() {
+  return (
+    <div className="relative h-[110px] w-[150px]">
+      <span className="panel-illo-ring" />
+      <span className="panel-illo-ring d2" />
+      <Mail size={26} className="panel-drop absolute top-2 left-[42%] -translate-x-1/2 text-[var(--em-2)]" />
+      <Mail size={20} className="panel-drop d2 absolute top-2 left-[62%] -translate-x-1/2 text-[var(--em)]" />
+      <Inbox size={58} strokeWidth={1.4} className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[#333]" />
+    </div>
+  );
+}
+
 export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        {copy.panel.solicitudesVendedorEmpty}
-      </div>
+      <EmptyState
+        illustration={<VendedorEmptyIllustration />}
+        message={copy.panel.solicitudesVendedorEmpty}
+        hint="Te avisamos cuando llegue la primera"
+      />
     );
   }
 
@@ -192,6 +198,7 @@ export function VendedorRequestsTable({ rows }: { rows: ClientRequest[] }) {
       rows={rows}
       getDate={(r) => r.created_at}
       renderGroup={(monthRows) => <VendedorRequestsForMonth rows={monthRows} />}
+      dark
     />
   );
 }

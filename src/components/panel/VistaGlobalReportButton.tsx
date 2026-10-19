@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Download } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
 
 export function VistaGlobalReportButton() {
@@ -35,19 +34,17 @@ export function VistaGlobalReportButton() {
   }
 
   return (
-    <div className="flex flex-col items-start gap-1">
-      <Button
+    <div className="flex flex-col items-end gap-1">
+      <button
         type="button"
-        size="sm"
-        variant="secondary"
         onClick={handleClick}
         disabled={isPending}
-        className="border-emerald-600! bg-emerald-600! text-white! hover:bg-emerald-700!"
+        className="inline-flex h-11 items-center gap-2 rounded-xl bg-[var(--em)] px-4.5 text-[14.5px] font-semibold text-white shadow-[0_12px_34px_-12px_var(--em-glow)] transition-colors hover:bg-[var(--em-2)] disabled:opacity-60"
       >
-        <Download size={14} />
+        <Download size={16} />
         {isPending ? copy.panel.downloadingMonthlyReport : copy.panel.downloadVistaGlobalReport}
-      </Button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      </button>
+      {error && <p className="text-xs text-[#ff8a8a]">{error}</p>}
     </div>
   );
 }

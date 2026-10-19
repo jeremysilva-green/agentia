@@ -1,12 +1,15 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { useMemo, useState } from "react";
+import { ExternalLink, Phone, Hash, Leaf, Search, Check } from "lucide-react";
+import { PanelBadge } from "@/components/panel/theme/PanelBadge";
+import { EmptyState } from "@/components/panel/theme/EmptyState";
 import { LeadStatusSelect } from "@/components/panel/LeadStatusSelect";
 import { CloseDealButton } from "@/components/panel/CloseDealButton";
 import { PayAffiliateModal } from "@/components/panel/PayAffiliateModal";
 import { CommissionAgreementModal } from "@/components/panel/CommissionAgreementModal";
 import { MonthYearAccordion } from "@/components/panel/MonthYearAccordion";
+import { normalizeText } from "@/lib/text";
 import { copy } from "@/lib/copy";
 import type { LeadPipelineRow } from "@/types/domain";
 
@@ -14,6 +17,11 @@ const AFFILIATE_PAYMENT_WINDOW_DAYS = 180;
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString("es-PY", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?";
 }
 
 // Counts down from the moment the deal closed (commission_confirmed_at) so
@@ -26,54 +34,95 @@ function daysRemainingToPay(commissionConfirmedAt: string) {
   return Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
 }
 
+function CodeChip({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title="Copiar código"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-black px-2 py-1 font-mono text-[11px] font-semibold text-[#bdbdbd] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
+    >
+      {copied ? <Check size={11} /> : <Hash size={11} />}
+      {code}
+    </button>
+  );
+}
+
 function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug: string }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-white">
-      <div className="max-h-[480px] overflow-auto">
-        <table className="w-full min-w-[980px] text-left text-xs">
-          <thead className="sticky top-0 z-10 bg-emerald-600 text-[11px] uppercase tracking-wide text-white">
+    <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--ink-2)]">
+      <div className="max-h-[560px] overflow-auto">
+        <table className="w-full min-w-[920px] text-left text-xs">
+          <thead className="sticky top-0 z-10 border-b border-[var(--line)] bg-white/[0.04] text-[11px] font-bold tracking-wide text-[#8d8d8d] uppercase">
           <tr>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.buyer}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.properties}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.date}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.traffic}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.referralCode}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.status}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-medium">{copy.panel.agreement}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-bold">{copy.panel.buyer}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-bold">
+              {copy.panel.properties} · {copy.panel.referralCode}
+            </th>
+            <th className="whitespace-nowrap px-4 py-3 font-bold">
+              {copy.panel.date} · {copy.panel.traffic}
+            </th>
+            <th className="whitespace-nowrap px-4 py-3 font-bold">{copy.panel.status}</th>
+            <th className="whitespace-nowrap px-4 py-3 font-bold">{copy.panel.agreement}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-emerald-100">
+        <tbody className="divide-y divide-white/[0.05]">
           {rows.map((row) => (
-            <tr key={row.id}>
-              <td className="whitespace-nowrap px-4 py-3">
-                <p className="font-medium text-slate-900">{row.buyer_name}</p>
-                <p className="text-slate-500">{row.buyer_phone}</p>
+            <tr key={row.id} className="align-middle transition-colors hover:bg-white/[0.03]">
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[var(--em-2)] to-[var(--em)] text-[13px] font-bold text-white">
+                    {initials(row.buyer_name)}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold whitespace-nowrap text-white">{row.buyer_name}</p>
+                    <p className="flex items-center gap-1 text-[12.5px] whitespace-nowrap text-[var(--muted)]">
+                      <Phone size={11} />
+                      {row.buyer_phone}
+                    </p>
+                  </div>
+                </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-900">
-                <span className="inline-flex items-center gap-1.5">
-                  {row.property_title}
-                  {row.property_id && (
-                    <a
-                      href={`/agentes/${agentSlug}/propiedades/${row.property_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-slate-400 transition-colors hover:text-emerald-600"
-                      title="Ver propiedad"
-                    >
-                      <ExternalLink size={12} />
-                    </a>
-                  )}
-                </span>
+              <td className="px-4 py-3">
+                <div className="flex flex-col items-start gap-1.5">
+                  <span className="inline-flex items-center gap-1.5 text-sm font-medium whitespace-nowrap text-[#e8e8e8]">
+                    {row.property_title}
+                    {row.property_id && (
+                      <a
+                        href={`/agentes/${agentSlug}/propiedades/${row.property_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[var(--muted)] transition-colors hover:text-[var(--em-2)]"
+                        title="Ver propiedad"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    )}
+                  </span>
+                  <CodeChip code={row.referral_code} />
+                </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-500">{formatDate(row.referral_date)}</td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-700">
-                {row.affiliate_link_id ? copy.panel.trafficAffiliate : copy.panel.trafficOrganic}
+              <td className="px-4 py-3">
+                <div className="flex flex-col items-start gap-1.5">
+                  <span className="text-sm whitespace-nowrap text-[#e0e0e0]">{formatDate(row.referral_date)}</span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-[#cfcfcf]">
+                    <Leaf size={11} className="text-[var(--em-2)]" />
+                    {row.affiliate_link_id ? copy.panel.trafficAffiliate : copy.panel.trafficOrganic}
+                  </span>
+                </div>
               </td>
-              <td className="whitespace-nowrap px-4 py-3 text-slate-500">{row.referral_code}</td>
-              <td className="whitespace-nowrap px-4 py-3">
+              <td className="px-4 py-3">
                 <LeadStatusSelect leadId={row.id} status={row.status} hasAffiliate={Boolean(row.affiliate_link_id)} />
               </td>
-              <td className="whitespace-nowrap px-4 py-3">
+              <td className="px-4 py-3">
                 {!row.commission_confirmed_at && row.affiliate_link_id && (
                   <CloseDealButton
                     leadId={row.id}
@@ -83,7 +132,7 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                 )}
                 {row.commission_confirmed_at && row.affiliate_link_id && !row.commission_agreement_accepted_at && (
                   <>
-                    <span className="text-[11px] font-medium text-amber-700">Falta aceptar el acuerdo</span>
+                    <span className="text-[11px] font-medium text-amber-400">Falta aceptar el acuerdo</span>
                     <CommissionAgreementModal leadId={row.id} />
                   </>
                 )}
@@ -91,7 +140,7 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                   <div className="flex flex-col items-start gap-1">
                     {row.commission_paid_at ? (
                       <>
-                        <Badge tone="success">{copy.panel.commissionPaid}</Badge>
+                        <PanelBadge tone="emerald">{copy.panel.commissionPaid}</PanelBadge>
                         <PayAffiliateModal
                           leadId={row.id}
                           paid
@@ -106,7 +155,7 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                       </>
                     ) : (
                       <>
-                        <span className="text-[11px] font-medium text-amber-700">
+                        <span className="text-[11px] font-medium text-amber-400">
                           {copy.panel.payAffiliateDaysRemaining(daysRemainingToPay(row.commission_confirmed_at!))}
                         </span>
                         <PayAffiliateModal
@@ -135,19 +184,45 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
 }
 
 export function LeadsTable({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug: string }) {
-  if (rows.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        {copy.panel.leadsEmpty}
-      </div>
+  const [query, setQuery] = useState("");
+
+  const filteredRows = useMemo(() => {
+    const q = normalizeText(query.trim());
+    if (!q) return rows;
+    return rows.filter((row) =>
+      [row.buyer_name, row.buyer_phone, row.property_title, row.referral_code].some((field) =>
+        normalizeText(field ?? "").includes(q)
+      )
     );
+  }, [rows, query]);
+
+  if (rows.length === 0) {
+    return <EmptyState message={copy.panel.leadsEmpty} />;
   }
 
   return (
-    <MonthYearAccordion
-      rows={rows}
-      getDate={(r) => r.referral_date}
-      renderGroup={(monthRows) => <LeadsForMonth rows={monthRows} agentSlug={agentSlug} />}
-    />
+    <div className="flex flex-col gap-4">
+      <label className="flex h-11 w-full items-center gap-2 rounded-xl border border-[var(--line)] bg-[var(--ink-2)] px-3.5 text-[var(--muted)] sm:w-72 sm:self-end">
+        <Search size={16} />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar nombre, teléfono, código…"
+          className="w-full bg-transparent text-sm text-white placeholder:text-[var(--muted)] focus:outline-none"
+        />
+      </label>
+
+      {filteredRows.length === 0 ? (
+        <EmptyState message="Sin resultados. Probá con otro nombre, teléfono o código." />
+      ) : (
+        <MonthYearAccordion
+          rows={filteredRows}
+          getDate={(r) => r.referral_date}
+          renderGroup={(monthRows) => <LeadsForMonth rows={monthRows} agentSlug={agentSlug} />}
+          dark
+        />
+      )}
+    </div>
   );
 }

@@ -3,8 +3,6 @@
 import { useEffect, useState, use as usePromise } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { callPagoparFunction } from "@/lib/pagoparFunctions";
 
 export default function CheckoutResultadoPage({ params }: { params: Promise<{ hash: string }> }) {
@@ -36,36 +34,40 @@ export default function CheckoutResultadoPage({ params }: { params: Promise<{ ha
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
-      <Card className="flex w-full flex-col items-center gap-4 p-8">
-        {state === "loading" && <Loader2 className="animate-spin text-slate-400" size={32} />}
+      <div className="flex w-full flex-col items-center gap-4 rounded-[26px] border border-[var(--line)] bg-[var(--ink-2)] p-8">
+        {state === "loading" && <Loader2 className="animate-spin text-[var(--muted)]" size={32} />}
 
         {state === "error" && (
           <>
-            <XCircle className="text-red-500" size={40} />
-            <p className="text-sm text-red-600">{error}</p>
+            <XCircle className="text-[#ff7a7a]" size={40} />
+            <p className="text-sm text-[#ff8a8a]">{error}</p>
           </>
         )}
 
         {state === "done" && paid && (
           <>
-            <CheckCircle2 className="text-emerald-500" size={40} />
-            <h1 className="font-display text-lg font-semibold text-slate-900">¡Pago confirmado!</h1>
-            <p className="text-sm text-slate-500">Tu suscripción está activa.</p>
+            <CheckCircle2 className="text-[var(--em-2)]" size={40} />
+            <h1 className="font-display text-lg font-semibold text-white">¡Pago confirmado!</h1>
+            <p className="text-sm text-[var(--muted)]">Tu suscripción está activa.</p>
           </>
         )}
 
         {state === "done" && !paid && (
           <>
-            <XCircle className="text-amber-500" size={40} />
-            <h1 className="font-display text-lg font-semibold text-slate-900">Pago pendiente o rechazado</h1>
-            <p className="text-sm text-slate-500">Si ya pagaste, esperá unos minutos y volvé a revisar.</p>
+            <XCircle className="text-amber-400" size={40} />
+            <h1 className="font-display text-lg font-semibold text-white">Pago pendiente o rechazado</h1>
+            <p className="text-sm text-[var(--muted)]">Si ya pagaste, esperá unos minutos y volvé a revisar.</p>
           </>
         )}
 
-        <Button type="button" size="sm" variant="secondary" onClick={() => router.push("/panel/suscripcion")}>
+        <button
+          type="button"
+          onClick={() => router.push("/panel/suscripcion")}
+          className="inline-flex h-10 items-center rounded-xl border border-[var(--line)] bg-white/[0.04] px-4 text-sm font-semibold text-[#d5d5d5] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
+        >
           Volver a Suscripción
-        </Button>
-      </Card>
+        </button>
+      </div>
     </div>
   );
 }

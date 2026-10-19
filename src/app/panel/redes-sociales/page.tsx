@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Lock } from "lucide-react";
+import { Lock, ArrowRight, Crown } from "lucide-react";
 import { getAgentSocialSharesForAgent } from "@/lib/data/agentSocialShares";
 import { listMarketingVideosForAgent } from "@/lib/data/marketingVideos";
 import { AgentSocialSharesTable } from "@/components/panel/AgentSocialSharesTable";
@@ -8,6 +8,10 @@ import { MarketingVideosGrid } from "@/components/panel/MarketingVideosGrid";
 import { getAgentContext } from "@/lib/data/panel";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { hasActiveProAccess } from "@/lib/plans";
+import { Reveal } from "@/components/panel/theme/Reveal";
+import { EmptyState } from "@/components/panel/theme/EmptyState";
+import { PanelLinkButton } from "@/components/panel/theme/PanelButton";
+import { cn } from "@/lib/cn";
 
 export default async function RedesSocialesPage() {
   const ctx = await getAgentContext();
@@ -24,45 +28,91 @@ export default async function RedesSocialesPage() {
     <div className="flex flex-col gap-10">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="font-display text-2xl font-semibold text-white">Redes Sociales</h1>
-          <p className="text-sm text-slate-300">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--em-2)] uppercase">
+            <span className="panel-pulse-dot" />
+            Marketing
+          </div>
+          <h1 className="mt-1 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">Redes Sociales</h1>
+          <p className="text-[15px] text-[var(--muted)]">
             Enlaces cortos e imágenes promocionales que generaste para compartir tus propiedades.
           </p>
         </div>
-        <AgentSocialSharesTable rows={rows} siteUrl={getSiteUrl()} />
+        <Reveal>
+          <AgentSocialSharesTable rows={rows} siteUrl={getSiteUrl()} />
+        </Reveal>
       </div>
 
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1">
           <h2 className="font-display text-xl font-semibold text-white">Videos promocionales</h2>
-          <p className="text-sm text-slate-300">
+          <p className="text-[15px] text-[var(--muted)]">
             Videos de 10 segundos generados desde cada propiedad, listos para compartir en Instagram, TikTok y WhatsApp.
           </p>
         </div>
 
         {!eligibleForVideo ? (
-          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-neutral-700 bg-neutral-950 px-6 py-16 text-center">
-            <Lock size={32} className="text-emerald-400" />
-            <p className="max-w-sm text-sm text-slate-400">
-              Esta función está disponible para los planes Pro y Fundador. Mejorá tu plan para empezar a usarla.
-            </p>
-            <Link
-              href="/panel/suscripcion"
-              className="mt-2 inline-flex h-10 items-center justify-center rounded-lg bg-emerald-500 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-600"
-            >
-              Ver planes
-            </Link>
-          </div>
+          <Reveal>
+            <div className="relative min-h-[380px] overflow-hidden rounded-[26px] border border-[var(--line)] bg-[var(--ink-2)]">
+              <div aria-hidden className="flex items-center justify-center gap-5 p-8 opacity-50 blur-[6px]">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "aspect-[9/16] w-[150px] shrink-0 rounded-[22px] border-[5px] border-[#1d1d1d] bg-gradient-to-b from-[#143425] to-black",
+                      i === 1 && "-mt-5 w-[170px]"
+                    )}
+                  />
+                ))}
+              </div>
+              <div
+                className="absolute inset-0 z-10 flex items-center justify-center p-6 text-center"
+                style={{ background: "radial-gradient(60% 75% at 50% 50%, #0E0E0Ed9, #0E0E0E80 70%, transparent)" }}
+              >
+                <div className="max-w-md">
+                  <span className="mx-auto flex h-[62px] w-[62px] items-center justify-center rounded-[20px] border border-[#13c47f55] bg-[#13c47f1f] text-[var(--em-2)]">
+                    <Lock size={26} />
+                  </span>
+                  <p className="mt-5 text-[15.5px] text-[#c9c9c9]">
+                    Esta función está disponible para los planes <b className="text-white">Pro</b> y{" "}
+                    <b className="text-white">Fundador</b>. Mejorá tu plan para empezar a usarla.
+                  </p>
+                  <div className="mt-3.5 flex justify-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold tracking-wide text-white uppercase">
+                      <Crown size={13} className="text-[var(--em-2)]" />
+                      Pro
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold tracking-wide text-white uppercase">
+                      <Crown size={13} className="text-[var(--em-2)]" />
+                      Fundador
+                    </span>
+                  </div>
+                  <PanelLinkButton href="/panel/suscripcion" className="mt-5">
+                    Ver planes <ArrowRight size={17} />
+                  </PanelLinkButton>
+                </div>
+              </div>
+            </div>
+          </Reveal>
         ) : videos.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-10 text-center text-sm text-white/50">
-            Todavía no generaste ningún video. Generá uno desde &quot;Propiedades&quot;, con el botón &quot;Generar
-            video&quot; debajo de cada propiedad.{" "}
-            <Link href="/panel/propiedades" className="underline">
-              Ver mis propiedades
-            </Link>
-          </p>
+          <Reveal>
+            <EmptyState
+              message={
+                <>
+                  Todavía no generaste ningún video. Generá uno desde &quot;Propiedades&quot;, con el botón &quot;Generar
+                  video&quot; debajo de cada propiedad.
+                </>
+              }
+              action={
+                <Link href="/panel/propiedades" className="text-sm font-semibold text-[var(--em-2)] hover:text-white">
+                  Ver mis propiedades
+                </Link>
+              }
+            />
+          </Reveal>
         ) : (
-          <MarketingVideosGrid videos={videos} />
+          <Reveal>
+            <MarketingVideosGrid videos={videos} />
+          </Reveal>
         )}
       </div>
     </div>

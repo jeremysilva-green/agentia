@@ -34,7 +34,7 @@ export function ViewClientRequestModal({ row }: { row: ClientRequest }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-emerald-700"
+        className="inline-flex items-center gap-1 rounded-md bg-[var(--em)] px-2 py-1 text-[11px] font-medium text-white hover:bg-[var(--em-2)]"
       >
         <Eye size={11} />
         {copy.panel.solicitudesView}

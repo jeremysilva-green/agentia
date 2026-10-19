@@ -39,11 +39,11 @@ export function DlocalGoCheckoutButton({ label, plan }: { label: string; plan: s
         variant="secondary"
         onClick={handleClick}
         disabled={isPending || disabled}
-        className="border-emerald-400! bg-transparent! text-emerald-400! hover:border-emerald-500! hover:bg-emerald-500! hover:text-white!"
+        className="border-[var(--em)]! bg-[var(--em)]! text-white! hover:bg-[var(--em-2)]! hover:border-[var(--em-2)]!"
       >
         {isPending ? "Redirigiendo..." : label}
       </Button>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#ff8a8a]">{error}</p>}
     </div>
   );
 }

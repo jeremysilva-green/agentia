@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Check, Printer } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { Copy, Check, Printer, Calendar, ChevronDown, FileSignature, MapPin } from "lucide-react";
+import { cn } from "@/lib/cn";
+import { PanelBadge } from "@/components/panel/theme/PanelBadge";
+import { EmptyState } from "@/components/panel/theme/EmptyState";
 import { ViewAcuerdoButton } from "@/components/panel/ViewAcuerdoButton";
 import { DeleteAcuerdoButton } from "@/components/panel/DeleteAcuerdoButton";
 import type { PrivateAgreement } from "@/types/domain";
@@ -14,15 +16,12 @@ import type { PrivateAgreement } from "@/types/domain";
 // part. Signed timestamps are the real source of truth for the display.
 function getDisplayStatus(agreement: PrivateAgreement): {
   label: string;
-  className: string;
+  tone: "blue" | "amber" | "emerald";
+  step: 1 | 2 | 3;
 } {
-  if (!agreement.agent_signed_at) {
-    return { label: "Borrador", className: "border-sky-500/40! bg-sky-500/15! text-sky-300!" };
-  }
-  if (!agreement.owner_signed_at) {
-    return { label: "Pendiente del propietario", className: "border-red-500/40! bg-red-500/15! text-red-300!" };
-  }
-  return { label: "Completado", className: "border-emerald-500/40! bg-emerald-500/15! text-emerald-300!" };
+  if (!agreement.agent_signed_at) return { label: "Borrador", tone: "blue", step: 2 };
+  if (!agreement.owner_signed_at) return { label: "Pendiente del propietario", tone: "amber", step: 2 };
+  return { label: "Completado", tone: "emerald", step: 3 };
 }
 
 const dateFmt = (value: string) =>
@@ -54,11 +53,45 @@ function CopyLinkButton({ shareCode }: { shareCode: string }) {
       type="button"
       onClick={handleCopy}
       title={copied ? "¡Copiado!" : "Copiar enlace para el propietario"}
-      className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-white/5 px-2 py-1 text-[11px] font-medium text-white/80 hover:bg-white/10"
+      className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white/[0.04] px-3.5 text-[13.5px] font-semibold whitespace-nowrap text-[#d5d5d5] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
     >
-      {copied ? <Check size={12} /> : <Copy size={12} />}
+      {copied ? <Check size={14} /> : <Copy size={14} />}
       {copied ? "¡Copiado!" : "Copiar enlace"}
     </button>
+  );
+}
+
+function StepTracker({ step }: { step: 1 | 2 | 3 }) {
+  const steps: { n: 1 | 2 | 3; label: string }[] = [
+    { n: 1, label: "Generado" },
+    { n: 2, label: "Completa el propietario" },
+    { n: 3, label: "Firmado" },
+  ];
+
+  return (
+    <div className="grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-4">
+      {steps.map(({ n, label }) => {
+        const done = n < step;
+        const current = n === step;
+        return (
+          <div key={n} className="flex items-center gap-2.5 text-[13px]">
+            <span
+              className={cn(
+                "grid h-7 w-7 shrink-0 place-items-center rounded-full border text-[12px] font-semibold",
+                done
+                  ? "border-[var(--em)] bg-[var(--em)] text-white"
+                  : current
+                    ? "panel-pulse-dot-ring border-[var(--em-2)] text-[var(--em-2)]"
+                    : "border-[#333] bg-[var(--ink)] text-[var(--muted)]"
+              )}
+            >
+              {done ? <Check size={14} /> : n}
+            </span>
+            <span className={cn("whitespace-nowrap", done || current ? "text-[#e6e6e6]" : "text-[var(--muted)]")}>{label}</span>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -82,8 +115,8 @@ export function AcuerdosList({ agreements, autoOpenId }: { agreements: PrivateAg
   // redirected here from "Nuevo Acuerdo" and need to show that agreement.
   const defaultMonth = useMemo(() => {
     const openAgreement = autoOpenId ? agreements.find((a) => a.id === autoOpenId) : undefined;
-    return openAgreement ? monthKey(openAgreement.created_at) : null;
-  }, [agreements, autoOpenId]);
+    return openAgreement ? monthKey(openAgreement.created_at) : (months[0]?.key ?? null);
+  }, [agreements, autoOpenId, months]);
 
   const [expandedMonth, setExpandedMonth] = useState<string | null>(defaultMonth);
 
@@ -94,11 +127,7 @@ export function AcuerdosList({ agreements, autoOpenId }: { agreements: PrivateAg
   }, []);
 
   if (agreements.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-        Todavía no generaste ningún Acuerdo Privado.
-      </div>
-    );
+    return <EmptyState message="Todavía no generaste ningún Acuerdo Privado." />;
   }
 
   return (
@@ -112,11 +141,16 @@ export function AcuerdosList({ agreements, autoOpenId }: { agreements: PrivateAg
               onClick={() => setExpandedMonth(isExpanded ? null : m.key)}
               className={
                 isExpanded
-                  ? "self-start rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white"
-                  : "self-start rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-white/70 hover:bg-white/15 hover:text-white"
+                  ? "inline-flex w-fit items-center gap-2 self-start rounded-full border border-[var(--em-2)] bg-[var(--ink-2)] px-3.5 py-2 text-[13.5px] font-semibold text-[var(--em-2)]"
+                  : "inline-flex w-fit items-center gap-2 self-start rounded-full border border-[#13c47f44] bg-[var(--ink-2)] px-3.5 py-2 text-[13.5px] font-semibold text-[var(--em-2)]/80 hover:border-[#13c47f88] hover:text-[var(--em-2)]"
               }
             >
-              {m.label} ({m.items.length})
+              <Calendar size={15} />
+              {m.label}
+              <span className="grid min-w-[22px] place-items-center rounded-full bg-[var(--em)] px-1.5 py-0.5 text-[11px] text-white">
+                {m.items.length}
+              </span>
+              <ChevronDown size={14} className={cn("transition-transform", isExpanded && "rotate-180")} />
             </button>
 
             {isExpanded && (
@@ -124,37 +158,48 @@ export function AcuerdosList({ agreements, autoOpenId }: { agreements: PrivateAg
                 {m.items.map((agreement) => {
                   const displayStatus = getDisplayStatus(agreement);
                   return (
-                    <div
-                      key={agreement.id}
-                      className="flex flex-col gap-2 rounded-2xl border border-emerald-500/40 bg-neutral-900 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
-                    >
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-medium text-white">{agreement.owner1_name || "Propietario sin completar"}</p>
-                          <Badge className={displayStatus.className}>{displayStatus.label}</Badge>
+                    <div key={agreement.id} className="flex flex-col gap-4 rounded-[24px] border border-[var(--line)] bg-[var(--ink-2)] p-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-4">
+                          <span className="grid h-[50px] w-[50px] shrink-0 place-items-center rounded-2xl border border-white/10 bg-[var(--ink)] text-[var(--em-2)]">
+                            <FileSignature size={20} />
+                          </span>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="font-semibold text-white">{agreement.owner1_name || "Propietario sin completar"}</p>
+                              <PanelBadge tone={displayStatus.tone}>{displayStatus.label}</PanelBadge>
+                            </div>
+                            <p className="mt-1 flex items-center gap-1.5 text-xs text-[var(--muted)]">
+                              <MapPin size={12} className={agreement.property_city ? "text-[var(--em-2)]" : "text-amber-400"} />
+                              <span className={agreement.property_city ? undefined : "text-amber-400"}>
+                                {agreement.property_city || "Ciudad sin definir"}
+                              </span>
+                              <span className="h-[3px] w-[3px] rounded-full bg-[#555]" />
+                              Generado el {dateFmt(agreement.created_at)}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs text-slate-400">
-                          {agreement.property_city || "Ciudad sin definir"} · Generado el {dateFmt(agreement.created_at)}
-                        </p>
+                        <div className="flex shrink-0 flex-wrap items-center gap-2">
+                          <CopyLinkButton shareCode={agreement.share_code} />
+                          <a
+                            href={`/imprimir-acuerdo/${agreement.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white/[0.04] px-3.5 text-[13.5px] font-semibold text-[#d5d5d5] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
+                          >
+                            <Printer size={14} />
+                            Imprimir
+                          </a>
+                          <ViewAcuerdoButton
+                            agreement={agreement}
+                            open={openId === agreement.id}
+                            onOpenChange={(isOpen) => setOpenId(isOpen ? agreement.id : null)}
+                          />
+                          <DeleteAcuerdoButton agreementId={agreement.id} />
+                        </div>
                       </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <CopyLinkButton shareCode={agreement.share_code} />
-                        <a
-                          href={`/imprimir-acuerdo/${agreement.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-white/5 px-2 py-1 text-[11px] font-medium text-white/80 hover:bg-white/10"
-                        >
-                          <Printer size={12} />
-                          Imprimir
-                        </a>
-                        <ViewAcuerdoButton
-                          agreement={agreement}
-                          open={openId === agreement.id}
-                          onOpenChange={(isOpen) => setOpenId(isOpen ? agreement.id : null)}
-                        />
-                        <DeleteAcuerdoButton agreementId={agreement.id} />
-                      </div>
+
+                      <StepTracker step={displayStatus.step} />
                     </div>
                   );
                 })}

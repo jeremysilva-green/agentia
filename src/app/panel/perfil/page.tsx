@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AgentProfileForm } from "@/components/panel/AgentProfileForm";
+import { Reveal } from "@/components/panel/theme/Reveal";
 import { copy } from "@/lib/copy";
 
 export default async function AgentProfilePage() {
@@ -24,24 +25,30 @@ export default async function AgentProfilePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-white">{copy.profile.title}</h1>
-        <p className="text-sm text-slate-300">{copy.profile.agentSubtitle}</p>
+      <div>
+        <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--em-2)] uppercase">
+          <span className="panel-pulse-dot" />
+          Tu cuenta
+        </div>
+        <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">{copy.profile.title}</h1>
+        <p className="mt-2 text-[15px] text-[var(--muted)]">{copy.profile.agentSubtitle}</p>
       </div>
-      <AgentProfileForm
-        userId={user.id}
-        avatarUrl={profile?.avatar_url ?? null}
-        fullName={profile?.full_name ?? null}
-        phone={profile?.phone ?? null}
-        city={agentProfile?.city ?? null}
-        ruc={agentProfile?.ruc ?? null}
-        brandName={agentProfile?.brand_name ?? null}
-        logoUrl={agentProfile?.logo_url ?? null}
-        ci={profile?.ci ?? null}
-        address={agentProfile?.address ?? null}
-        sifenCityId={sifenCityId}
-        sifenCities={sifenCities ?? []}
-      />
+      <Reveal>
+        <AgentProfileForm
+          userId={user.id}
+          avatarUrl={profile?.avatar_url ?? null}
+          fullName={profile?.full_name ?? null}
+          phone={profile?.phone ?? null}
+          city={agentProfile?.city ?? null}
+          ruc={agentProfile?.ruc ?? null}
+          brandName={agentProfile?.brand_name ?? null}
+          logoUrl={agentProfile?.logo_url ?? null}
+          ci={profile?.ci ?? null}
+          address={agentProfile?.address ?? null}
+          sifenCityId={sifenCityId}
+          sifenCities={sifenCities ?? []}
+        />
+      </Reveal>
     </div>
   );
 }

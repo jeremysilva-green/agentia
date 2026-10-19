@@ -8,6 +8,13 @@ import {
   type AgendamientoStatus,
 } from "@/lib/constants/agendamientoStatus";
 
+const STATUS_COLOR: Record<AgendamientoStatus, string> = {
+  pending: "#f5b942",
+  confirmed: "#13c47f",
+  cancelled: "#ff6b6b",
+  completed: "#5aa9ff",
+};
+
 export function AgendamientoStatusSelect({
   agendamientoId,
   status,
@@ -33,21 +40,30 @@ export function AgendamientoStatusSelect({
     });
   }
 
+  const dotColor = STATUS_COLOR[current];
+
   return (
     <div className="flex flex-col gap-1">
-      <select
-        value={current}
-        onChange={handleChange}
-        disabled={isPending}
-        className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 outline-none transition-colors focus:border-emerald-500 disabled:opacity-60"
-      >
-        {AGENDAMIENTO_STATUS_VALUES.map((value) => (
-          <option key={value} value={value}>
-            {AGENDAMIENTO_STATUS_LABELS[value]}
-          </option>
-        ))}
-      </select>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      <div className="relative">
+        <span
+          className="pointer-events-none absolute top-1/2 left-3 h-2 w-2 -translate-y-1/2 rounded-full"
+          style={{ background: dotColor, boxShadow: `0 0 0 3px ${dotColor}40` }}
+        />
+        <select
+          value={current}
+          onChange={handleChange}
+          disabled={isPending}
+          style={{ borderColor: `${dotColor}66`, background: `${dotColor}1a` }}
+          className="h-9 min-w-[130px] appearance-none rounded-xl border pr-7 pl-7 text-[13px] font-semibold text-white outline-none transition-colors disabled:opacity-60"
+        >
+          {AGENDAMIENTO_STATUS_VALUES.map((value) => (
+            <option key={value} value={value} className="bg-[#151515] text-white">
+              {AGENDAMIENTO_STATUS_LABELS[value]}
+            </option>
+          ))}
+        </select>
+      </div>
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }

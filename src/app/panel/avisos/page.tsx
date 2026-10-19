@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listMlsNotices, type MlsNoticeFilter } from "@/lib/data/mlsNotices";
 import { AvisosList } from "@/components/panel/avisos/AvisosList";
 import { AvisosFilterPills } from "@/components/panel/avisos/AvisosFilterPills";
+import { Reveal } from "@/components/panel/theme/Reveal";
 import { copy } from "@/lib/copy";
 
 const VALID_FILTERS: MlsNoticeFilter[] = ["all", "listings", "buyers", "showings", "closings", "no_leidos"];
@@ -27,9 +28,19 @@ export default async function AvisosPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl font-semibold text-white">{copy.panel.avisos}</h1>
-      <AvisosFilterPills current={filter} />
-      <AvisosList notices={notices} />
+      <div>
+        <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--em-2)] uppercase">
+          <span className="panel-pulse-dot" />
+          Notificaciones
+        </div>
+        <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">{copy.panel.avisos}</h1>
+      </div>
+      <Reveal>
+        <AvisosFilterPills current={filter} />
+      </Reveal>
+      <Reveal delay={1}>
+        <AvisosList notices={notices} />
+      </Reveal>
     </div>
   );
 }

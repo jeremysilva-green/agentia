@@ -26,7 +26,7 @@ export function DeleteAcuerdoButton({ agreementId }: { agreementId: string }) {
         disabled={isPending}
         aria-label="Eliminar acuerdo"
         title="Eliminar acuerdo"
-        className="inline-flex items-center justify-center rounded-md border border-red-500/30 bg-white/5 p-1.5 text-red-400 hover:bg-red-500/10 disabled:opacity-60"
+        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#ff5a5a33] bg-[#ff5a5a0d] text-[#ff7a7a] transition-colors hover:border-[#ff5a5a] hover:bg-[#ff5a5a] hover:text-white disabled:opacity-60"
       >
         <Trash2 size={13} />
       </button>
@@ -38,7 +38,7 @@ export function DeleteAcuerdoButton({ agreementId }: { agreementId: string }) {
           onClick={() => setConfirmOpen(false)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-emerald-500/40 bg-neutral-900 p-5 shadow-xl"
+            className="w-full max-w-sm rounded-2xl border border-[#ff5a5a44] bg-[var(--ink-2)] p-5 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-start justify-between gap-3">
@@ -46,24 +46,24 @@ export function DeleteAcuerdoButton({ agreementId }: { agreementId: string }) {
               <button
                 type="button"
                 onClick={() => setConfirmOpen(false)}
-                className="shrink-0 text-white/40 transition-colors hover:text-white/70"
+                className="shrink-0 text-[var(--muted)] transition-colors hover:text-white"
               >
                 <X size={18} />
               </button>
             </div>
-            <p className="text-sm text-white/70">¿Eliminar este Acuerdo Privado? Esta acción no se puede deshacer.</p>
+            <p className="text-sm text-[#cfcfcf]">¿Eliminar este Acuerdo Privado? Esta acción no se puede deshacer.</p>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setConfirmOpen(false)}
-                className="rounded-lg border border-white/15 px-3 py-1.5 text-sm font-medium text-white/80 transition-colors hover:bg-white/5"
+                className="rounded-lg border border-[var(--line)] px-3 py-1.5 text-sm font-medium text-[#d5d5d5] transition-colors hover:border-[#4a4a4a] hover:text-white"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleConfirm}
-                className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                className="rounded-lg bg-[#ff5a5a] px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-[#ff6b6b]"
               >
                 Eliminar
               </button>

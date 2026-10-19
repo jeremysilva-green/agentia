@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/Card";
 import { niceMax, formatCompact } from "@/lib/chartMath";
 import type { MonthlyTrendPoint } from "@/lib/data/dashboard";
 
-const GREEN = "#059669"; // emerald-600, the app's brand accent
-const GREEN_WASH = "#a7f3d0"; // emerald-200, lighter step of the same ramp
-const GRID = "#e2e8f0"; // slate-200, recessive one-step-off-surface gray
-const AXIS_TEXT = "#64748b"; // slate-500, text token — never the series color
+const GREEN = "#13c47f"; // --em-2, the panel's brand accent on dark backgrounds
+const GREEN_WASH = "#13c47f33";
+const GRID = "#ffffff14"; // faint line on the dark --ink-2 card background
+const AXIS_TEXT = "#9a9a9a"; // --muted
 
 const CHART_WIDTH = 340;
 const CHART_HEIGHT = 190;
@@ -24,11 +23,11 @@ function ChartFrame({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="flex flex-col gap-1 border-emerald-100! bg-emerald-50! p-5">
-      <p className="text-sm font-semibold text-slate-900">{title}</p>
-      <p className="text-xs text-slate-500">{subtitle}</p>
+    <div className="flex flex-col gap-1 rounded-[22px] border border-[var(--line)] bg-[var(--ink-2)] p-5">
+      <p className="text-sm font-semibold text-white">{title}</p>
+      <p className="text-xs text-[var(--muted)]">{subtitle}</p>
       <div className="mt-2 w-full overflow-x-auto">{children}</div>
-    </Card>
+    </div>
   );
 }
 

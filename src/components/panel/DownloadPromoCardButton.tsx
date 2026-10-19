@@ -5,7 +5,9 @@ import { Download } from "lucide-react";
 import { downloadPromoCard } from "@/lib/downloadPromoCard";
 import { copy } from "@/lib/copy";
 
-export function DownloadPromoCardButton({ propertyId }: { propertyId: string }) {
+// `dark` is purely additive — existing callers that don't pass it keep the
+// default light look (e.g. the affiliate panel's AffiliateLinksTable).
+export function DownloadPromoCardButton({ propertyId, dark }: { propertyId: string; dark?: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState(false);
 
@@ -28,7 +30,11 @@ export function DownloadPromoCardButton({ propertyId }: { propertyId: string }) 
         disabled={isPending}
         title={isPending ? copy.affiliatePanel.downloadingImage : copy.affiliatePanel.downloadImage}
         aria-label={isPending ? copy.affiliatePanel.downloadingImage : copy.affiliatePanel.downloadImage}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60"
+        className={
+          dark
+            ? "inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--line)] text-[#cfcfcf] hover:border-[var(--em)] hover:text-[var(--em-2)] disabled:opacity-60"
+            : "inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-60"
+        }
       >
         <Download size={13} />
       </button>

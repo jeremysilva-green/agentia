@@ -12,6 +12,7 @@ export type RangeStats = {
   acuerdosSigned: number;
   salesPYG: number;
   salesUSD: number;
+  salesCount: number;
   affiliatesPaid: number;
 };
 
@@ -163,6 +164,7 @@ async function getRangeStats(agentId: string, rangeStart: Date, rangeEnd: Date):
     acuerdosSigned: acuerdosSigned ?? 0,
     salesPYG,
     salesUSD,
+    salesCount: soldRows?.length ?? 0,
     affiliatesPaid,
   };
 }

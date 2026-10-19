@@ -62,22 +62,22 @@ export function JoinMlsForm({
       </div>
 
       {reglamentoBody && (
-        <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed whitespace-pre-line text-slate-600">
+        <div className="max-h-56 overflow-y-auto rounded-xl border border-[var(--line)] bg-black/30 p-4 text-xs leading-relaxed whitespace-pre-line text-[#bdbdbd]">
           {reglamentoBody}
         </div>
       )}
 
-      <label className="flex items-start gap-2 text-sm text-slate-700">
+      <label className="flex items-start gap-2 text-sm text-[#cfcfcf]">
         <input
           type="checkbox"
           checked={accepted}
           onChange={(e) => setAccepted(e.target.checked)}
-          className="mt-0.5"
+          className="mt-0.5 accent-[var(--em)]"
         />
         {copy.mls.reglamentoCheckbox}
       </label>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[#ff8a8a]">{error}</p>}
 
       <Button type="submit" disabled={isPending || !accepted || !ci.trim()} className="self-start">
         {isPending ? copy.mls.joining : isReaccept ? copy.mls.reaccept : copy.mls.join}

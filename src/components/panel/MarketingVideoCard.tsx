@@ -68,31 +68,31 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
   }
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="relative overflow-hidden rounded-xl bg-slate-900" style={{ aspectRatio: "9 / 16" }}>
+    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-[var(--line)] bg-[var(--ink-2)] p-4">
+      <div className="relative overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "9 / 16" }}>
         <video src={url} muted loop playsInline preload="metadata" controls className="h-full w-full object-cover" />
       </div>
 
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <h3 className="truncate text-sm font-semibold text-slate-900">{video.property_title}</h3>
+          <h3 className="truncate text-sm font-semibold text-white">{video.property_title}</h3>
           {stale && (
-            <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <span className="shrink-0 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-300">
               Desactualizado
             </span>
           )}
         </div>
-        <p className="text-sm font-medium text-emerald-700">
+        <p className="text-sm font-medium text-[var(--em-2)]">
           {formatListingPrice(video.property_price, video.property_currency)}
         </p>
       </div>
 
-      <div className="flex items-start gap-2 rounded-lg bg-slate-50 p-2.5">
-        <p className="min-w-0 flex-1 break-words text-xs text-slate-600">{video.caption}</p>
+      <div className="flex items-start gap-2 rounded-lg bg-black/40 p-2.5">
+        <p className="min-w-0 flex-1 break-words text-xs text-[#bdbdbd]">{video.caption}</p>
         <button
           type="button"
           onClick={handleCopyCaption}
-          className="shrink-0 rounded-md p-1.5 text-slate-500 hover:bg-slate-200"
+          className="shrink-0 rounded-md p-1.5 text-[#9a9a9a] hover:bg-white/10 hover:text-white"
           title="Copiar texto"
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -104,7 +104,7 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
           <button
             type="button"
             onClick={() => handleShare("instagram")}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[#d5d5d5] hover:border-[var(--em)] hover:text-[var(--em-2)]"
           >
             <Camera size={13} />
             Reels
@@ -112,14 +112,14 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
           <button
             type="button"
             onClick={() => handleShare("tiktok")}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[#d5d5d5] hover:border-[var(--em)] hover:text-[var(--em-2)]"
           >
             TikTok
           </button>
           <button
             type="button"
             onClick={() => handleShare("whatsapp")}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[#d5d5d5] hover:border-[var(--em)] hover:text-[var(--em-2)]"
           >
             <MessageCircle size={13} />
             WhatsApp
@@ -127,7 +127,7 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
           <button
             type="button"
             onClick={() => downloadFile(url, filename)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[#d5d5d5] hover:border-[var(--em)] hover:text-[var(--em-2)]"
           >
             <Download size={13} />
             Descargar
@@ -137,14 +137,14 @@ export function MarketingVideoCard({ video }: { video: MarketingVideoRow }) {
           type="button"
           onClick={() => setConfirmOpen(true)}
           disabled={isPending}
-          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+          className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#ff5a5a33] px-2.5 py-1.5 text-xs font-medium text-[#ff8a8a] hover:bg-[#ff5a5a] hover:text-white"
         >
           <Trash2 size={13} />
           Eliminar
         </button>
       </div>
 
-      {shareError && <p className="text-xs text-amber-600">{shareError}</p>}
+      {shareError && <p className="text-xs text-amber-400">{shareError}</p>}
 
       <ConfirmModal
         open={confirmOpen}

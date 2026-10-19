@@ -1,13 +1,13 @@
-import { Badge } from "@/components/ui/Badge";
+import { PanelBadge } from "@/components/panel/theme/PanelBadge";
 import { copy } from "@/lib/copy";
 
 type Status = "pending" | "trialing" | "active" | "past_due" | "canceled" | null | undefined;
 
 const toneByStatus = {
-  pending: "warning",
-  trialing: "success",
-  active: "success",
-  past_due: "danger",
+  pending: "amber",
+  trialing: "emerald",
+  active: "emerald",
+  past_due: "red",
   canceled: "neutral",
 } as const;
 
@@ -23,8 +23,9 @@ export function SubscriptionStatusBadge({ status }: { status: Status }) {
   const key = status ?? "pending";
   const tone = toneByStatus[key as keyof typeof toneByStatus] ?? "neutral";
   return (
-    <Badge tone={tone} className={tone === "success" ? "border-emerald-200! bg-emerald-50! text-emerald-700!" : undefined}>
+    <PanelBadge tone={tone}>
+      {(key === "active" || key === "trialing") && <span className="panel-pulse-dot" />}
       {labelByStatus[key]}
-    </Badge>
+    </PanelBadge>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -14,11 +14,12 @@ import {
   Link2,
   UserRound,
   Menu,
-  ChevronDown,
   Bell,
   FileSignature,
   LayoutDashboard,
   Globe,
+  Crown,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
@@ -67,6 +68,30 @@ export function PanelNav({
   const pathname = usePathname();
   const current = navItems.find((item) => item.href === pathname);
 
+  const listRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLDivElement>(null);
+
+  // Sliding active-item pill, same measure-and-translate technique as the
+  // mockups' `movePill()`.
+  useLayoutEffect(() => {
+    function movePill() {
+      const list = listRef.current;
+      const pill = pillRef.current;
+      if (!list || !pill) return;
+      const active = list.querySelector<HTMLElement>('a[data-active="true"]');
+      if (!active) {
+        pill.style.opacity = "0";
+        return;
+      }
+      pill.style.opacity = "1";
+      pill.style.transform = `translateY(${active.offsetTop}px)`;
+      pill.style.height = `${active.offsetHeight}px`;
+    }
+    movePill();
+    window.addEventListener("resize", movePill);
+    return () => window.removeEventListener("resize", movePill);
+  }, [pathname, open]);
+
   function handleClick(notifyKey?: PanelSection) {
     setOpen(false);
     if (notifyKey && notifications?.[notifyKey] && !cleared.has(notifyKey)) {
@@ -85,49 +110,71 @@ export function PanelNav({
         type="button"
         onClick={() => setOpen((v) => !v)}
         data-tour="tour-panel-nav-mobile"
-        className="flex w-full items-center justify-between gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm font-medium text-white backdrop-blur-md lg:hidden"
+        aria-label={open ? "Cerrar menú" : current?.label ?? "Abrir menú"}
+        aria-expanded={open}
+        className="grid h-11 w-11 place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--ink-2)] text-white lg:hidden"
       >
-        <span className="flex items-center gap-2">
-          <Menu size={17} />
-          {current?.label ?? "Menú"}
-        </span>
-        <ChevronDown size={16} className={cn("transition-transform", open && "rotate-180")} />
+        <Menu size={19} />
       </button>
 
-      <nav
+      {open && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setOpen(false)} />}
+
+      <div
         className={cn(
-          "flex-col gap-1 lg:flex lg:border-none lg:bg-transparent lg:p-0 lg:backdrop-blur-none",
-          open
-            ? "mt-1 flex rounded-xl border border-white/15 bg-white/10 p-1.5 backdrop-blur-md"
-            : "hidden"
+          "lg:sticky lg:top-6 lg:block",
+          open ? "fixed inset-x-4 top-[72px] z-50" : "hidden"
         )}
       >
-        {navItems.map((item) => {
-          const showDot = Boolean(item.notifyKey && notifications?.[item.notifyKey] && !cleared.has(item.notifyKey));
-          return (
+        <div className="flex flex-col gap-1 rounded-2xl border border-[var(--line)] bg-[var(--ink-2)]/95 p-4 backdrop-blur-md">
+          <div ref={listRef} className="relative flex flex-col gap-0.5">
+            <div
+              ref={pillRef}
+              className="absolute inset-x-0 top-0 h-[42px] rounded-[13px] bg-gradient-to-r from-[#0a8f5c] to-[#0b7a50] opacity-0 shadow-[0_10px_30px_-12px_var(--em-glow)] transition-[transform,opacity] duration-300"
+            />
+            {navItems.map((item) => {
+              const isActive = item.href === pathname;
+              const showDot = Boolean(item.notifyKey && notifications?.[item.notifyKey] && !cleared.has(item.notifyKey));
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  data-active={isActive}
+                  onClick={() => handleClick(item.notifyKey)}
+                  data-tour={item.dataTour}
+                  className={cn(
+                    "relative z-10 flex h-[42px] shrink-0 items-center gap-3 rounded-[13px] px-3.5 text-[14.5px] font-medium transition-colors",
+                    isActive ? "text-white font-semibold" : "text-[#bdbdbd] hover:bg-white/[0.06] hover:text-white"
+                  )}
+                >
+                  <span className="relative flex items-center">
+                    <item.icon size={17} className={isActive ? "text-white" : "text-[#8a8a8a]"} />
+                    {showDot && (
+                      <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[var(--em-2)] ring-2 ring-[var(--ink-2)]" />
+                    )}
+                  </span>
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {variant === "agent" && (
             <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => handleClick(item.notifyKey)}
-              data-tour={item.dataTour}
-              className={cn(
-                "flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
-                item.href === pathname
-                  ? "bg-emerald-900 text-emerald-400"
-                  : "text-white/70 hover:bg-neutral-800 hover:text-white"
-              )}
+              href="/panel/suscripcion"
+              className="mt-3 rounded-[18px] border border-[#13c47f33] bg-gradient-to-br from-[#0a8f5c33] to-white/[0.02] p-4"
             >
-              <span className="relative flex items-center">
-                <item.icon size={17} />
-                {showDot && (
-                  <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-prussian" />
-                )}
+              <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                <Crown size={17} className="text-[var(--em-2)]" />
+                Pasate a Pro
               </span>
-              {item.label}
+              <p className="mt-1.5 text-[12.5px] text-[#a9b8b1]">Estadísticas avanzadas, propiedades ilimitadas y reportes en PDF.</p>
+              <span className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--em-2)]">
+                Ver plan Pro <ArrowRight size={15} />
+              </span>
             </Link>
-          );
-        })}
-      </nav>
+          )}
+        </div>
+      </div>
     </>
   );
 }

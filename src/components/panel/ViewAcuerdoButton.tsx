@@ -21,16 +21,21 @@ export function ViewAcuerdoButton({
     if (isControlled) onOpenChange?.(value);
     else setUncontrolledOpen(value);
   };
-  const label = agreement.status === "completed" ? "Ver Acuerdo" : "Completar Acuerdo";
+  const completed = agreement.status === "completed";
+  const label = completed ? "Ver Acuerdo" : "Completar Acuerdo";
 
   return (
     <>
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1 rounded-md border border-emerald-500/30 bg-white/5 px-2 py-1 text-[11px] font-medium text-white/80 hover:bg-white/10"
+        className={
+          completed
+            ? "inline-flex h-10 items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white/[0.04] px-3.5 text-[13.5px] font-semibold whitespace-nowrap text-[#d5d5d5] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
+            : "inline-flex h-10 items-center gap-1.5 rounded-xl bg-[var(--em)] px-3.5 text-[13.5px] font-semibold whitespace-nowrap text-white shadow-[0_10px_26px_-12px_var(--em-glow)] transition-colors hover:bg-[var(--em-2)]"
+        }
       >
-        <FileSignature size={11} />
+        <FileSignature size={14} />
         {label}
       </button>
       {open && <AgentAcuerdoModal agreement={agreement} onClose={() => setOpen(false)} />}

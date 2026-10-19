@@ -1390,7 +1390,7 @@ export interface Database {
         Row: {
           id: string;
           recipient_user_id: string;
-          type: "membership_activated" | "membership_deactivated";
+          type: "membership_activated" | "membership_deactivated" | "mls_listing_added" | "mls_listing_duplicate_blocked";
           title: string;
           body: string;
           listing_id: string | null;
@@ -1407,7 +1407,7 @@ export interface Database {
         Insert: {
           id?: string;
           recipient_user_id: string;
-          type: "membership_activated" | "membership_deactivated";
+          type: "membership_activated" | "membership_deactivated" | "mls_listing_added" | "mls_listing_duplicate_blocked";
           title: string;
           body: string;
           listing_id?: string | null;
@@ -1434,6 +1434,81 @@ export interface Database {
             columns: ["listing_id"];
             isOneToOne: false;
             referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mls_listings: {
+        Row: {
+          id: string;
+          property_id: string;
+          agent_id: string;
+          status: "active" | "removed";
+          authorization_type: "exclusiva" | "no_exclusiva";
+          authorization_signed_at: string;
+          authorization_expires_at: string | null;
+          authorization_storage_path: string;
+          cobroke_percent: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          agent_id: string;
+          status?: "active" | "removed";
+          authorization_type: "exclusiva" | "no_exclusiva";
+          authorization_signed_at: string;
+          authorization_expires_at?: string | null;
+          authorization_storage_path: string;
+          cobroke_percent: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["mls_listings"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mls_listings_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: true;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mls_listings_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      mls_listing_private: {
+        Row: {
+          id: string;
+          mls_listing_id: string;
+          owner_min_price: number | null;
+          exact_address: string | null;
+          showing_instructions: string | null;
+          documentation_status: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          mls_listing_id: string;
+          owner_min_price?: number | null;
+          exact_address?: string | null;
+          showing_instructions?: string | null;
+          documentation_status?: string | null;
+          notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["mls_listing_private"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "mls_listing_private_mls_listing_id_fkey";
+            columns: ["mls_listing_id"];
+            isOneToOne: true;
+            referencedRelation: "mls_listings";
             referencedColumns: ["id"];
           },
         ];

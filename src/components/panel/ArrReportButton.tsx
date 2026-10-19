@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import { Download, Lock } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
 
 export function ArrReportButton({ eligible, daysRemaining }: { eligible: boolean; daysRemaining: number }) {
@@ -36,27 +35,28 @@ export function ArrReportButton({ eligible, daysRemaining }: { eligible: boolean
 
   if (!eligible) {
     return (
-      <Button type="button" size="sm" variant="secondary" disabled className="opacity-60">
-        <Lock size={14} />
+      <span
+        aria-disabled="true"
+        className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-[var(--line)] bg-white/[0.03] px-3.5 text-[13.5px] font-semibold text-[var(--muted)]"
+      >
+        <Lock size={15} />
         {copy.panel.arrReportLocked(daysRemaining)}
-      </Button>
+      </span>
     );
   }
 
   return (
-    <div className="flex flex-col items-start gap-1">
-      <Button
+    <div className="flex flex-col items-end gap-1">
+      <button
         type="button"
-        size="sm"
-        variant="secondary"
         onClick={handleClick}
         disabled={isPending}
-        className="border-emerald-600! bg-emerald-600! text-white! hover:bg-emerald-700!"
+        className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl bg-[var(--em)] px-3.5 text-[13.5px] font-semibold text-white transition-colors hover:bg-[var(--em-2)] disabled:opacity-60"
       >
-        <Download size={14} />
+        <Download size={15} />
         {isPending ? copy.panel.downloadingMonthlyReport : copy.panel.arrReportGenerate}
-      </Button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      </button>
+      {error && <p className="text-xs text-[#ff8a8a]">{error}</p>}
     </div>
   );
 }

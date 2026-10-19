@@ -27,7 +27,7 @@ export function DeleteClientRequestButton({ requestId }: { requestId: string }) 
         disabled={isPending}
         aria-label="Eliminar solicitud"
         title="Eliminar solicitud"
-        className="inline-flex items-center justify-center rounded-md border border-red-200 bg-white p-1.5 text-red-500 hover:bg-red-50 disabled:opacity-60"
+        className="inline-flex items-center justify-center rounded-md border border-[#ff5a5a33] bg-[#ff5a5a0d] p-1.5 text-[#ff7a7a] transition-colors hover:bg-[#ff5a5a] hover:text-white disabled:opacity-60"
       >
         <Trash2 size={13} />
       </button>
