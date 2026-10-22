@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AgentCardData } from "@/types/domain";
+import type { AgentCardData, PropertyWithImages } from "@/types/domain";
 import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
 import { normalizeText } from "@/lib/text";
 
@@ -137,4 +137,68 @@ export async function getMarketplaceAgents(filters: MarketplaceFilters): Promise
       rating_count: ratingTotal?.count ?? 0,
     };
   });
+}
+
+export type MarketplacePropertyRow = PropertyWithImages & {
+  agent_profiles: {
+    slug: string;
+    profiles: { full_name: string | null; username: string; avatar_url: string | null } | null;
+  } | null;
+};
+
+// Cross-agent counterpart to getMarketplaceAgents — same filters, same
+// "narrow in SQL where cheap, normalizeText-filter city/q in app code"
+// split, but returns property rows (joined with the owning agent's slug +
+// name for PropertyCard) instead of agent cards. No status filter beyond
+// published, matching how a single agent's own portfolio page
+// (getAgentProperties) already behaves — sold/rented listings still show.
+export async function getMarketplaceProperties(filters: MarketplaceFilters): Promise<MarketplacePropertyRow[]> {
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("properties")
+    .select("*, property_images(*), agent_profiles(slug, profiles(full_name, username, avatar_url))")
+    .eq("published", true)
+    .order("created_at", { ascending: false });
+
+  if (filters.listingType) query = query.eq("listing_type", filters.listingType);
+  if (filters.minPrice) query = query.gte("price", filters.minPrice);
+  if (filters.maxPrice) query = query.lte("price", filters.maxPrice);
+  if (filters.propertyType && filters.propertyType.length > 0) {
+    query = query.in("property_type", filters.propertyType);
+  }
+
+  const { data } = await query;
+  let properties = (data ?? []) as unknown as MarketplacePropertyRow[];
+
+  if (filters.city) {
+    const normalizedCity = normalizeText(filters.city);
+    properties = properties.filter((p) => p.city && normalizeText(p.city).includes(normalizedCity));
+  }
+
+  const q = filters.q?.trim();
+  if (q) {
+    const normalizedQuery = normalizeText(q);
+    const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
+      normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
+    );
+    const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
+      normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
+    );
+
+    properties = properties.filter((p) => {
+      const agentProfile = p.agent_profiles?.profiles;
+      const agentName = agentProfile?.full_name || agentProfile?.username || "";
+      return (
+        normalizeText(p.title).includes(normalizedQuery) ||
+        normalizeText(p.description).includes(normalizedQuery) ||
+        normalizeText(p.city).includes(normalizedQuery) ||
+        normalizeText(agentName).includes(normalizedQuery) ||
+        (p.property_type !== null && matchingPropertyTypes.includes(p.property_type as PropertyType)) ||
+        matchingListingTypes.includes(p.listing_type)
+      );
+    });
+  }
+
+  return properties;
 }

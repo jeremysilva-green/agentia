@@ -20,7 +20,7 @@ export function AgentGrid({
 
   if (agents.length === 0) {
     return (
-      <p className="w-full rounded-2xl border border-dashed border-slate-300 bg-snow p-10 text-center text-sm text-slate-500">
+      <p className="w-full rounded-2xl border border-dashed border-[#2f2f2f] bg-[var(--ink-2)] p-10 text-center text-sm text-[var(--muted)]">
         {emptyMessage}
       </p>
     );
@@ -32,8 +32,8 @@ export function AgentGrid({
   return (
     <div className="flex w-full flex-col items-center gap-6">
       <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {visibleAgents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} dict={dict} />
+        {visibleAgents.map((agent, i) => (
+          <AgentCard key={agent.id} agent={agent} dict={dict} revealDelay={(i % 5) * 0.07} />
         ))}
       </div>
 
@@ -41,7 +41,7 @@ export function AgentGrid({
         <button
           type="button"
           onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-          className="rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+          className="rounded-xl bg-[var(--em)] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_-12px_var(--em-glow)] transition-colors hover:bg-[var(--em-2)]"
         >
           Cargar más
         </button>

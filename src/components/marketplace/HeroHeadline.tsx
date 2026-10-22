@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/cn";
 
 const PHRASES = [
   "La plataforma de ventas inmobiliarias más inteligente del Paraguay.",
@@ -8,7 +9,17 @@ const PHRASES = [
   "Compartí tus enlaces de afiliado y ganá 1% de cada venta.",
 ];
 
-export function HeroHeadline({ fallback, animated }: { fallback: string; animated: boolean }) {
+export function HeroHeadline({
+  fallback,
+  animated,
+  dark = false,
+}: {
+  fallback: string;
+  animated: boolean;
+  // Only an additive override — existing callers that don't pass it keep
+  // the exact same (dark-text-on-light) look.
+  dark?: boolean;
+}) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -20,7 +31,10 @@ export function HeroHeadline({ fallback, animated }: { fallback: string; animate
   return (
     <h1
       key={animated ? index : "static"}
-      className="animate-fade-in-up text-balance font-display text-4xl font-semibold leading-[0.95] tracking-tight text-prussian sm:text-5xl lg:text-5xl xl:text-6xl"
+      className={cn(
+        "animate-fade-in-up text-balance font-display text-4xl font-semibold leading-[0.95] tracking-tight sm:text-5xl lg:text-5xl xl:text-6xl",
+        dark ? "text-white" : "text-prussian"
+      )}
     >
       {animated ? PHRASES[index] : fallback}
     </h1>

@@ -1,0 +1,138 @@
+/* Dark/emerald theme scoped to the /agentes marketplace page only — same
+   palette as the panel redesign's panel-theme.css, but a separate scope so
+   the two never collide. Never touches globals.css or the warm
+   prussian/sage/snow tokens the rest of the site/NavBar/Footer use. */
+
+.market-dark {
+  --ink: #0e0e0e;
+  --ink-2: #151515;
+  --ink-3: #1c1c1c;
+  --line: #262626;
+  --em: #0a8f5c;
+  --em-2: #13c47f;
+  --em-glow: rgba(19, 196, 127, 0.32);
+  --muted: #9a9a9a;
+  --text: #ededed;
+
+  position: relative;
+  background: var(--ink);
+  color: var(--text);
+}
+
+.market-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(#ffffff10 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes market-breathe {
+  50% {
+    opacity: 0.55;
+    transform: translateX(-50%) scale(1.08);
+  }
+}
+.market-dark .market-glow {
+  position: absolute;
+  left: 50%;
+  top: -120px;
+  width: 900px;
+  max-width: 160vw;
+  height: 500px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, #0a8f5c33, transparent);
+  pointer-events: none;
+  animation: market-breathe 8s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes market-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+.market-dark .market-spin {
+  animation: market-spin 10s linear infinite;
+}
+
+@keyframes market-ping {
+  0% {
+    box-shadow: 0 0 0 0 var(--em-glow);
+  }
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+.market-dark .market-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--em-2);
+  animation: market-ping 2s infinite;
+}
+
+/* Mount-triggered entrance (not scroll-triggered — an animation, not a
+   transition, so it never fights with a card's own hover transitions on
+   the same transform/opacity properties; just plays once and gets out of
+   the way). Stagger via inline animation-delay. */
+@keyframes market-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+}
+.market-dark .market-rv {
+  animation: market-reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes market-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+.market-dark .market-pop {
+  animation: market-pop 0.35s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+
+@keyframes market-vin {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.market-dark .market-vin {
+  animation: market-vin 0.45s ease both;
+}
+
+@keyframes market-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}
+.market-dark .market-toast-in {
+  animation: market-toast-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-dark .market-rv {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .market-dark .market-spin,
+  .market-dark .market-pulse-dot,
+  .market-dark .market-pop,
+  .market-dark .market-vin,
+  .market-dark .market-toast-in,
+  .market-dark .market-glow {
+    animation: none !important;
+  }
+}

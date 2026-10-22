@@ -21,6 +21,7 @@ export function MultiSelectDropdown({
   defaultValues = [],
   buttonClassName,
   panelClassName,
+  optionClassName,
   onChange,
 }: {
   name: string;
@@ -30,6 +31,7 @@ export function MultiSelectDropdown({
   defaultValues?: string[];
   buttonClassName?: string;
   panelClassName?: string;
+  optionClassName?: string;
   onChange?: (values: string[]) => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -88,7 +90,12 @@ export function MultiSelectDropdown({
             panelClassName
           )}
         >
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50">
+          <label
+            className={cn(
+              "flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50",
+              optionClassName
+            )}
+          >
             <input
               type="checkbox"
               checked={allSelected}
@@ -104,7 +111,10 @@ export function MultiSelectDropdown({
           {options.map((option) => (
             <label
               key={option.value}
-              className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className={cn(
+                "flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-50",
+                optionClassName
+              )}
             >
               <input
                 type="checkbox"

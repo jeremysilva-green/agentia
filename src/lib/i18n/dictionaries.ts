@@ -32,6 +32,11 @@ export type Dictionary = {
       new: string;
     };
     empty: string;
+    tabs: {
+      agents: string;
+      properties: string;
+    };
+    propertiesEmpty: string;
   };
 };
 
@@ -65,6 +70,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
         new: "Nuevo",
       },
       empty: "No encontramos agentes con esos filtros. Probá con otra búsqueda.",
+      tabs: {
+        agents: "Agentes",
+        properties: "Propiedades",
+      },
+      propertiesEmpty: "No encontramos propiedades con esos filtros. Probá con otra búsqueda.",
     },
   },
   en: {
@@ -96,6 +106,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
         new: "New",
       },
       empty: "No agents match those filters. Try a different search.",
+      tabs: {
+        agents: "Agents",
+        properties: "Properties",
+      },
+      propertiesEmpty: "No properties match those filters. Try a different search.",
     },
   },
 };

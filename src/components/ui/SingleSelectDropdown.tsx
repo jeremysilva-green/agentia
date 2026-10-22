@@ -16,6 +16,7 @@ export function SingleSelectDropdown({
   searchPlaceholder = "Buscar...",
   buttonClassName,
   panelClassName,
+  optionClassName,
   onChange,
   error,
 }: {
@@ -33,6 +34,7 @@ export function SingleSelectDropdown({
   searchPlaceholder?: string;
   buttonClassName?: string;
   panelClassName?: string;
+  optionClassName?: string;
   onChange?: (value: string) => void;
   error?: string;
 }) {
@@ -117,7 +119,10 @@ export function SingleSelectDropdown({
               <button
                 type="button"
                 onClick={() => select("")}
-                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 hover:bg-slate-50",
+                  optionClassName
+                )}
               >
                 <span
                   className={cn(
@@ -137,7 +142,10 @@ export function SingleSelectDropdown({
               key={option.value}
               type="button"
               onClick={() => select(option.value)}
-              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-slate-700 hover:bg-slate-50",
+                optionClassName
+              )}
             >
               <span
                 className={cn(
