@@ -32,6 +32,10 @@ export async function POST(request: Request) {
   const documentationStatus = formData.get("documentationStatus");
   const notes = formData.get("notes");
   const file = formData.get("authorizationFile");
+  // Set on the resubmit after the agent dismisses the "this might already be
+  // listed" warning — e.g. two different units in the same building sharing
+  // one street address, which the text-based address match can't tell apart.
+  const confirmDuplicate = formData.get("confirmDuplicate") === "true";
 
   if (typeof propertyId !== "string" || !propertyId) {
     return NextResponse.json({ error: "Falta la propiedad." }, { status: 400 });
@@ -109,39 +113,44 @@ export async function POST(request: Request) {
     propertyType: property.property_type,
   });
 
-  if (duplicate) {
+  if (duplicate && !confirmDuplicate) {
     const service = createServiceClient();
-    const { data: blockedAgentProfile } = await service
+    const { data: otherAgentProfile } = await service
       .from("profiles")
       .select("full_name, username")
       .eq("id", duplicate.agentId)
       .single();
-    const otherAgentName = blockedAgentProfile?.full_name || blockedAgentProfile?.username || "otro agente";
+    const otherAgentName = otherAgentProfile?.full_name || otherAgentProfile?.username || "otro agente";
 
-    await createMlsNotice({
-      recipientUserId: user.id,
-      type: "mls_listing_duplicate_blocked",
-      title: "Esta propiedad ya está en el MLS",
-      body: `"${duplicate.propertyTitle}" ya está cargada en el MLS por ${otherAgentName}. No se pudo agregar tu propiedad.`,
-      eventAt: new Date(),
-      listingId: duplicate.propertyId,
-    });
-    await createMlsNotice({
-      recipientUserId: duplicate.agentId,
-      type: "mls_listing_duplicate_blocked",
-      title: "Otro agente intentó cargar tu propiedad al MLS",
-      body: `Un agente intentó cargar una propiedad que coincide con "${duplicate.propertyTitle}", ya en el MLS a tu nombre.`,
-      eventAt: new Date(),
-      listingId: duplicate.propertyId,
-    });
-
+    // Text-match only (city + normalized address + property type) — a soft
+    // warning, not a hard block, since two different units in the same
+    // building can legitimately share one street address. The agent can
+    // confirm "this is a different listing" to resubmit past it.
     return NextResponse.json(
-      { error: `Esta propiedad ya está en el MLS desde antes, cargada por ${otherAgentName}.` },
+      {
+        requiresDuplicateConfirmation: true,
+        duplicateAgentName: otherAgentName,
+        duplicatePropertyTitle: duplicate.propertyTitle,
+        error: `Ya hay una propiedad cargada en el MLS en esta dirección, a nombre de ${otherAgentName}. Si es un inmueble distinto (otra unidad, por ejemplo), podés continuar igual.`,
+      },
       { status: 409 }
     );
   }
 
   const service = createServiceClient();
+
+  // Confirmed past the warning above — still let the other agent know, so
+  // they can check whether it's genuinely the same property.
+  if (duplicate && confirmDuplicate) {
+    await createMlsNotice({
+      recipientUserId: duplicate.agentId,
+      type: "mls_listing_duplicate_blocked",
+      title: "Otro agente cargó una propiedad similar a la tuya",
+      body: `Un agente cargó una propiedad en la misma dirección que "${duplicate.propertyTitle}", que ya está en el MLS a tu nombre. Puede ser otra unidad, pero vale la pena revisar.`,
+      eventAt: new Date(),
+      listingId: duplicate.propertyId,
+    });
+  }
 
   const { data: mlsListing, error: insertError } = await service
     .from("mls_listings")

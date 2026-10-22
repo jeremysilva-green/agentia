@@ -34,7 +34,7 @@ export async function MlsListingCard({ listing }: { listing: MlsListingWithPrope
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-[var(--muted)]">Sin foto</div>
         )}
-        <PanelBadge tone="blue" className="absolute top-3 left-3">
+        <PanelBadge tone="blue" className="absolute top-3 left-3 bg-black/60! backdrop-blur-sm">
           {listing.authorization_type === "exclusiva" ? "Exclusiva" : "No exclusiva"}
         </PanelBadge>
       </div>

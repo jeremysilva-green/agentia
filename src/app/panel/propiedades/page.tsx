@@ -136,7 +136,7 @@ export default async function PropiedadesPage() {
                     </Link>
 
                     {isActiveMlsMember && property.listing_kind !== "modelo" && !activeMlsPropertyIds.has(property.id) && (
-                      <AddToMlsModal propertyId={property.id} propertyAddress={property.address} />
+                      <AddToMlsModal propertyId={property.id} propertyAddress={property.address} propertyCurrency={property.currency} />
                     )}
 
                     {eligibleForVideo &&

@@ -24,3 +24,31 @@ export async function markMlsAvisoRead(noticeId: string): Promise<void> {
 
   revalidatePath("/panel/avisos");
 }
+
+// Clears one notice out of the agent's own inbox. RLS (recipient_user_id =
+// auth.uid()) backs the .eq() filter below — the append-only trigger on
+// this table only guards UPDATE, never DELETE, so this is a real row
+// removal, not a soft-dismiss.
+export async function deleteMlsNotice(noticeId: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("mls_notices").delete().eq("id", noticeId).eq("recipient_user_id", user.id);
+
+  revalidatePath("/panel/avisos");
+}
+
+export async function deleteAllMlsNotices(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("mls_notices").delete().eq("recipient_user_id", user.id);
+
+  revalidatePath("/panel/avisos");
+}

@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listMlsNotices, type MlsNoticeFilter } from "@/lib/data/mlsNotices";
 import { AvisosList } from "@/components/panel/avisos/AvisosList";
 import { AvisosFilterPills } from "@/components/panel/avisos/AvisosFilterPills";
+import { ClearAllNoticesButton } from "@/components/panel/avisos/ClearAllNoticesButton";
 import { Reveal } from "@/components/panel/theme/Reveal";
 import { copy } from "@/lib/copy";
 
@@ -36,7 +37,10 @@ export default async function AvisosPage({
         <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">{copy.panel.avisos}</h1>
       </div>
       <Reveal>
-        <AvisosFilterPills current={filter} />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <AvisosFilterPills current={filter} />
+          {notices.length > 0 && <ClearAllNoticesButton />}
+        </div>
       </Reveal>
       <Reveal delay={1}>
         <AvisosList notices={notices} />

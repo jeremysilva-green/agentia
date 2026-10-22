@@ -1,15 +1,32 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Bell, Download } from "lucide-react";
+import { Bell, Download, Trash2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
-import { markMlsAvisoRead } from "@/lib/actions/mlsNotices";
+import { markMlsAvisoRead, deleteMlsNotice } from "@/lib/actions/mlsNotices";
 import { EmptyState } from "@/components/panel/theme/EmptyState";
 import type { MlsNotice } from "@/lib/data/mlsNotices";
 
-const dateFmt = (value: string) =>
-  new Date(value).toLocaleString("es-PY", { dateStyle: "long", timeStyle: "short" });
+const MONTH_NAMES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+// Deliberately not `toLocaleString` — Node's and the browser's Intl/ICU data
+// don't always agree on the es-PY date+time combining pattern (comma vs
+// "a las"), which causes a hydration mismatch. Manual string building
+// sidesteps that, same fix already applied to ChatsTable's timeOnlyFmt.
+function dateFmt(value: string) {
+  const d = new Date(value);
+  const month = MONTH_NAMES[d.getMonth()];
+  const hours24 = d.getHours();
+  const minutes = d.getMinutes();
+  const period = hours24 >= 12 ? "p. m." : "a. m.";
+  const hours12 = hours24 % 12 || 12;
+  const time = `${String(hours12).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period}`;
+  return `${d.getDate()} de ${month} de ${d.getFullYear()} a las ${time}`;
+}
 
 function AvisosIllustration() {
   return (
@@ -28,9 +45,12 @@ export function AvisosList({ notices }: { notices: MlsNotice[] }) {
   const [readIds, setReadIds] = useState<Set<string>>(
     new Set(notices.filter((n) => n.read_at).map((n) => n.id))
   );
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
 
-  if (notices.length === 0) {
+  const visibleNotices = notices.filter((n) => !deletedIds.has(n.id));
+
+  if (visibleNotices.length === 0) {
     return (
       <EmptyState
         illustration={<AvisosIllustration />}
@@ -48,9 +68,16 @@ export function AvisosList({ notices }: { notices: MlsNotice[] }) {
     });
   }
 
+  function remove(id: string) {
+    setDeletedIds((prev) => new Set(prev).add(id));
+    startTransition(() => {
+      void deleteMlsNotice(id);
+    });
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      {notices.map((notice) => {
+      {visibleNotices.map((notice) => {
         const isUnread = !readIds.has(notice.id);
         return (
           <div
@@ -80,16 +107,30 @@ export function AvisosList({ notices }: { notices: MlsNotice[] }) {
               </div>
             </div>
 
-            <a
-              href={`/api/mls/notices/${notice.id}/comprobante`}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-lg border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[#d5d5d5] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
-            >
-              <Download size={13} />
-              {copy.mls.downloadReceipt}
-            </a>
+            <div className="flex shrink-0 items-center gap-2 self-start">
+              <a
+                href={`/api/mls/notices/${notice.id}/comprobante`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--line)] px-2.5 py-1.5 text-xs font-medium text-[#d5d5d5] transition-colors hover:border-[var(--em)] hover:text-[var(--em-2)]"
+              >
+                <Download size={13} />
+                {copy.mls.downloadReceipt}
+              </a>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  remove(notice.id);
+                }}
+                aria-label="Eliminar aviso"
+                title="Eliminar aviso"
+                className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg border border-[#ff5a5a33] bg-[#ff5a5a0d] text-[#ff7a7a] transition-colors hover:border-[#ff5a5a] hover:bg-[#ff5a5a] hover:text-white"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
           </div>
         );
       })}
