@@ -372,6 +372,7 @@ export default function HomePage() {
         <symbol id="i-wa" viewBox="0 0 24 24"><path d="M3 21l1.7-5A9 9 0 1 1 8 19.3z" /><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1-1.5-2-1-1 1a4 4 0 0 1-2-2l1-1-1-2z" /></symbol>
         <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4" /></symbol>
         <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 18h18M4 7l4 4 4-6 4 6 4-4-2 11H6z" /></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></symbol>
       </svg>
 
       {/* HERO */}
@@ -379,9 +380,11 @@ export default function HomePage() {
         <div className={styles.glow} />
         <div className={styles.dots} />
         <div className={styles.wrap}>
-          <div className={cn(styles.pill, styles.rv, styles.in)}>
-            <b>Nuevo</b>CRM, asistente con IA y red de afiliados en un solo lugar
-          </div>
+          <a href="#planes" className={cn(styles.pill, styles.pillMls, styles.rv, styles.in)}>
+            <b>Nuevo</b>
+            <Icon name="globe" style={{ width: 16, height: 16 }} />
+            Plan MLS: cooperá con agentes de otras agencias y cerrá más ventas
+          </a>
           <h1>
             <span className={styles.line}>
               <span>Vendé más propiedades,</span>
@@ -785,17 +788,27 @@ export default function HomePage() {
               const plan = PLANS[planId];
               const isFound = planId === "fundador";
               const isPop = planId === "pro";
+              const isMls = planId === "mls";
               const basicoFeatureSet = new Set(PLANS.basico.features);
               const addedFeatures = plan.features.filter((f) => !basicoFeatureSet.has(f));
               return (
                 <div
                   key={plan.id}
-                  className={cn(styles.plan, isPop && styles.pop, isFound && styles.found, styles.rv, styles[`d${i + 1}` as "d1" | "d2" | "d3"])}
+                  className={cn(
+                    styles.plan,
+                    isPop && styles.pop,
+                    isFound && styles.found,
+                    isMls && styles.mlsPlan,
+                    styles.rv,
+                    styles[`d${i + 1}` as "d1" | "d2" | "d3"]
+                  )}
                 >
                   {isPop && <span className={styles.tagx}>Más completo</span>}
                   {isFound && <span className={styles.tagx}>Cupos limitados</span>}
-                  <h3 style={isFound ? { display: "flex", gap: 10, alignItems: "center", position: "relative", zIndex: 1 } : undefined}>
+                  {isMls && <span className={styles.tagx}>Premium</span>}
+                  <h3 style={isFound || isMls ? { display: "flex", gap: 10, alignItems: "center", position: "relative", zIndex: 1 } : undefined}>
                     {isFound && <Icon name="crown" />}
+                    {isMls && <Icon name="globe" style={{ color: "#a78bfa" }} />}
                     {plan.name}
                   </h3>
                   <div className={styles.desc} style={isFound ? { position: "relative", zIndex: 1 } : undefined}>
@@ -847,8 +860,8 @@ export default function HomePage() {
                       </>
                     )}
                   </ul>
-                  <Link href="/registro" className={cn(styles.btn, isFound ? undefined : isPop ? styles.pri : styles.sec)}>
-                    {planId === "basico" ? "Empezá gratis" : isPop ? "Elegir Pro" : "Quiero mi cupo"}
+                  <Link href="/registro" className={cn(styles.btn, isFound || isMls ? undefined : isPop ? styles.pri : styles.sec)}>
+                    {planId === "basico" ? "Empezá gratis" : isPop ? "Elegir Pro" : isMls ? "Elegir Plan" : "Quiero mi cupo"}
                   </Link>
                 </div>
               );

@@ -281,6 +281,22 @@
   padding: 4px 9px;
   border-radius: 999px;
 }
+.pill.pillMls {
+  border-color: #8b5cf6;
+  background: radial-gradient(120% 140% at 0% 0%, #8b5cf626, transparent 60%), var(--ink-2);
+  color: #e9e1ff;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.pill.pillMls:hover {
+  transform: translateY(-2px);
+}
+.pill.pillMls b {
+  background: #8b5cf6;
+}
+.pill.pillMls svg {
+  color: #c084fc;
+}
 .hero h1 {
   font-size: clamp(48px, 8.4vw, 112px);
   font-weight: 600;
@@ -1546,6 +1562,23 @@
 .plan.found .tagx {
   background: #fff;
   color: var(--em);
+}
+.plan.mlsPlan {
+  border-color: #8b5cf6;
+  background: radial-gradient(130% 80% at 50% 0%, #8b5cf61f, transparent 60%), var(--ink-2);
+  box-shadow: 0 40px 90px -40px rgba(139, 92, 246, 0.45);
+}
+.plan.mlsPlan .tagx {
+  background: #8b5cf6;
+  color: #fff;
+}
+.plan.mlsPlan .btn {
+  background: #8b5cf6;
+  color: #fff;
+  box-shadow: 0 10px 40px -12px rgba(139, 92, 246, 0.5);
+}
+.plan.mlsPlan .btn:hover {
+  background: #7c3aed;
 }
 .seats {
   margin-top: 14px;

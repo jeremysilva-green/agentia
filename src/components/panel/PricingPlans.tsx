@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Loader2, Crown, ArrowRight } from "lucide-react";
+import { Check, Loader2, Crown, ArrowRight, Globe } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { PLANS, PLAN_ORDER, type PlanId } from "@/lib/plans";
 import { selectPlan } from "@/lib/actions/subscription";
@@ -100,7 +100,9 @@ export function PricingPlans({
                     ? "bg-white text-[var(--em)] hover:bg-[#eafff5]"
                     : isPro
                       ? "bg-[var(--em)] text-white shadow-[0_12px_30px_-12px_var(--em-glow)] hover:bg-[var(--em-2)]"
-                      : "border border-[var(--line)] bg-white/[0.04] text-white hover:border-[var(--em)] hover:text-[var(--em-2)]"
+                      : isMls
+                        ? "bg-[#8b5cf6] text-white shadow-[0_12px_30px_-12px_rgba(139,92,246,0.5)] hover:bg-[#7c3aed]"
+                        : "border border-[var(--line)] bg-white/[0.04] text-white hover:border-[var(--em)] hover:text-[var(--em-2)]"
               )}
             >
               {isChoosing && <Loader2 size={15} className="animate-spin" />}
@@ -129,23 +131,26 @@ export function PricingPlans({
                   ? "border border-transparent bg-gradient-to-br from-[#13b06e] via-[#0a8f5c] to-[#05613d] text-white shadow-[0_40px_80px_-40px_var(--em-glow)]"
                   : isPro
                     ? "border border-[var(--em)] bg-[var(--ink-2)] shadow-[0_40px_80px_-40px_var(--em-glow)]"
-                    : "border border-[var(--line)] bg-[var(--ink-2)]"
+                    : isMls
+                      ? "border border-[#8b5cf6] bg-[radial-gradient(130%_80%_at_50%_0%,#8b5cf61f,transparent_60%)] bg-[var(--ink-2)] shadow-[0_40px_80px_-40px_rgba(139,92,246,0.45)]"
+                      : "border border-[var(--line)] bg-[var(--ink-2)]"
               )}
             >
               <div>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="flex items-center gap-2 font-display text-[22px] font-semibold text-white">
                     {isFundador && <Crown size={19} />}
+                    {isMls && <Globe size={19} className="text-[#a78bfa]" />}
                     {plan.name}
                   </h3>
-                  {(isPro || isFundador) && (
+                  {(isPro || isFundador || isMls) && (
                     <span
                       className={cn(
                         "shrink-0 rounded-full px-2.5 py-1 text-[10.5px] font-bold tracking-wide whitespace-nowrap uppercase",
-                        isFundador ? "bg-white text-[var(--em)]" : "bg-[var(--em)] text-white"
+                        isFundador ? "bg-white text-[var(--em)]" : isMls ? "bg-[#8b5cf6] text-white" : "bg-[var(--em)] text-white"
                       )}
                     >
-                      {isFundador ? "Cupos limitados" : "Más completo"}
+                      {isFundador ? "Cupos limitados" : isMls ? "Premium" : "Más completo"}
                     </span>
                   )}
                 </div>
@@ -174,7 +179,7 @@ export function PricingPlans({
               {isMls ? (
                 <div className="flex flex-1 items-center justify-center py-2">
                   <div className="w-full max-w-[200px] scale-90">
-                    <MlsNetworkDiagram />
+                    <MlsNetworkDiagram accent="purple" />
                   </div>
                 </div>
               ) : (
