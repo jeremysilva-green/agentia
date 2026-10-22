@@ -121,6 +121,7 @@ export default async function VistaGlobalPage() {
   const funnelSteps = [
     { label: copy.panel.statPortfolioClicks, value: stats.portfolioClicks },
     { label: copy.panel.statPropertyClicks, value: stats.propertyClicks },
+    { label: copy.panel.statLikes, value: stats.likes },
     { label: copy.panel.statConversations, value: stats.conversations },
     { label: copy.panel.statLeads, value: stats.leads },
     { label: copy.panel.statAgendamientos, value: stats.agendamientos },

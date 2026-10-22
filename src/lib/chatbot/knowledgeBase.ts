@@ -81,6 +81,82 @@ Antes de la escrituración se verifica que esté libre de gravámenes y al día 
 
 - Hectáreas y distribución (agrícola, ganadera, monte), fuentes de agua (tajamares, pozos, arroyos), infraestructura (casco, galpones, alambrados, corrales), aptitud agropecuaria, reserva legal/obligaciones ambientales, acceso (caminos, distancia a ruta/ciudad), aptitud para crédito agropecuario: usar el dato del listado; si falta, ofrecer confirmarlo.
 
+## Proyectos en pozo (preventa / sobre planos)
+
+Usar esta sección cuando el interesado pregunte sobre una propiedad "en pozo" (listing_kind proyecto_en_pozo) o sobre comprar en preventa/sobre planos en general, ya sea de esta propiedad puntual o como concepto. Para datos puntuales del proyecto (desarrollador, etapa de construcción, avance %, plan de pago, requisitos), siempre priorizá primero los datos reales del listado si están cargados — esta sección es conocimiento general de respaldo, no reemplaza al dato específico del listado. Nunca cites esta sección como un documento ni dejes ver que es una referencia externa; usala como conocimiento propio del agente.
+
+**¿Qué significa comprar "en pozo"?**
+Es adquirir un departamento antes de que esté construido, cuando el proyecto está en etapa inicial o en construcción. El nombre viene de la etapa donde solo existe el "pozo" de la excavación para los cimientos.
+
+**Etapas de un proyecto y descuento típico frente al precio terminado:**
+- Preventa (pozo) — solo existen planos y renders: 20%–30% de descuento.
+- En construcción — obra iniciada, avance visible: 10%–20% de descuento.
+- Terminado — listo para entrega: precio de mercado, sin descuento.
+
+**Ventajas de comprar en pozo:**
+- Precio más bajo: ahorro típico del 15%–30% frente al precio terminado (ej. un depto que termina en USD 90.000 puede salir USD 70.000 en pozo, ahorro de USD 20.000).
+- Financiamiento directo con la constructora, generalmente sin intereses o con tasas muy bajas. Plan típico: 30% de entrada (a veces en cuotas), 40% durante la construcción (18-24 meses), 30% contra entrega.
+- Se puede elegir piso, orientación y vista al comprar primero.
+- Departamento nuevo, sin uso, con garantía de la constructora.
+- Algunos desarrolladores permiten personalizar terminaciones o colores.
+- Posible ganancia de capital si se revende al terminar (15%-30% sin haber hecho nada más que esperar).
+
+**Riesgos y desventajas (mencionar con naturalidad si preguntan, sin generar alarma):**
+- Que la obra no se termine (la constructora quiebra o abandona el proyecto) — poco común en desarrolladores serios, pero ha pasado.
+- Demoras en la entrega: es común que se atrase 6-12 meses más de lo prometido (clima, permisos, materiales, finanzas).
+- El resultado puede diferir de los renders — las imágenes de venta suelen ser optimistas.
+- No se puede ver ni verificar la calidad de construcción hasta que esté terminado.
+- El dinero queda inmovilizado 18-36 meses (aunque algunos contratos permiten ceder el contrato a un tercero).
+- El mercado puede bajar y el departamento valer menos al terminar.
+
+**Ahorro típico (referencia de mercado Asunción, 2026) — precio terminado vs. en pozo:**
+- Monoambiente 35m² (Centro): USD 55.000 terminado vs. USD 42.000 en pozo (ahorro ≈24%).
+- 1 dormitorio 50m² (Villa Morra): USD 85.000 vs. USD 68.000 (≈20%).
+- 2 dormitorios 75m² (Carmelitas): USD 120.000 vs. USD 95.000 (≈21%).
+- 3 dormitorios 100m² (Recoleta): USD 150.000 vs. USD 115.000 (≈23%).
+- En general, el ahorro típico ronda 20%-25% del valor final (USD 15.000 a USD 35.000 según el departamento).
+
+**Zonas con más oferta de proyectos en pozo en Asunción (precio de referencia por m²):**
+- Villa Morra / Carmelitas: oferta alta, USD 1.600–2.200/m².
+- Manorá: oferta alta, USD 1.700–2.300/m².
+- Centro / Microcentro: oferta media, USD 1.000–1.400/m².
+- San Lorenzo (zona UNA): oferta media, USD 900–1.200/m².
+- Luque (zona aeropuerto): oferta creciente, USD 800–1.100/m².
+
+**Cómo orientar sobre si un proyecto es seguro (contexto para el interesado, no es un trámite del agente):**
+- Trayectoria del desarrollador: cuántos proyectos completó, si entregó a tiempo, respaldo financiero.
+- Documentación: título de propiedad del terreno a nombre del desarrollador, permiso de construcción municipal aprobado, planos aprobados, estudio de suelo. Sin permiso de construcción es una señal de alerta grave.
+- Conviene que un abogado revise el contrato antes de firmar: fecha de entrega y penalidades por demora, qué pasa si la obra no se termina, condiciones de rescisión, cláusulas de ajuste de precio, posibilidad de ceder el contrato.
+- Si la obra ya empezó, visitarla regularmente para comparar el avance real contra el cronograma.
+- Desconfiar de descuentos mucho mayores a la competencia (40%+): puede indicar problemas financieros del desarrollador.
+
+**Preguntas típicas de un interesado en un proyecto en pozo, y cómo orientarlo:**
+- Cuántos proyectos entregó el desarrollador — más experiencia, menor riesgo.
+- Si tiene permiso de construcción — sin permiso, no se recomienda avanzar.
+- Fecha de entrega y si hay penalidad por demora.
+- Si se puede ceder el contrato (por si necesita vender antes de la entrega).
+- Qué pasa si la constructora no termina la obra.
+- Qué terminaciones incluye el precio.
+- Qué garantía tiene el edificio.
+
+**Conviene comprar en pozo si:** el interesado tiene tiempo (no necesita mudarse ya), quiere ahorrar 20-25%, puede asumir el riesgo de demoras, el desarrollador es confiable, y quiere financiar en cuotas sin pasar por el banco.
+
+**Conviene comprar terminado si:** necesita mudarse pronto, prefiere ver lo que compra, no quiere asumir riesgos, o va a usar crédito hipotecario (más fácil de aprobar sobre un inmueble terminado).
+
+**Ejemplo de plan de pago típico (depto USD 70.000, plazo de obra 24 meses):**
+Reserva USD 2.000 al firmar; entrada USD 12.000 a los 30 días; USD 35.000 durante la construcción en 24 cuotas de ≈USD 1.460; USD 21.000 contra entrega. Total USD 70.000 en 24-26 meses, sin intereses. Para esta propiedad puntual, siempre priorizá el plan de pago real del listado si está cargado, en vez de este ejemplo genérico.
+
+**Si la constructora no cumple:**
+- Demora: algunos contratos tienen penalidad (ej. 0,1% del valor por mes de atraso); se puede negociar compensación/descuento; en casos extremos, rescindir y pedir devolución.
+- Abandono de obra: reclamo judicial (largo y costoso); los compradores pueden organizarse para terminar la obra con otra constructora; en el peor caso, se puede perder parte o todo lo invertido. Por eso es clave elegir desarrolladores con trayectoria comprobada.
+
+**Preguntas frecuentes puntuales sobre comprar en pozo:**
+- ¿Se puede usar crédito hipotecario para comprar en pozo? Es difícil — la mayoría de los bancos solo financia inmuebles terminados; lo normal es financiar con la constructora durante la obra y refinanciar con banco al terminar si hace falta.
+- ¿Se puede vender el departamento en pozo antes de que termine? Depende del contrato — muchos permiten "cesión de derechos" a un tercero, pagando una comisión a la constructora (2%-5%).
+- ¿Qué pasa si hay atraso en las cuotas? Depende del contrato — algunos dan período de gracia, otros cobran intereses moratorios; en casos extremos pueden rescindir y quedarse con parte de lo pagado.
+- ¿Los precios en pozo son en dólares o guaraníes? La mayoría de los proyectos premium se venden en dólares; proyectos más económicos pueden estar en guaraníes o tener cláusula de ajuste.
+- ¿Vale la pena comprar en pozo para invertir? Puede ser rentable (comprar con 20% de descuento y vender al terminar a precio de mercado), pero implica riesgo y el dinero queda inmovilizado 2+ años — ideal si el interesado tiene capital que no necesita usar en ese plazo.
+
 ## Datos de referencia del mercado paraguayo (respaldo general cuando falte info específica)
 
 Usar solo como respaldo, aclarando siempre que puede variar según el caso y sugiriendo confirmar con el agente, escribano o banco:

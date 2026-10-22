@@ -126,6 +126,7 @@ export interface Database {
           lng: number | null;
           maps_url: string | null;
           youtube_url: string | null;
+          instagram_reel_url: string | null;
           status: "available" | "sold" | "rented" | "draft";
           published: boolean;
           hidden_by_downgrade: boolean;
@@ -177,6 +178,7 @@ export interface Database {
           lng?: number | null;
           maps_url?: string | null;
           youtube_url?: string | null;
+          instagram_reel_url?: string | null;
           status?: "available" | "sold" | "rented" | "draft";
           published?: boolean;
           hidden_by_downgrade?: boolean;
@@ -1509,6 +1511,29 @@ export interface Database {
             columns: ["mls_listing_id"];
             isOneToOne: true;
             referencedRelation: "mls_listings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_likes: {
+        Row: {
+          id: string;
+          property_id: string;
+          visitor_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          visitor_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["property_likes"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "property_likes_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
             referencedColumns: ["id"];
           },
         ];

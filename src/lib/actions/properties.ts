@@ -234,6 +234,7 @@ function readPropertyForm(formData: FormData) {
     address: formData.get("address") || undefined,
     mapsUrl: formData.get("mapsUrl") || undefined,
     youtubeUrl: formData.get("youtubeUrl") || undefined,
+    instagramReelUrl: formData.get("instagramReelUrl") || undefined,
     status: formData.get("status") || "available",
     published: formData.get("published") === "on",
     bedrooms: formData.get("bedrooms") || undefined,
@@ -413,6 +414,7 @@ export async function createProperty(
       lng: map.lng,
       maps_url: map.mapsUrl,
       youtube_url: parsed.data.youtubeUrl || null,
+      instagram_reel_url: parsed.data.instagramReelUrl || null,
       status: parsed.data.status,
       published: parsed.data.published,
       bedrooms: parsed.data.bedrooms ?? null,
@@ -492,6 +494,7 @@ export async function updateProperty(
       lng: map.lng,
       maps_url: map.mapsUrl,
       youtube_url: parsed.data.youtubeUrl || null,
+      instagram_reel_url: parsed.data.instagramReelUrl || null,
       status: parsed.data.status,
       published: parsed.data.published,
       // A deliberate re-publish overrides any earlier automatic downgrade

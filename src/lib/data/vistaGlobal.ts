@@ -4,6 +4,7 @@ export type RangeStats = {
   leads: number;
   portfolioClicks: number;
   propertyClicks: number;
+  likes: number;
   affiliateLinkClicks: number;
   solicitudesVendedor: number;
   solicitudesComprador: number;
@@ -55,6 +56,7 @@ async function getRangeStats(agentId: string, rangeStart: Date, rangeEnd: Date):
     { count: leads },
     { count: portfolioClicks },
     { count: propertyClicks },
+    { count: likes },
     { count: affiliateLinkClicks },
     { count: solicitudesVendedor },
     { count: solicitudesComprador },
@@ -81,6 +83,12 @@ async function getRangeStats(agentId: string, rangeStart: Date, rangeEnd: Date):
       .select("id, properties!inner(agent_id)", { count: "exact", head: true })
       .eq("properties.agent_id", agentId)
       .eq("event_type", "view")
+      .gte("created_at", startIso)
+      .lt("created_at", endIso),
+    supabase
+      .from("property_likes")
+      .select("id, properties!inner(agent_id)", { count: "exact", head: true })
+      .eq("properties.agent_id", agentId)
       .gte("created_at", startIso)
       .lt("created_at", endIso),
     supabase
@@ -156,6 +164,7 @@ async function getRangeStats(agentId: string, rangeStart: Date, rangeEnd: Date):
     leads: leads ?? 0,
     portfolioClicks: portfolioClicks ?? 0,
     propertyClicks: propertyClicks ?? 0,
+    likes: likes ?? 0,
     affiliateLinkClicks: affiliateLinkClicks ?? 0,
     solicitudesVendedor: solicitudesVendedor ?? 0,
     solicitudesComprador: solicitudesComprador ?? 0,

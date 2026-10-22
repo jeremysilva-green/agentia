@@ -109,6 +109,7 @@ export const copy = {
     statTotalProperties: "Propiedades totales",
     statPortfolioClicks: "Clics en tu portafolio",
     statPropertyClicks: "Clics en propiedades",
+    statLikes: "Me gusta",
     statSolicitudes: "Solicitudes",
     statConversations: "Conversaciones de chat",
     statAgendamientos: "Visitas agendadas",

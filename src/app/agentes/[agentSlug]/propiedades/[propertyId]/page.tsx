@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPropertyForPublicView } from "@/lib/data/agentPortfolio";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
 import { PropertyVideo } from "@/components/property/PropertyVideo";
+import { PropertyInstagramReel } from "@/components/property/PropertyInstagramReel";
 import { PropertyMap } from "@/components/property/PropertyMap";
 import { ChatWidget } from "@/components/property/ChatWidget";
 import { AgendarModal } from "@/components/property/AgendarModal";
@@ -185,6 +186,7 @@ export default async function PropertyDetailPage({
 
           <PropertyGallery imageUrls={imageUrls} title={property.title} />
           <PropertyVideo url={property.youtube_url} />
+          <PropertyInstagramReel url={property.instagram_reel_url} />
 
           <FactsGrid
             areaM2={property.area_m2}

@@ -108,6 +108,7 @@ export function PropertyForm({
     areaM2: defaultValues?.area_m2 != null ? String(defaultValues.area_m2) : "",
     mapsUrl: defaultValues?.maps_url ?? "",
     youtubeUrl: defaultValues?.youtube_url ?? "",
+    instagramReelUrl: defaultValues?.instagram_reel_url ?? "",
     negotiationDetails: defaultValues?.negotiation_details ?? "",
     developerName: defaultValues?.developer_name ?? "",
     estimatedDeliveryDate: defaultValues?.estimated_delivery_date ?? "",
@@ -803,6 +804,22 @@ export function PropertyForm({
           value={values.youtubeUrl}
           onChange={setField("youtubeUrl")}
           error={fieldError("youtubeUrl")}
+          className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
+        />
+        <p className="text-xs text-slate-500">
+          Opcional — se muestra en la ficha de la propiedad junto a las fotos.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Input
+          id="instagramReelUrl"
+          name="instagramReelUrl"
+          label="Video de Instagram (Reel)"
+          placeholder="https://www.instagram.com/reel/..."
+          value={values.instagramReelUrl}
+          onChange={setField("instagramReelUrl")}
+          error={fieldError("instagramReelUrl")}
           className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
         />
         <p className="text-xs text-slate-500">
