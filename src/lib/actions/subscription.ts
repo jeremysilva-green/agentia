@@ -61,7 +61,10 @@ export async function selectPlan(planId: PlanId): Promise<SelectPlanState> {
     // Stop dLocal's monthly billing before downgrading locally — if that
     // fails, don't downgrade, or the agent would keep being charged with no
     // record of it on our side.
-    if (subscription.dlocal_go_subscription_id && (subscription.plan === "pro" || subscription.plan === "fundador")) {
+    if (
+      subscription.dlocal_go_subscription_id &&
+      (subscription.plan === "pro" || subscription.plan === "fundador" || subscription.plan === "mls")
+    ) {
       try {
         await deactivateDlocalGoSubscription(DLOCAL_GO_PLANS[subscription.plan].planId, subscription.dlocal_go_subscription_id);
       } catch {
