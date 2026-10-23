@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Card } from "@/components/ui/Card";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { copy } from "@/lib/copy";
@@ -19,9 +18,9 @@ export default async function IngresarPage({
         <h1 className="font-display text-center text-2xl font-semibold text-white">
           {copy.auth.loginTitle}
         </h1>
-        <Card className="border-emerald-200! bg-emerald-50! p-6 sm:p-8">
+        <div className="rounded-2xl border border-emerald-500/40 bg-black/30 p-6 backdrop-blur-md sm:p-8">
           <LoginForm next={next} />
-        </Card>
+        </div>
         <p className="font-display-light text-center text-sm text-white/70">
           {copy.auth.noAccount}{" "}
           <Link href="/registro" className="font-medium text-emerald-400 hover:underline">

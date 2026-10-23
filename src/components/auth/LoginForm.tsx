@@ -20,12 +20,12 @@ export function LoginForm({ next }: { next?: string }) {
     if (resetState?.success) {
       return (
         <div className="flex flex-col gap-4 text-center">
-          <p className="font-display text-slate-900">{copy.auth.resetEmailSentTitle}</p>
-          <p className="text-sm text-slate-600">{copy.auth.resetEmailSentBody}</p>
+          <p className="font-display text-white">{copy.auth.resetEmailSentTitle}</p>
+          <p className="text-sm text-white/70">{copy.auth.resetEmailSentBody}</p>
           <button
             type="button"
             onClick={() => setMode("login")}
-            className="text-sm font-medium text-emerald-700 hover:underline"
+            className="text-sm font-medium text-emerald-400 hover:underline"
           >
             {copy.auth.backToLogin}
           </button>
@@ -40,7 +40,7 @@ export function LoginForm({ next }: { next?: string }) {
           name="email"
           type="email"
           label={copy.auth.email}
-          labelClassName="font-display-light text-slate-700"
+          labelClassName="font-display-light text-white/90"
           required
           autoComplete="email"
           value={email}
@@ -49,20 +49,20 @@ export function LoginForm({ next }: { next?: string }) {
           className="bg-white!"
         />
 
-        {resetState?.error && !resetState.fieldErrors && <p className="text-sm text-red-600">{resetState.error}</p>}
+        {resetState?.error && !resetState.fieldErrors && <p className="text-sm text-red-400">{resetState.error}</p>}
 
         <Button
           type="submit"
           size="lg"
           disabled={resetPending}
-          className="font-display border! border-black! bg-black! text-white! hover:bg-white! hover:text-black!"
+          className="font-display bg-emerald-500! text-white! hover:bg-emerald-600!"
         >
           {resetPending ? "Enviando..." : copy.auth.sendResetLink}
         </Button>
         <button
           type="button"
           onClick={() => setMode("login")}
-          className="text-sm font-medium text-emerald-700 hover:underline"
+          className="text-sm font-medium text-emerald-400 hover:underline"
         >
           {copy.auth.backToLogin}
         </button>
@@ -78,7 +78,7 @@ export function LoginForm({ next }: { next?: string }) {
         name="email"
         type="email"
         label={copy.auth.email}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="email"
         value={email}
@@ -91,7 +91,7 @@ export function LoginForm({ next }: { next?: string }) {
         name="password"
         type="password"
         label={copy.auth.password}
-        labelClassName="font-display-light text-slate-700"
+        labelClassName="font-display-light text-white/90"
         required
         autoComplete="current-password"
         error={state?.fieldErrors?.password}
@@ -100,18 +100,18 @@ export function LoginForm({ next }: { next?: string }) {
       <button
         type="button"
         onClick={() => setMode("forgot")}
-        className="-mt-2 self-end text-sm font-medium text-emerald-700 hover:underline"
+        className="-mt-2 self-end text-sm font-medium text-emerald-400 hover:underline"
       >
         {copy.auth.forgotPassword}
       </button>
 
-      {state?.error && !state.fieldErrors && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && !state.fieldErrors && <p className="text-sm text-red-400">{state.error}</p>}
 
       <Button
         type="submit"
         size="lg"
         disabled={pending}
-        className="font-display border! border-black! bg-black! text-white! hover:bg-white! hover:text-black!"
+        className="font-display bg-emerald-500! text-white! hover:bg-emerald-600!"
       >
         {pending ? "Ingresando..." : copy.auth.submitLogin}
       </Button>
