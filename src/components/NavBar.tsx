@@ -3,7 +3,6 @@ import Image from "next/image";
 import { LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getDictionary } from "@/lib/i18n/locale";
-import { LogoutButton } from "@/components/LogoutButton";
 import { TermsModal } from "@/components/legal/TermsModal";
 import { NavMenu } from "@/components/NavMenu";
 
@@ -38,7 +37,7 @@ export async function NavBar() {
           <nav className="flex items-center gap-2.5 font-display print:hidden sm:gap-6">
             <Link
               href="/agentes"
-              className="text-sm font-medium text-white/90 transition-colors hover:text-white"
+              className="rounded-md border border-transparent px-2.5 py-1.5 text-base font-medium text-white/90 transition-colors hover:border-emerald-400 hover:text-white"
             >
               Portal
             </Link>
@@ -47,7 +46,7 @@ export async function NavBar() {
               <Link
                 href="/panel"
                 data-tour="tour-mi-panel"
-                className="hidden items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 sm:flex"
+                className="hidden items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-base font-medium text-emerald-400 transition-colors hover:border-emerald-400 hover:text-emerald-300 sm:flex"
               >
                 <LayoutDashboard size={16} />
                 {dict.nav.panel}
@@ -57,7 +56,7 @@ export async function NavBar() {
             {user && role === "user" && (
               <Link
                 href="/panel-afiliado"
-                className="hidden items-center gap-1.5 text-sm font-medium text-emerald-400 transition-colors hover:text-emerald-300 sm:flex"
+                className="hidden items-center gap-1.5 rounded-md border border-transparent px-2.5 py-1.5 text-base font-medium text-emerald-400 transition-colors hover:border-emerald-400 hover:text-emerald-300 sm:flex"
               >
                 <LayoutDashboard size={16} />
                 {dict.nav.affiliatePanel}
@@ -81,8 +80,6 @@ export async function NavBar() {
               </div>
             )}
 
-            {user && <LogoutButton locale={locale} />}
-
             <NavMenu
               panelLink={
                 user && role === "agent"
@@ -93,6 +90,8 @@ export async function NavBar() {
               }
               servicesLink={user && role === "agent" ? { href: "/panel/servicios", label: "Servicios" } : null}
               authLinks={!user ? { loginLabel: dict.nav.login, signupLabel: dict.nav.signup } : null}
+              showLogout={Boolean(user)}
+              locale={locale}
             />
           </nav>
         </div>

@@ -3,15 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Menu, MessageCircle, Info, Trophy, LayoutDashboard, LogIn, UserPlus, Sparkles } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
+import type { Locale } from "@/lib/i18n/dictionaries";
 
 export function NavMenu({
   panelLink,
   servicesLink,
   authLinks,
+  showLogout = false,
+  locale = "es",
 }: {
   panelLink: { href: string; label: string } | null;
   servicesLink: { href: string; label: string } | null;
   authLinks: { loginLabel: string; signupLabel: string } | null;
+  // Only an additive opt-in — NavBar passes this now that "Salir" lives at
+  // the bottom of this dropdown instead of inline in the navbar.
+  showLogout?: boolean;
+  locale?: Locale;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -104,6 +112,16 @@ export function NavMenu({
             <MessageCircle size={16} />
             Comunidad WhatsApp
           </a>
+          {showLogout && (
+            <>
+              <div className="my-1.5 border-t border-white/10" />
+              <LogoutButton
+                locale={locale}
+                onClick={() => setOpen(false)}
+                className="w-full rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/5 hover:text-white"
+              />
+            </>
+          )}
         </div>
       )}
     </div>
