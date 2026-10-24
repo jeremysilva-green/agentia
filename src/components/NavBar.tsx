@@ -28,7 +28,13 @@ export async function NavBar() {
   return (
     <>
       {role && !termsAccepted && <TermsModal role={role === "agent" ? "agent" : "affiliate"} />}
-      <header className="bg-prussian">
+      {/* z-40: the navbar (and its burger dropdown) must always paint above
+          page content, including a page's own locally-elevated z-index
+          (e.g. the marketplace search panel's z-30, needed so its dropdown
+          popups escape their own clipping wrapper) — without this, that
+          page-level stacking context could otherwise outrank the navbar's
+          dropdown just by having a higher raw z-index number. */}
+      <header className="relative z-40 bg-prussian">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-8">
           <Link href="/" className="flex items-center">
             <Image src="/logo.png" alt="Agentia" width={595} height={94} priority className="h-7 w-auto sm:h-10" />

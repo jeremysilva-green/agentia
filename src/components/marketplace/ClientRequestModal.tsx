@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, type ChangeEvent } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -68,7 +69,13 @@ export function ClientRequestModal({
 
   const isVendedor = kind === "vendedor";
 
-  return (
+  // Portaled to <body> — rendered deep inside the page's content tree
+  // (nested under the .market-dark wrapper, which has overflow-x-hidden),
+  // and mobile Safari can mis-stack a position:fixed descendant of an
+  // overflow-affected ancestor instead of truly pinning it to the viewport.
+  // Portaling sidesteps that entirely, same fix already used for
+  // AddToMlsModal's equivalent bug.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/40 p-4"
       onClick={onClose}
@@ -392,6 +399,7 @@ export function ClientRequestModal({
           </form>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
