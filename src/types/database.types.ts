@@ -21,6 +21,7 @@ export interface Database {
           ci: string | null;
           qr_url: string | null;
           terms_accepted_at: string | null;
+          profile_photo_reminder_sent_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -35,6 +36,7 @@ export interface Database {
           ci?: string | null;
           qr_url?: string | null;
           terms_accepted_at?: string | null;
+          profile_photo_reminder_sent_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
         Relationships: [];
