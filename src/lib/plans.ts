@@ -1,5 +1,12 @@
 export type PlanId = "basico" | "pro" | "fundador" | "mls";
 
+// Single source of truth for the free-plan limits — used by the property
+// cap (actions/properties.ts), the enhancer route, and all upgrade copy.
+export const BASICO_PROPERTY_LIMIT = 6;
+// Lifetime, not monthly: monthly free tries would teach agents to wait
+// instead of upgrade.
+export const BASICO_FREE_ENHANCE_TRIES = 3;
+
 export type Plan = {
   id: PlanId;
   eyebrow: string;
@@ -28,7 +35,7 @@ const PRO_FEATURES = [
   "Sistema de referidos/afiliados",
 ];
 
-// Agents sign up free on Básico (no card required, up to 3 active listings,
+// Agents sign up free on Básico (no card required, up to BASICO_PROPERTY_LIMIT active listings,
 // no advanced stats). Fundador carries the exact same feature set as Pro at
 // a reduced price, capped at FUNDADOR_SEAT_LIMIT seats — see selectPlan()
 // in actions/subscription.ts for where that cap is actually enforced.
@@ -51,7 +58,11 @@ export const PLANS: Record<PlanId, Plan> = {
       "Sistema de referidos/afiliados",
       "Soporte básico",
     ],
-    limitations: ["Hasta 3 propiedades activas", "Sin estadísticas avanzadas"],
+    limitations: [
+      `Hasta ${BASICO_PROPERTY_LIMIT} propiedades activas`,
+      `${BASICO_FREE_ENHANCE_TRIES} mejoras de fotos con IA gratis`,
+      "Sin estadísticas avanzadas",
+    ],
   },
   pro: {
     id: "pro",

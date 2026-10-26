@@ -9,6 +9,7 @@ import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
 import { fieldErrorsFrom, firstIssueMessage } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { MODELO_REFERRAL_REWARD_PCT } from "@/lib/constants/commission";
+import { BASICO_PROPERTY_LIMIT } from "@/lib/plans";
 
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
 
@@ -103,11 +104,9 @@ export async function notifyFirstPhotoAdded(propertyId: string) {
 
 export type PropertyActionState = { error?: string; fieldErrors?: Record<string, string> } | undefined;
 
-const BASICO_PROPERTY_LIMIT = 3;
-
 // Only Básico agents are capped — Pro/Fundador are unlimited. "Activas"
 // means status="available"; drafts and sold properties don't count against
-// the limit, matching the plan copy ("Hasta 3 propiedades activas").
+// the limit, matching the plan copy ("Hasta 6 propiedades activas").
 async function checkPropertyLimit(
   supabase: Awaited<ReturnType<typeof createClient>>,
   agentId: string,
@@ -132,7 +131,7 @@ async function checkPropertyLimit(
 
   const { count } = await query;
   if ((count ?? 0) >= BASICO_PROPERTY_LIMIT) {
-    return "Alcanzaste el límite de 3 propiedades activas del plan Básico. Actualizá a Pro para publicar sin límites.";
+    return `Alcanzaste el límite de ${BASICO_PROPERTY_LIMIT} propiedades activas del plan Básico. Actualizá a Pro para publicar sin límites.`;
   }
   return null;
 }

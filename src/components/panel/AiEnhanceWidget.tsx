@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { UploadCloud, Sparkles, Download, X, Loader2 } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { UpgradeModal } from "@/components/panel/UpgradeModal";
 
 const MAX_CLIENT_FILE_BYTES = 15 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/webp"];
@@ -23,9 +24,13 @@ function base64ToBlobUrl(base64: string, mime = "image/png") {
 export function AiEnhanceWidget({
   creditsRemaining: initialCredits,
   creditsTotal,
+  isFree = false,
+  fundadorSeatsRemaining,
 }: {
   creditsRemaining: number;
   creditsTotal: number;
+  isFree?: boolean;
+  fundadorSeatsRemaining?: number;
 }) {
   const [phase, setPhase] = useState<Phase>("upload");
   const [file, setFile] = useState<File | null>(null);
@@ -36,6 +41,7 @@ export function AiEnhanceWidget({
   const [creditsRemaining, setCreditsRemaining] = useState(initialCredits);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Nothing about either image is durable anywhere — revoke every blob URL
@@ -66,7 +72,12 @@ export function AiEnhanceWidget({
   }
 
   async function handleGenerate() {
-    if (!file || creditsRemaining <= 0) return;
+    if (!file) return;
+    if (creditsRemaining <= 0) {
+      // Free agents at 0 get the upgrade screen right here, not just an error.
+      if (isFree) setShowUpgrade(true);
+      return;
+    }
     setError(null);
     setPhase("generating");
     setCreditsRemaining((c) => c - 1); // optimistic — the backend charges at the same moment
@@ -79,7 +90,12 @@ export function AiEnhanceWidget({
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        setCreditsRemaining((c) => c + 1); // refund already happened server-side — reflect it
+        if (data.code === "free_limit") {
+          setCreditsRemaining(0);
+          setShowUpgrade(true);
+        } else {
+          setCreditsRemaining((c) => c + 1); // refund already happened server-side — reflect it
+        }
         setError(data.error ?? "No se pudo generar la imagen.");
         setPhase("ready");
         return;
@@ -188,6 +204,19 @@ export function AiEnhanceWidget({
         )}
       </div>
 
+      {isFree && phase === "upload" && (
+        <p className="text-sm" style={{ color: MUTED }}>
+          {creditsRemaining > 0
+            ? `Te quedan ${creditsRemaining} de ${creditsTotal} mejoras gratis`
+            : "Usaste tus mejoras gratis."}{" "}
+          {creditsRemaining <= 0 && (
+            <button type="button" onClick={() => setShowUpgrade(true)} className="font-semibold underline" style={{ color: GREEN }}>
+              Ver planes
+            </button>
+          )}
+        </p>
+      )}
+
       {phase !== "upload" && (
         <div
           className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3"
@@ -199,12 +228,12 @@ export function AiEnhanceWidget({
               className="rounded-full px-3 py-1 text-xs font-medium text-white/80"
               style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
             >
-              {creditsRemaining}/{creditsTotal} créditos
+              {isFree ? `${creditsRemaining} de ${creditsTotal} gratis` : `${creditsRemaining}/${creditsTotal} créditos`}
             </span>
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={phase === "generating" || creditsRemaining <= 0}
+              disabled={phase === "generating" || (creditsRemaining <= 0 && !isFree)}
               className="inline-flex h-9 items-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
               style={{ backgroundColor: GREEN, color: INK }}
             >
@@ -223,7 +252,7 @@ export function AiEnhanceWidget({
 
       {creditsRemaining <= 0 && phase !== "upload" && (
         <p className="text-xs" style={{ color: MUTED }}>
-          No te quedan créditos este mes.
+          {isFree ? "Usaste tus mejoras gratis." : "No te quedan créditos este mes."}
         </p>
       )}
 
@@ -255,6 +284,13 @@ export function AiEnhanceWidget({
           </div>
         </div>
       )}
+
+      <UpgradeModal
+        reason="enhancer"
+        open={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        fundadorSeatsRemaining={fundadorSeatsRemaining}
+      />
 
       <ConfirmModal
         open={showDiscardConfirm}

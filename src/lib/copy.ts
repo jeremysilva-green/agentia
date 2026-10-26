@@ -73,7 +73,7 @@ export const copy = {
     contactWhatsapp: "Chat",
     share: "Referir",
     shareCopied: "¡Enlace copiado!",
-    shareTooltip: "Compartí este enlace en tus canales de venta para aumentar tus posibilidades de ganar 1%.",
+    shareTooltip: "Compartí este enlace en tus canales de venta para aumentar tus posibilidades de ganar tu comisión.",
     gallery: "Galería",
     sold: "Vendida",
     rented: "Alquilada",

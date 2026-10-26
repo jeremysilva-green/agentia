@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { isAtPropertyLimit } from "@/lib/actions/properties";
 import { NuevaPropiedadButton } from "@/components/panel/NuevaPropiedadButton";
 import { MarketingVideoGenerator } from "@/components/panel/MarketingVideoGenerator";
+import { LockedVideoButton } from "@/components/panel/LockedVideoButton";
+import { getFundadorSeatsRemaining } from "@/lib/data/fundador";
 import { getAgentContext } from "@/lib/data/panel";
 import { listMarketingVideosForAgent } from "@/lib/data/marketingVideos";
 import { isVideoStale } from "@/lib/marketing-video/isStale";
@@ -40,7 +42,7 @@ export default async function PropiedadesPage() {
 
   const eligibleForVideo = hasActiveProAccess(ctx.subscription);
 
-  const [{ data: properties }, atLimit, videos, { data: mlsMembership }, { data: mlsListings }] = await Promise.all([
+  const [{ data: properties }, atLimit, videos, { data: mlsMembership }, { data: mlsListings }, fundadorSeatsRemaining] = await Promise.all([
     supabase
       .from("properties")
       .select("*, property_images(id, storage_path, position)")
@@ -50,6 +52,7 @@ export default async function PropiedadesPage() {
     eligibleForVideo ? listMarketingVideosForAgent(user.id) : Promise.resolve([]),
     supabase.from("mls_memberships").select("status").eq("user_id", user.id).maybeSingle(),
     supabase.from("mls_listings").select("property_id, status").eq("agent_id", user.id),
+    getFundadorSeatsRemaining(),
   ]);
 
   const videoByPropertyId = new Map(videos.map((v) => [v.property_id, v]));
@@ -68,7 +71,7 @@ export default async function PropiedadesPage() {
           </div>
           <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">Propiedades</h1>
         </div>
-        <NuevaPropiedadButton atLimit={atLimit} />
+        <NuevaPropiedadButton atLimit={atLimit} fundadorSeatsRemaining={fundadorSeatsRemaining} />
       </div>
 
       <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--ink-2)] px-3 py-1.5 text-[13px] text-[#cfcfcf]">
@@ -139,6 +142,10 @@ export default async function PropiedadesPage() {
                       <AddToMlsModal propertyId={property.id} propertyAddress={property.address} propertyCurrency={property.currency} />
                     )}
 
+                    {!eligibleForVideo && property.listing_kind === "standard" && property.property_images.length > 0 && (
+                      <LockedVideoButton fundadorSeatsRemaining={fundadorSeatsRemaining} />
+                    )}
+
                     {eligibleForVideo &&
                       property.listing_kind === "standard" &&
                       property.property_images.length > 0 &&
@@ -175,7 +182,7 @@ export default async function PropiedadesPage() {
         })}
 
         <Reveal delay={(((properties?.length ?? 0) % 4) + 1) as 1 | 2 | 3 | 4}>
-          <NuevaPropiedadButton atLimit={atLimit} variant="tile" />
+          <NuevaPropiedadButton atLimit={atLimit} variant="tile" fundadorSeatsRemaining={fundadorSeatsRemaining} />
         </Reveal>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { hasActiveProAccess } from "@/lib/plans";
+import { hasActiveProAccess, BASICO_FREE_ENHANCE_TRIES } from "@/lib/plans";
 
 const DAILY_CAP = 20;
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20MB server-side ceiling, well under OpenAI's 50MB limit
@@ -28,7 +28,9 @@ export async function POST(request: Request) {
   // Server-side plan gate — never trust the page-level redirect alone.
   // Checks status too, not just plan: an agent who picks Pro/Fundador
   // starts at status "pending" until dLocal Go confirms the first charge,
-  // and shouldn't get paid-tier access before that actually happens.
+  // and shouldn't get paid-tier access before that actually happens. Anyone
+  // without active paid access is on the free path: BASICO_FREE_ENHANCE_TRIES
+  // lifetime tries, then blocked until they upgrade.
   const { data: subscription } = await service
     .from("subscriptions")
     .select("plan, status")
@@ -36,9 +38,7 @@ export async function POST(request: Request) {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (!hasActiveProAccess(subscription)) {
-    return NextResponse.json({ error: "Esta función está disponible para planes Pro y Fundador." }, { status: 403 });
-  }
+  const isPaid = hasActiveProAccess(subscription);
 
   const formData = await request.formData().catch(() => null);
   const file = formData?.get("image");
@@ -74,10 +74,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Alcanzaste el límite diario de mejoras. Probá de nuevo mañana." }, { status: 429 });
   }
 
-  const { data: charged } = await service.rpc("try_charge_ai_credit", { p_agent_id: user.id });
+  // Paid agents spend monthly credits; free agents spend a lifetime try.
+  // Both are charged atomically up front and refunded on any failure below.
+  const { data: charged } = isPaid
+    ? await service.rpc("try_charge_ai_credit", { p_agent_id: user.id })
+    : await service.rpc("try_charge_free_enhance", { p_agent_id: user.id, p_limit: BASICO_FREE_ENHANCE_TRIES });
   if (!charged) {
-    return NextResponse.json({ error: "No te quedan créditos este mes." }, { status: 402 });
+    return isPaid
+      ? NextResponse.json({ error: "No te quedan créditos este mes." }, { status: 402 })
+      : NextResponse.json(
+          { error: "Usaste tus mejoras gratis. Actualizá tu plan para seguir mejorando fotos.", code: "free_limit" },
+          { status: 402 }
+        );
   }
+  const refund = () =>
+    isPaid
+      ? service.rpc("refund_ai_credit", { p_agent_id: user.id })
+      : service.rpc("refund_free_enhance", { p_agent_id: user.id });
 
   const { data: template } = await service
     .from("enhancement_prompt_templates")
@@ -87,7 +100,7 @@ export async function POST(request: Request) {
     .single();
 
   if (!template) {
-    await service.rpc("refund_ai_credit", { p_agent_id: user.id });
+    await refund();
     return NextResponse.json({ error: "No se pudo cargar la configuración. Intentá de nuevo." }, { status: 500 });
   }
 
@@ -134,7 +147,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ imageBase64: result.data[0].b64_json });
   } catch (err) {
     console.error("[ai-enhance] generation failed:", err);
-    await service.rpc("refund_ai_credit", { p_agent_id: user.id });
+    await refund();
     await service.from("enhancement_jobs").insert({
       agent_id: user.id,
       enhancement_type: enhancementType,

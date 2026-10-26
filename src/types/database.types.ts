@@ -1283,6 +1283,7 @@ export interface Database {
           agent_id: string;
           plan_monthly_allowance: number;
           credits_remaining: number;
+          free_tries_used: number;
           cycle_reset_at: string;
           updated_at: string;
         };
@@ -1290,6 +1291,7 @@ export interface Database {
           agent_id: string;
           plan_monthly_allowance?: number;
           credits_remaining?: number;
+          free_tries_used?: number;
           cycle_reset_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["agent_ai_credits"]["Insert"]>;
@@ -1564,6 +1566,14 @@ export interface Database {
         Returns: boolean;
       };
       refund_ai_credit: {
+        Args: { p_agent_id: string };
+        Returns: undefined;
+      };
+      try_charge_free_enhance: {
+        Args: { p_agent_id: string; p_limit: number };
+        Returns: boolean;
+      };
+      refund_free_enhance: {
         Args: { p_agent_id: string };
         Returns: undefined;
       };

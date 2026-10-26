@@ -8,10 +8,8 @@ import { DlocalGoCheckoutButton } from "@/components/panel/DlocalGoCheckoutButto
 import { CancelSubscriptionButton } from "@/components/panel/CancelSubscriptionButton";
 import { PricingPlans } from "@/components/panel/PricingPlans";
 import { Reveal } from "@/components/panel/theme/Reveal";
-import { PLANS, isPlanId, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
+import { PLANS, isPlanId, FUNDADOR_SEAT_LIMIT, BASICO_PROPERTY_LIMIT } from "@/lib/plans";
 import { copy } from "@/lib/copy";
-
-const BASICO_PROPERTY_LIMIT = 3;
 
 function daysUntil(isoDate: string) {
   return Math.max(0, Math.ceil((new Date(isoDate).getTime() - Date.now()) / 86_400_000));
