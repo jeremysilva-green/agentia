@@ -27,6 +27,18 @@ const nextConfig: NextConfig = {
       "./node_modules/@img/sharp-libvips-linux-x64/**/*",
     ],
   },
+  // The agent survey is a standalone static page (public/encuesta.html) with
+  // its own styles and submit script — served at the clean /encuesta URL and
+  // kept out of search results.
+  async rewrites() {
+    return [{ source: "/encuesta", destination: "/encuesta.html" }];
+  },
+  async headers() {
+    return [
+      { source: "/encuesta", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+      { source: "/encuesta.html", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
+    ];
+  },
   experimental: {
     serverActions: {
       // Owners can attach up to three document photos/PDFs (título,

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Encuesta para agentes · Agentia</title>
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0E0E0E;--ink-2:#151515;--ink-3:#1c1c1c;--line:#272727;--em:#0A8F5C;--em-2:#13C47F;--em-glow:rgba(19,196,127,.32);--muted:#9a9a9a;--text:#EDEDED;--err:#ff7a7a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{max-width:100%;overflow-x:clip}
+body{background:var(--ink);color:var(--text);font-family:Inter,system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;background-image:radial-gradient(#ffffff10 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+body::after{content:"";position:fixed;left:50%;top:-260px;width:900px;height:560px;transform:translateX(-50%);background:radial-gradient(closest-side,#0A8F5C30,transparent);pointer-events:none}
+h1,h2,h3{font-family:"Clash Display",Inter,sans-serif;letter-spacing:-.02em;line-height:1.08}
+button,input,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+.ico{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--em-glow)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes spin{to{transform:rotate(1turn)}}
+
+.top{position:sticky;top:0;z-index:20;background:rgba(14,14,14,.82);backdrop-filter:blur(14px);border-bottom:1px solid #ffffff0d}
+.top-in{max-width:760px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;flex:none}
+.logo img{display:block;height:24px;width:auto}
+.logo .lg-icon{display:none}
+.prog{flex:1;display:flex;flex-direction:column;gap:6px;opacity:0;transition:opacity .4s}
+.prog.show{opacity:1}
+.prog .lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.prog .lbl b{color:#fff;font-weight:600}
+.track{height:6px;border-radius:6px;background:#ffffff12;overflow:hidden}
+.track i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--em),var(--em-2));box-shadow:0 0 12px var(--em-glow);transition:width .6s cubic-bezier(.2,.7,.2,1)}
+
+main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:36px 20px 120px}
+.step{display:none}
+.step.on{display:block;animation:sin .55s cubic-bezier(.2,.7,.2,1) both}
+.step.back.on{animation-name:sinb}
+@keyframes sin{from{opacity:0;transform:translateX(28px)}}
+@keyframes sinb{from{opacity:0;transform:translateX(-28px)}}
+
+/* intro */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--em-2)}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--em-2);animation:ping 2s infinite}
+.intro h1{font-size:clamp(34px,6vw,54px);font-weight:600;margin-top:14px}
+.intro h1 span{color:var(--em-2)}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.meta span{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:999px;background:var(--ink-2);border:1px solid var(--line);font-size:13px;font-weight:600;color:#d5d5d5}
+.meta .ico{width:15px;height:15px;color:var(--em-2)}
+.letter{position:relative;margin-top:26px;border-radius:24px;padding:2px;overflow:hidden;isolation:isolate}
+.letter .bord{position:absolute;inset:-80%;background:conic-gradient(from 0deg,#0A8F5C,#13C47F 15%,transparent 30%,transparent 65%,#13C47F 85%,#0A8F5C);animation:spin 10s linear infinite;z-index:-1}
+.letter-in{border-radius:22px;background:#121614;padding:22px;display:flex;gap:16px}
+.letter img{width:52px;height:52px;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--em)}
+.letter b{display:block;font-size:15px}
+.letter small{display:block;font-size:12.5px;color:var(--muted)}
+.letter p{margin-top:10px;font-size:15px;color:#d5d5d5;line-height:1.6}
+.secs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:22px}
+.secs div{padding:12px 10px;border-radius:14px;background:var(--ink-2);border:1px solid var(--line);font-size:12.5px;font-weight:600;color:#cfcfcf;text-align:center}
+.secs div b{display:block;font-family:"Clash Display";font-size:18px;color:var(--em-2)}
+
+/* section header */
+.sh{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.sh .num{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:#13C47F17;border:1px solid #13C47F44;color:var(--em-2);font-family:"Clash Display";font-size:20px;font-weight:600;flex:none}
+.sh h2{font-size:clamp(26px,4vw,34px);font-weight:600}
+.sh p{font-size:13.5px;color:var(--muted);margin-top:3px}
+
+/* question card */
+.q{border-radius:22px;border:1px solid var(--line);background:var(--ink-2);padding:20px;margin-bottom:12px;transition:border-color .3s}
+.q:focus-within{border-color:#0A8F5C88}
+.q.err{border-color:#ff7a7a88;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.q.hidden{display:none}
+.qt{display:flex;gap:10px;font-size:16px;font-weight:600;line-height:1.4}
+.qt .n{flex:none;min-width:28px;height:24px;padding:0 7px;border-radius:8px;background:#ffffff0c;color:var(--em-2);font-size:12.5px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+.qh{font-size:12.5px;color:var(--muted);margin:4px 0 0 38px}
+.qe{display:none;font-size:12.5px;color:var(--err);margin:10px 0 0 38px}
+.q.err .qe{display:block}
+.opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.opts.col{flex-direction:column}
+.opt{position:relative;display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 14px;border-radius:14px;background:var(--ink);border:1px solid var(--line);font-size:14.5px;font-weight:500;cursor:pointer;transition:border-color .2s,background .25s,transform .2s;user-select:none}
+.opt:hover{border-color:#3a3a3a}
+.opt:active{transform:scale(.98)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt .mk{width:20px;height:20px;flex:none;border-radius:50%;border:2px solid #444;display:grid;place-items:center;transition:.25s}
+.opt.multi .mk{border-radius:6px}
+.opt .mk::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff;transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.opt.multi .mk::after{width:10px;height:6px;border-radius:0;background:none;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) scale(0);margin-top:-2px}
+.opt.sel{border-color:var(--em);background:linear-gradient(160deg,#0A8F5C2a,var(--ink) 80%)}
+.opt.sel .mk{border-color:var(--em-2);background:var(--em)}
+.opt.sel .mk::after{transform:scale(1)}
+.opt.multi.sel .mk::after{transform:rotate(-45deg) scale(1)}
+.opt:focus-within{box-shadow:0 0 0 3px #13C47F33}
+.other{display:none;margin-top:8px}
+.other.on{display:block;animation:sin .3s ease}
+.field{display:flex;align-items:center;gap:10px;height:50px;padding:0 14px;border-radius:14px;background:var(--ink);border:1px solid var(--line);transition:border-color .25s,box-shadow .25s}
+.field:focus-within{border-color:var(--em);box-shadow:0 0 0 4px #13C47F1f}
+.field input{flex:1;min-width:0;height:100%;background:none;border:0;outline:0;font-size:15.5px;font-weight:500}
+.field input::placeholder,textarea::placeholder{color:#5f5f5f}
+.field .suf{font-weight:700;color:var(--em-2);font-size:15px}
+.field.pct{max-width:200px;margin-top:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.grid2 label{display:block}
+.grid2 label span{display:block;font-size:13px;color:#cfcfcf;margin-bottom:6px;font-weight:500}
+.or{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+.or .field{flex:1;min-width:150px}
+.or em{font-style:normal;font-size:12.5px;color:var(--muted)}
+textarea{width:100%;min-height:110px;margin-top:14px;padding:14px;border-radius:14px;background:var(--ink);border:1px solid var(--line);outline:0;font-size:15px;line-height:1.5;resize:vertical;transition:border-color .25s,box-shadow .25s}
+textarea:focus{border-color:var(--em);box-shadow:0 0 0 4px #13C47F1f}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(14,14,14,.88);backdrop-filter:blur(14px);border-top:1px solid #ffffff0d;padding:12px 20px max(12px,env(safe-area-inset-bottom))}
+.nav-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:50px;padding:0 22px;border-radius:15px;font-weight:700;font-size:15px;transition:.3s;white-space:nowrap}
+.btn .ico{width:18px;height:18px;transition:transform .25s}
+.btn.pri{background:var(--em);color:#fff;box-shadow:0 12px 30px -12px var(--em-glow);margin-left:auto}
+.btn.pri:hover{background:var(--em-2)}
+.btn.pri:hover .ico{transform:translateX(3px)}
+.btn.sec{border:1px solid var(--line);color:#cfcfcf}
+.btn.sec:hover{border-color:#4a4a4a;color:#fff}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn.hide{visibility:hidden}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid #ffffff55;border-top-color:#fff;animation:spin .8s linear infinite;display:none}
+.sending .spin{display:block}.sending .ico{display:none}
+
+/* done */
+.done{text-align:center;padding-top:30px}
+.check{position:relative;width:96px;height:96px;margin:0 auto;border-radius:50%;background:var(--em);display:grid;place-items:center;box-shadow:0 20px 50px -18px var(--em-glow)}
+.check::before,.check::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--em-2);animation:halo 2.4s ease-out infinite}
+.check::after{animation-delay:1.2s}
+@keyframes halo{from{opacity:.8;transform:scale(1)}to{opacity:0;transform:scale(1.8)}}
+.check svg{width:44px;height:44px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40}
+.step.on .check svg{animation:draw .7s .3s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.done h2{font-size:clamp(30px,5vw,44px);font-weight:600;margin-top:26px}
+.done p{color:#cfcfcf;font-size:16px;margin:12px auto 0;max-width:460px}
+.contact{max-width:460px;margin:28px auto 0;text-align:left;border-radius:22px;border:1px solid var(--line);background:var(--ink-2);padding:20px}
+.contact b{font-size:15px}
+.contact small{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}
+.contact .row{display:flex;gap:8px;margin-top:14px}
+.contact .row .field{flex:1}
+.contact .btn{height:50px;padding:0 16px}
+.contact .ok{display:none;margin-top:12px;font-size:13.5px;color:var(--em-2);font-weight:600}
+.sendErr{display:none;margin-top:14px;padding:12px 14px;border-radius:14px;background:#ff5a5a14;border:1px solid #ff5a5a44;color:#ffb3b3;font-size:13.5px}
+
+@media(max-width:640px){
+  main{padding:24px 16px 120px}
+  .top-in{padding:12px 16px}
+  .logo .lg-full{display:none}
+  .logo .lg-icon{display:block;height:26px}
+  .secs{grid-template-columns:repeat(3,1fr)}
+  .q{padding:16px;border-radius:18px}
+  .qh,.qe{margin-left:0}
+  .opts:not(.col) .opt{flex:1 1 calc(50% - 4px)}
+  .grid2{grid-template-columns:1fr}
+  .btn{padding:0 18px}
+  .btn.sec .t{display:none}
+  .contact .row{flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.check svg{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="top-in">
+    <div class="logo"><img class="lg-full" src="data:image/png;base64,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" alt="Agentia"><img class="lg-icon" src="data:image/png;base64,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" alt="Agentia"></div>
+    <div class="prog" id="prog">
+      <div class="lbl"><span id="pLbl">Perfil</span><b id="pPct">0%</b></div>
+      <div class="track"><i id="pBar"></i></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <form id="f" novalidate onsubmit="return false">
+    <!-- INTRO -->
+    <section class="step on intro" data-title="Inicio">
+      <div class="eyebrow">Encuesta para agentes</div>
+      <h1>Comisiones y referidos <span>en Paraguay.</span></h1>
+      <div class="meta">
+        <span><svg class="ico"><use href="#i-list"/></svg>20 preguntas</span>
+        <span><svg class="ico"><use href="#i-clock"/></svg>Unos 7 minutos</span>
+        <span><svg class="ico"><use href="#i-shield"/></svg>Anónima</span>
+      </div>
+      <div class="letter">
+        <div class="bord"></div>
+        <div class="letter-in">
+          <img src="data:image/jpeg;base64,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" alt="Jeremy Silva">
+          <div>
+            <b>Jeremy Silva</b><small>Fundador de Agentia</small>
+            <p>Hola, soy Jeremy, fundador de Agentia. Estoy relevando cómo se manejan las comisiones y los referidos en Paraguay, porque no hay una norma escrita y cada agente trabaja distinto. Tus respuestas son anónimas y solo se usan en conjunto, nunca se publica quién dijo qué. Te lleva unos 7 minutos. Si querés, al final te comparto el resumen de resultados.</p>
+          </div>
+        </div>
+      </div>
+      <div class="secs">
+        <div><b>1</b>Perfil</div><div><b>2</b>Comisión</div><div><b>3</b>Entre agentes</div><div><b>4</b>Referidos</div><div><b>5</b>Plataforma</div>
+      </div>
+    </section>
+    
+    <section class="step" data-title="Perfil">
+      <div class="sh"><div class="num">1</div><div><h2>Perfil</h2><p>Contanos cómo trabajás.</p></div></div>
+      <div class="q" data-key="perfil_trabajo" data-req="perfil_trabajo"><div class="qt"><span class="n">1</span><span>¿Cómo trabajás hoy?</span></div><div class="opts col"><label class="opt"><input type="radio" name="perfil_trabajo" value="Agente independiente"><span class="mk"></span>Agente independiente</label><label class="opt"><input type="radio" name="perfil_trabajo" value="Agente en una inmobiliaria local"><span class="mk"></span>Agente en una inmobiliaria local</label><label class="opt"><input type="radio" name="perfil_trabajo" value="Agente en una franquicia"><span class="mk"></span>Agente en una franquicia</label><label class="opt"><input type="radio" name="perfil_trabajo" value="Vendedor para una desarrolladora"><span class="mk"></span>Vendedor para una desarrolladora</label><label class="opt"><input type="radio" name="perfil_trabajo" value="Dueño o director de inmobiliaria"><span class="mk"></span>Dueño o director de inmobiliaria</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="anios_rubro" data-req="anios_rubro"><div class="qt"><span class="n">2</span><span>¿Cuántos años tenés en el rubro?</span></div><div class="opts"><label class="opt"><input type="radio" name="anios_rubro" value="Menos de 1"><span class="mk"></span>Menos de 1</label><label class="opt"><input type="radio" name="anios_rubro" value="1 a 3"><span class="mk"></span>1 a 3</label><label class="opt"><input type="radio" name="anios_rubro" value="3 a 7"><span class="mk"></span>3 a 7</label><label class="opt"><input type="radio" name="anios_rubro" value="Más de 7"><span class="mk"></span>Más de 7</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="zona" data-req="zona"><div class="qt"><span class="n">3</span><span>¿En qué zona operás principalmente?</span></div><div class="opts"><label class="opt"><input type="radio" name="zona" value="Asunción"><span class="mk"></span>Asunción</label><label class="opt"><input type="radio" name="zona" value="Gran Asunción"><span class="mk"></span>Gran Asunción</label><label class="opt"><input type="radio" name="zona" value="Ciudad del Este"><span class="mk"></span>Ciudad del Este</label><label class="opt"><input type="radio" name="zona" value="Encarnación"><span class="mk"></span>Encarnación</label><label class="opt"><input type="radio" name="zona" value="Otra"><span class="mk"></span>Otra</label></div><div class="other" data-for="Otra"><label class="field"><input type="text" placeholder="¿Cuál?"></label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="operaciones_12m" data-req="operaciones_12m"><div class="qt"><span class="n">4</span><span>¿Cuántas operaciones cerraste en los últimos 12 meses?</span></div><div class="opts"><label class="opt"><input type="radio" name="operaciones_12m" value="0 a 2"><span class="mk"></span>0 a 2</label><label class="opt"><input type="radio" name="operaciones_12m" value="3 a 6"><span class="mk"></span>3 a 6</label><label class="opt"><input type="radio" name="operaciones_12m" value="7 a 12"><span class="mk"></span>7 a 12</label><label class="opt"><input type="radio" name="operaciones_12m" value="Más de 12"><span class="mk"></span>Más de 12</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div>
+    </section>
+    <section class="step" data-title="Comisión de venta">
+      <div class="sh"><div class="num">2</div><div><h2>Comisión de venta</h2><p>Lo que cobrás en una venta.</p></div></div>
+      <div class="q" data-key="comision_pct" data-req="comision_pct"><div class="qt"><span class="n">5</span><span>En una venta normal de un propietario particular, ¿qué % cobrás?</span></div><label class="field pct"><input name="comision_pct" inputmode="decimal" data-num="pct" placeholder="Ej: 5"><span class="suf">%</span></label><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="comision_iva" data-req="comision_iva"><div class="qt"><span class="n">6</span><span>Ese %, ¿incluye IVA?</span></div><div class="opts col"><label class="opt"><input type="radio" name="comision_iva" value="Sí, IVA incluido"><span class="mk"></span>Sí, IVA incluido</label><label class="opt"><input type="radio" name="comision_iva" value="No, el IVA va aparte"><span class="mk"></span>No, el IVA va aparte</label><label class="opt"><input type="radio" name="comision_iva" value="Depende de la operación"><span class="mk"></span>Depende de la operación</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="casos"><div class="qt"><span class="n">7</span><span>¿Qué % cobrás o te pagan en estos casos?</span></div><div class="qh">Dejá vacío si no aplica.</div><div class="grid2"><label><span>Venta para una desarrolladora</span><span class="field"><input name="pct_desarrolladora" inputmode="decimal" data-num="pct" placeholder="—"><span class="suf">%</span></span></label><label><span>Venta urgente pedida por el propietario</span><span class="field"><input name="pct_venta_urgente" inputmode="decimal" data-num="pct" placeholder="—"><span class="suf">%</span></span></label><label><span>Inmueble de alto valor</span><span class="field"><input name="pct_alto_valor" inputmode="decimal" data-num="pct" placeholder="—"><span class="suf">%</span></span></label><label><span>Terreno o lote</span><span class="field"><input name="pct_terreno" inputmode="decimal" data-num="pct" placeholder="—"><span class="suf">%</span></span></label></div></div><div class="q" data-key="monto_fijo" data-req="monto_fijo"><div class="qt"><span class="n">8</span><span>¿Alguna vez cobraste un monto fijo en lugar de un %?</span></div><div class="opts"><label class="opt"><input type="radio" name="monto_fijo" value="Nunca"><span class="mk"></span>Nunca</label><label class="opt"><input type="radio" name="monto_fijo" value="A veces"><span class="mk"></span>A veces</label><label class="opt"><input type="radio" name="monto_fijo" value="Seguido"><span class="mk"></span>Seguido</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="quien_paga" data-req="quien_paga"><div class="qt"><span class="n">9</span><span>¿Quién paga normalmente la comisión en una venta?</span></div><div class="opts"><label class="opt"><input type="radio" name="quien_paga" value="Solo el vendedor"><span class="mk"></span>Solo el vendedor</label><label class="opt"><input type="radio" name="quien_paga" value="Solo el comprador"><span class="mk"></span>Solo el comprador</label><label class="opt"><input type="radio" name="quien_paga" value="Ambos"><span class="mk"></span>Ambos</label><label class="opt"><input type="radio" name="quien_paga" value="Depende"><span class="mk"></span>Depende</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="donde_se_pacta" data-req="donde_se_pacta"><div class="qt"><span class="n">10</span><span>¿Dónde queda pactada la comisión?</span></div><div class="opts col"><label class="opt"><input type="radio" name="donde_se_pacta" value="Autorización de venta firmada"><span class="mk"></span>Autorización de venta firmada</label><label class="opt"><input type="radio" name="donde_se_pacta" value="Mensaje de WhatsApp"><span class="mk"></span>Mensaje de WhatsApp</label><label class="opt"><input type="radio" name="donde_se_pacta" value="Acuerdo verbal"><span class="mk"></span>Acuerdo verbal</label><label class="opt"><input type="radio" name="donde_se_pacta" value="Otro"><span class="mk"></span>Otro</label></div><div class="other" data-for="Otro"><label class="field"><input type="text" placeholder="¿Cuál?"></label></div><div class="qe">Respondé esta pregunta para seguir.</div></div>
+    </section>
+    <section class="step" data-title="Comisión entre agentes">
+      <div class="sh"><div class="num">3</div><div><h2>Comisión entre agentes</h2><p>Cuando compartís una venta con un colega.</p></div></div>
+      <div class="q" data-key="reparto_colegas" data-req="reparto_colegas"><div class="qt"><span class="n">11</span><span>Cuando un colega de otra inmobiliaria trae al comprador, ¿cómo reparten la comisión normalmente?</span></div><div class="opts col"><label class="opt"><input type="radio" name="reparto_colegas" value="50/50"><span class="mk"></span>50/50</label><label class="opt"><input type="radio" name="reparto_colegas" value="60/40 a favor de quien tiene la propiedad"><span class="mk"></span>60/40 a favor de quien tiene la propiedad</label><label class="opt"><input type="radio" name="reparto_colegas" value="70/30"><span class="mk"></span>70/30</label><label class="opt"><input type="radio" name="reparto_colegas" value="Otro"><span class="mk"></span>Otro</label></div><div class="other" data-for="Otro"><label class="field"><input type="text" placeholder="¿Cuál?"></label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="frecuencia_compartir" data-req="frecuencia_compartir"><div class="qt"><span class="n">12</span><span>¿Con qué frecuencia compartís propiedades con agentes de otras inmobiliarias?</span></div><div class="opts"><label class="opt"><input type="radio" name="frecuencia_compartir" value="Nunca"><span class="mk"></span>Nunca</label><label class="opt"><input type="radio" name="frecuencia_compartir" value="A veces"><span class="mk"></span>A veces</label><label class="opt"><input type="radio" name="frecuencia_compartir" value="Seguido"><span class="mk"></span>Seguido</label><label class="opt"><input type="radio" name="frecuencia_compartir" value="Siempre que puedo"><span class="mk"></span>Siempre que puedo</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="problemas_compartida"><div class="qt"><span class="n">13</span><span>¿Tuviste problemas al cobrar una comisión compartida? Si es así, ¿qué pasó?</span></div><div class="qh">Opcional.</div><textarea name="problemas_compartida" placeholder="Contanos brevemente…"></textarea></div>
+    </section>
+    <section class="step" data-title="Referidos">
+      <div class="sh"><div class="num">4</div><div><h2>Referidos</h2><p>Cuando alguien te trae un cliente.</p></div></div>
+      <div class="q" data-key="paga_referidos" data-req="paga_referidos"><div class="qt"><span class="n">14</span><span>¿Pagás referidos?</span></div><div class="opts col"><label class="opt"><input type="radio" name="paga_referidos" value="Nunca"><span class="mk"></span>Nunca</label><label class="opt"><input type="radio" name="paga_referidos" value="A veces"><span class="mk"></span>A veces</label><label class="opt"><input type="radio" name="paga_referidos" value="Siempre que alguien me trae un cliente"><span class="mk"></span>Siempre que alguien me trae un cliente</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="base_referido" data-req="base_referido"><div class="qt"><span class="n">15</span><span>Cuando pagás un referido, ¿sobre qué se calcula?</span></div><div class="opts col"><label class="opt"><input type="radio" name="base_referido" value="Un % de mi comisión"><span class="mk"></span>Un % de mi comisión</label><label class="opt"><input type="radio" name="base_referido" value="Un % del precio de venta"><span class="mk"></span>Un % del precio de venta</label><label class="opt"><input type="radio" name="base_referido" value="Un monto fijo"><span class="mk"></span>Un monto fijo</label><label class="opt"><input type="radio" name="base_referido" value="Depende"><span class="mk"></span>Depende</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="referido_monto" data-req="referido_pct,referido_gs"><div class="qt"><span class="n">16</span><span>¿Cuánto pagás normalmente?</span></div><div class="qh">Completá uno: % de tu comisión o un monto fijo en Gs.</div><div class="or"><label class="field"><input name="referido_pct" inputmode="decimal" data-num="pct" placeholder="Ej: 20"><span class="suf">% de tu comisión</span></label><em>o</em><label class="field"><span class="suf">Gs.</span><input name="referido_gs" inputmode="numeric" data-num="gs" placeholder="Monto fijo"></label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="referido_agente_vs_particular" data-req="referido_agente_vs_particular"><div class="qt"><span class="n">17</span><span>¿Pagás lo mismo si el referido es otro agente que si es una persona fuera del rubro?</span></div><div class="opts col"><label class="opt"><input type="radio" name="referido_agente_vs_particular" value="Sí, lo mismo"><span class="mk"></span>Sí, lo mismo</label><label class="opt"><input type="radio" name="referido_agente_vs_particular" value="Más a un agente"><span class="mk"></span>Más a un agente</label><label class="opt"><input type="radio" name="referido_agente_vs_particular" value="Más a un particular"><span class="mk"></span>Más a un particular</label><label class="opt"><input type="radio" name="referido_agente_vs_particular" value="A un particular no le pago"><span class="mk"></span>A un particular no le pago</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="disgustos_referidos" data-req="disgustos_referidos"><div class="qt"><span class="n">18</span><span>¿Qué es lo que menos te gusta de pagar referidos?</span></div><div class="qh">Podés marcar varias.</div><div class="opts col"><label class="opt multi"><input type="checkbox" name="disgustos_referidos" value="No se acuerda el monto antes de la venta"><span class="mk"></span>No se acuerda el monto antes de la venta</label><label class="opt multi"><input type="checkbox" name="disgustos_referidos" value="El referido no hizo casi nada"><span class="mk"></span>El referido no hizo casi nada</label><label class="opt multi"><input type="checkbox" name="disgustos_referidos" value="Después reclaman más de lo pactado"><span class="mk"></span>Después reclaman más de lo pactado</label><label class="opt multi"><input type="checkbox" name="disgustos_referidos" value="Me cuesta saber si el cliente realmente vino por el referido"><span class="mk"></span>Me cuesta saber si el cliente realmente vino por el referido</label><label class="opt multi"><input type="checkbox" name="disgustos_referidos" value="El cliente lo contacta directo y lo pierdo"><span class="mk"></span>El cliente lo contacta directo y lo pierdo</label><label class="opt multi"><input type="checkbox" name="disgustos_referidos" value="Otro"><span class="mk"></span>Otro</label></div><div class="other" data-for="Otro"><label class="field"><input type="text" placeholder="¿Cuál?"></label></div><div class="qe">Respondé esta pregunta para seguir.</div></div>
+    </section>
+    <section class="step" data-title="Plataforma">
+      <div class="sh"><div class="num">5</div><div><h2>Plataforma</h2><p>Qué te daría confianza.</p></div></div>
+      <div class="q" data-key="usaria_sistema" data-req="usaria_sistema"><div class="qt"><span class="n">19</span><span>Si una plataforma dejara el % de comisión y el pago al referido fijados y visibles desde que se publica la propiedad, ¿usarías ese sistema?</span></div><div class="opts"><label class="opt"><input type="radio" name="usaria_sistema" value="Sí"><span class="mk"></span>Sí</label><label class="opt"><input type="radio" name="usaria_sistema" value="Tal vez"><span class="mk"></span>Tal vez</label><label class="opt"><input type="radio" name="usaria_sistema" value="No"><span class="mk"></span>No</label></div><div class="qe">Respondé esta pregunta para seguir.</div></div><div class="q" data-key="confianza_necesita" data-req="confianza_necesita"><div class="qt"><span class="n">20</span><span>¿Qué necesitarías ver para confiar en compartir una propiedad o pagar un referido por una plataforma?</span></div><textarea name="confianza_necesita" placeholder="Ej.: Que todo quede respaldado en la plataforma."></textarea><div class="qe">Respondé esta pregunta para seguir.</div></div>
+    </section>
+    <!-- DONE -->
+    <section class="step done" data-title="Listo">
+      <div class="check"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h2>¡Gracias por tu tiempo!</h2>
+      <p>Tus respuestas ya están guardadas. Me ayudan a que Agentia funcione como trabaja de verdad un agente en Paraguay.</p>
+      <div class="contact">
+        <b>¿Querés recibir el resumen de resultados?</b>
+        <small>Opcional. Tu contacto se guarda aparte de tus respuestas.</small>
+        <div class="row">
+          <label class="field"><input id="contact" type="text" placeholder="WhatsApp o email" autocomplete="tel"></label>
+          <button class="btn pri" id="sendContact" type="button"><span class="spin"></span><svg class="ico"><use href="#i-send"/></svg>Enviar</button>
+        </div>
+        <div class="ok" id="contactOk">¡Listo! Te escribo cuando tenga los resultados.</div>
+      </div>
+    </section>
+  </form>
+  <div class="sendErr" id="sendErr">No pudimos enviar tus respuestas. Revisá tu conexión e intentá de nuevo.</div>
+</main>
+
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <button class="btn sec hide" id="back" type="button"><svg class="ico"><use href="#i-left"/></svg><span class="t">Atrás</span></button>
+    <button class="btn pri" id="next" type="button"><span class="spin"></span><span id="nextTxt">Empezar</span><svg class="ico"><use href="#i-arrow"/></svg></button>
+  </div>
+</nav>
+
+<script>
+// ===== CONFIG: pegá acá la URL de tu Apps Script (termina en /exec) =====
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJMyZ91o13Ko60ldiYzVyhudEUo09xkEj8j1A4xs298IsnpSIqx638iJVkDH6zyWtdFw/exec';
+// =======================================================================
+
+const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
+const steps=[...$$('.step')],QSTEPS=steps.length-2;let cur=0;
+
+// selection behaviour
+$$('.opt input').forEach(inp=>inp.addEventListener('change',()=>{
+  const q=inp.closest('.q');
+  q.querySelectorAll('.opt').forEach(o=>o.classList.toggle('sel',o.querySelector('input').checked));
+  q.querySelectorAll('.other').forEach(o=>{const on=q.querySelector(`input[value="${o.dataset.for}"]`).checked;o.classList.toggle('on',on);if(on)o.querySelector('input').focus()});
+  q.classList.remove('err');logic();
+}));
+$$('.q input[type=text],.q input[inputmode],.q textarea').forEach(i=>i.addEventListener('input',()=>i.closest('.q').classList.remove('err')));
+// numbers: keep digits, comma or dot for % ; thousands for Gs
+$$('input[data-num="pct"]').forEach(i=>i.addEventListener('input',()=>{i.value=i.value.replace(/[^\d.,]/g,'').slice(0,5)}));
+$$('input[data-num="gs"]').forEach(i=>i.addEventListener('input',()=>{const d=i.value.replace(/\D/g,'');i.value=d?(+d).toLocaleString('es-PY'):''}));
+
+// conditional: if "Nunca" pays referrals, skip 15-17
+function logic(){
+  const never=$('input[name="paga_referidos"][value="Nunca"]')?.checked;
+  ['base_referido','referido_monto','referido_agente_vs_particular'].forEach(k=>{const q=$(`.q[data-key="${k}"]`);if(q)q.classList.toggle('hidden',!!never)});
+}
+
+function val(name){
+  const els=[...$$(`[name="${name}"]`)];if(!els.length)return '';
+  const q=els[0].closest('.q');
+  const withOther=c=>{const o=q.querySelector(`.other[data-for="${c.value}"] input`);const t=o?o.value.trim():'';return t?`${c.value}: ${t}`:c.value};
+  if(els[0].type==='radio'){const c=els.find(e=>e.checked);return c?withOther(c):''}
+  if(els[0].type==='checkbox')return els.filter(e=>e.checked).map(withOther).join(' | ');
+  return els[0].value.trim();
+}
+function validate(step){
+  let ok=true,first=null;
+  step.querySelectorAll('.q[data-req]:not(.hidden)').forEach(q=>{
+    const names=q.dataset.req.split(',');const filled=names.some(n=>val(n)!=='');
+    q.classList.toggle('err',!filled);if(!filled){ok=false;first=first||q}
+  });
+  if(first)first.scrollIntoView({behavior:'smooth',block:'center'});
+  return ok;
+}
+function collect(){
+  const keys=[...new Set([...$$('#f [name]')].map(e=>e.name))].filter(k=>k!=='contact');
+  const d={};keys.forEach(k=>{const q=$(`[name="${k}"]`).closest('.q');d[k]=q&&q.classList.contains('hidden')?'':val(k)});return d;
+}
+function post(data){
+  return fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)});
+}
+
+function show(i,dir){
+  steps[cur].classList.remove('on','back');cur=i;
+  steps[cur].classList.toggle('back',dir<0);steps[cur].classList.add('on');
+  scrollTo({top:0,behavior:'smooth'});
+  const inQ=cur>0&&cur<=QSTEPS;$('#prog').classList.toggle('show',cur>0);
+  const pct=cur>QSTEPS?100:Math.round((cur-1)/QSTEPS*100);
+  $('#pBar').style.width=(cur===0?0:Math.max(pct,4))+'%';$('#pPct').textContent=(cur===0?0:pct)+'%';
+  $('#pLbl').textContent=cur>QSTEPS?'Completado':`Sección ${cur} de ${QSTEPS} · ${steps[cur].dataset.title}`;
+  $('#back').classList.toggle('hide',!inQ);
+  $('#nav').style.display=cur>QSTEPS?'none':'';
+  $('#nextTxt').textContent=cur===0?'Empezar':cur===QSTEPS?'Enviar respuestas':'Siguiente';
+}
+$('#next').onclick=async()=>{
+  if(cur===0)return show(1,1);
+  if(!validate(steps[cur]))return;
+  if(cur<QSTEPS)return show(cur+1,1);
+  const b=$('#next');b.disabled=true;b.classList.add('sending');$('#sendErr').style.display='none';
+  try{await post({tipo:'respuesta',...collect()});show(QSTEPS+1,1)}
+  catch(e){$('#sendErr').style.display='block'}
+  finally{b.disabled=false;b.classList.remove('sending')}
+};
+$('#back').onclick=()=>show(cur-1,-1);
+$('#sendContact').onclick=async()=>{
+  const v=$('#contact').value.trim();if(!v){$('#contact').focus();return}
+  const b=$('#sendContact');b.disabled=true;b.classList.add('sending');
+  try{await post({tipo:'contacto',contacto:v});$('#contactOk').style.display='block';$('#contact').closest('.row').style.display='none'}
+  catch(e){alert('No se pudo enviar. Intentá de nuevo.')}
+  finally{b.disabled=false;b.classList.remove('sending')}
+};
+addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName!=='TEXTAREA'&&cur<=QSTEPS&&e.target.id!=='contact'){e.preventDefault();$('#next').click()}});
+show(0,1);
+</script>
+</body>
+</html>

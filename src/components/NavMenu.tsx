@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, MessageCircle, Info, Trophy, LayoutDashboard, LogIn, UserPlus, Sparkles } from "lucide-react";
+import { Menu, MessageCircle, Info, Trophy, ClipboardList, LayoutDashboard, LogIn, UserPlus, Sparkles } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 import type { Locale } from "@/lib/i18n/dictionaries";
 
@@ -102,6 +102,15 @@ export function NavMenu({
             <Trophy size={16} />
             Ranking de Afiliados
           </Link>
+          {/* Plain <a>: /encuesta is a static HTML page outside the app router. */}
+          <a
+            href="/encuesta"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <ClipboardList size={16} />
+            Encuesta
+          </a>
           <a
             href="https://chat.whatsapp.com/BahpSvfmwIGLj7fSkAGijz"
             target="_blank"
