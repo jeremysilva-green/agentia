@@ -45,7 +45,7 @@ export default async function AgentPortfolioPage({
   const [properties, ratingSummary] = await Promise.all([
     getAgentProperties(agent.id, {
       city: filters.city || undefined,
-      listingType: filters.listingType === "rent" || filters.listingType === "sale" ? filters.listingType : undefined,
+      listingType: filters.listingType === "sale" ? "sale" : undefined,
       propertyType: parsePropertyTypeParam(filters.propertyType),
       minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
       maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,

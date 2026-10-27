@@ -1,4 +1,4 @@
-export type ListingType = "sale" | "rent";
+export type ListingType = "sale";
 
 export interface PropertySocialCardProps {
   title: string; // e.g. "Vendo Terreno en Villa Hayes"
@@ -25,5 +25,4 @@ export const FORMAT_DIMENSIONS: Record<
 
 export const LISTING_TAG_LABEL: Record<ListingType, string> = {
   sale: "EN VENTA",
-  rent: "EN ALQUILER",
 };

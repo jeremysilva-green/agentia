@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
 import { normalizeText } from "@/lib/text";
 
-const LISTING_TYPE_LABELS: Record<"rent" | "sale", string> = { sale: "venta", rent: "alquiler" };
+const LISTING_TYPE_LABELS: Record<"sale", string> = { sale: "venta" };
 const LISTING_KIND_LABELS: Record<"standard" | "proyecto_en_pozo" | "modelo", string> = {
   standard: "propiedad",
   proyecto_en_pozo: "proyecto en pozo",
@@ -76,7 +76,7 @@ export async function getAgentProperties(
   const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
     normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
   );
-  const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
+  const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>
     normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
   );
   const matchingListingKinds = (
@@ -89,7 +89,7 @@ export async function getAgentProperties(
       normalizeText(p.description).includes(normalizedQuery) ||
       normalizeText(p.city).includes(normalizedQuery) ||
       (p.property_type !== null && matchingPropertyTypes.includes(p.property_type)) ||
-      matchingListingTypes.includes(p.listing_type) ||
+      matchingListingTypes.includes(p.listing_type as "sale") ||
       matchingListingKinds.includes(p.listing_kind)
   );
 }

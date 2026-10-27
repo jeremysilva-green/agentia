@@ -89,7 +89,6 @@ export async function PropertyCard({
   ) : (
     <>
       {new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(property.price)}
-      {property.listing_type === "rent" && !dark && <span className="block text-xs font-normal text-slate-500">/mes</span>}
     </>
   );
 

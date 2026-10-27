@@ -15,7 +15,7 @@ export function buildListingVideoCaption(
   propertyId: string
 ): string {
   const price = formatListingPrice(property.price, property.currency);
-  const type = formatListingTypeLabel(property.listing_type);
+  const type = formatListingTypeLabel();
   const location = formatLocationLine(property);
   const url = `${getSiteUrl()}/agentes/${agentSlug}/propiedades/${propertyId}`;
   const cityTag = property.city.replace(/\s+/g, "").toLowerCase();

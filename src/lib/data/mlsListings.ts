@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
 import { normalizeText } from "@/lib/text";
 
-const LISTING_TYPE_LABELS: Record<"rent" | "sale", string> = { sale: "venta", rent: "alquiler" };
+const LISTING_TYPE_LABELS: Record<"sale", string> = { sale: "venta" };
 
 export type MlsListingWithProperty = {
   id: string;
@@ -107,7 +107,7 @@ export async function listActiveMlsListings(filters: {
   const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
     normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
   );
-  const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
+  const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>
     normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
   );
 
@@ -116,6 +116,6 @@ export async function listActiveMlsListings(filters: {
       normalizeText(l.property.title).includes(normalizedQuery) ||
       normalizeText(l.property.city).includes(normalizedQuery) ||
       (l.property.property_type !== null && matchingPropertyTypes.includes(l.property.property_type as PropertyType)) ||
-      matchingListingTypes.includes(l.property.listing_type)
+      matchingListingTypes.includes(l.property.listing_type as "sale")
   );
 }

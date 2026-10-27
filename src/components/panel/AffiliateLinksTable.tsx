@@ -75,7 +75,6 @@ export function AffiliateLinksTable({
                         currency: row.property_currency,
                         maximumFractionDigits: 0,
                       }).format(row.property_price)}
-                      {row.property_listing_type === "rent" && "/mes"}
                     </p>
                   </div>
 
@@ -156,7 +155,6 @@ export function AffiliateLinksTable({
                             currency: row.property_currency,
                             maximumFractionDigits: 0,
                           }).format(row.property_price)}
-                          {row.property_listing_type === "rent" && "/mes"}
                         </p>
                       </div>
                     </div>

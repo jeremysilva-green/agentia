@@ -125,7 +125,7 @@ export default async function PropiedadesPage() {
                     <MapPin size={14} className="text-[var(--em-2)]" />
                     {property.city}
                     <span className="h-[3px] w-[3px] rounded-full bg-[#555]" />
-                    {property.listing_type === "rent" ? "Alquiler" : "Venta"}
+                    Venta
                   </p>
                   {!property.published && <PanelBadge tone="amber">Sin publicar</PanelBadge>}
 

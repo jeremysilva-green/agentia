@@ -40,7 +40,7 @@ export default async function HomePage({
 
   const filters = {
     city: params.city,
-    listingType: params.listingType === "rent" || params.listingType === "sale" ? params.listingType : undefined,
+    listingType: params.listingType === "sale" ? "sale" : undefined,
     minPrice: params.minPrice ? Number(params.minPrice) : undefined,
     maxPrice: params.maxPrice ? Number(params.maxPrice) : undefined,
     propertyType: parsePropertyTypeParam(params.propertyType),

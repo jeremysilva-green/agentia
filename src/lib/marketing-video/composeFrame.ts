@@ -71,7 +71,7 @@ export function composeFrame(
 
   const locationLine = formatLocationLine(listing);
   const priceText = formatListingPrice(listing.price, listing.currency);
-  const typeLabel = formatListingTypeLabel(listing.listingType);
+  const typeLabel = formatListingTypeLabel();
 
   const locationSize = 36;
   ctx.font = interFont(locationSize);
@@ -99,7 +99,7 @@ export function composeFrame(
 
   let cursorY = INFO_BLOCK_BOTTOM - totalHeight;
 
-  // Operation type pill (VENTA / ALQUILER).
+  // Operation type pill (VENTA).
   cursorY += typeSize;
   ctx.font = interFont(typeSize);
   const typeWidth = ctx.measureText(typeLabel).width;

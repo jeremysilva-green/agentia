@@ -78,7 +78,7 @@ export async function getPropertyForSocialCard(
   const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
   const imageDataUri = await resizeToDataUri(imageBuffer);
 
-  const listingType: ListingType = property.listing_type === "rent" ? "rent" : "sale";
+  const listingType: ListingType = "sale";
 
   return {
     title: truncateTitle(property.title),

@@ -19,7 +19,6 @@ export const copy = {
       propertyType: "Tipo de Propiedad",
       priceRange: "Rango de precio",
       all: "Todos",
-      rent: "Alquiler",
       sale: "Venta",
       clear: "Limpiar filtros",
     },

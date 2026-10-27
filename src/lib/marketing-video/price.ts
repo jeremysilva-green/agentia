@@ -8,6 +8,7 @@ export function formatListingPrice(price: number, currency: string): string {
   return new Intl.NumberFormat("es-PY", { style: "currency", currency, maximumFractionDigits: 0 }).format(price);
 }
 
-export function formatListingTypeLabel(listingType: "rent" | "sale"): string {
-  return listingType === "sale" ? "VENTA" : "ALQUILER";
+// Agentia only lists properties for sale.
+export function formatListingTypeLabel(): string {
+  return "VENTA";
 }

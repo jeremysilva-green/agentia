@@ -304,7 +304,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                   <div style={{ display: "flex", fontFamily: "ClashSemibold", fontSize: px(72), color: "#ffffff", lineHeight: 1 }}>
                     {price}
                   </div>
-                  {(isModelo || property.listing_type === "rent") && (
+                  {isModelo && (
                     <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(30), color: "#e2e8f0", paddingBottom: px(8) }}>
                       /mes
                     </div>

@@ -57,7 +57,7 @@ export async function generateMetadata({
   // otherwise look like duplicate pages to Google.
   const canonical = `${siteUrl}/agentes/${agentSlug}/propiedades/${propertyId}`;
   const listingTitle = property.title.trim();
-  const operation = property.listing_type === "rent" ? "en alquiler" : "en venta";
+  const operation = "en venta";
   const formatPrice = (value: number) =>
     new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency, maximumFractionDigits: 0 }).format(value);
 
@@ -174,7 +174,7 @@ export default async function PropertyDetailPage({
         maximumFractionDigits: 0,
       }).format(property.model_installment_from ?? 0)
     : new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency }).format(property.price);
-  const priceSuffix = isModelo || property.listing_type === "rent" ? "/mes" : "";
+  const priceSuffix = isModelo ? "/mes" : "";
   const priceLabelPlain = priceSuffix ? `${priceFormatted} ${priceSuffix}` : priceFormatted;
 
   // schema.org structured data. Modelo listings never expose their private
@@ -252,9 +252,7 @@ export default async function PropertyDetailPage({
               </Badge>
             </div>
             {!isModelo && !isProyectoEnPozo && (
-              <Badge className="self-start border-white/15! bg-white/5! text-white/80!">
-                {property.listing_type === "rent" ? "En alquiler" : "En venta"}
-              </Badge>
+              <Badge className="self-start border-white/15! bg-white/5! text-white/80!">En venta</Badge>
             )}
             {isModelo && (
               <Badge className="self-start border-transparent! bg-emerald-700! text-white!">

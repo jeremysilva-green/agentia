@@ -12,7 +12,7 @@ export type MarketplaceFilters = {
   q?: string;
 };
 
-const LISTING_TYPE_LABELS: Record<"rent" | "sale", string> = { sale: "venta", rent: "alquiler" };
+const LISTING_TYPE_LABELS: Record<"sale", string> = { sale: "venta" };
 
 export async function getMarketplaceAgents(filters: MarketplaceFilters): Promise<AgentCardData[]> {
   const supabase = await createClient();
@@ -44,7 +44,7 @@ export async function getMarketplaceAgents(filters: MarketplaceFilters): Promise
     const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
       normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
     );
-    const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
+    const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>
       normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
     );
 
@@ -61,7 +61,7 @@ export async function getMarketplaceAgents(filters: MarketplaceFilters): Promise
             normalizeText(p.description).includes(normalizedQuery) ||
             normalizeText(p.city).includes(normalizedQuery) ||
             (p.property_type !== null && matchingPropertyTypes.includes(p.property_type)) ||
-            matchingListingTypes.includes(p.listing_type)
+            matchingListingTypes.includes(p.listing_type as "sale")
         )
         .map((p) => p.agent_id)
     );
@@ -182,7 +182,7 @@ export async function getMarketplaceProperties(filters: MarketplaceFilters): Pro
     const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
       normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
     );
-    const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as ("rent" | "sale")[]).filter((type) =>
+    const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>
       normalizeText(LISTING_TYPE_LABELS[type]).includes(normalizedQuery)
     );
 
@@ -195,7 +195,7 @@ export async function getMarketplaceProperties(filters: MarketplaceFilters): Pro
         normalizeText(p.city).includes(normalizedQuery) ||
         normalizeText(agentName).includes(normalizedQuery) ||
         (p.property_type !== null && matchingPropertyTypes.includes(p.property_type as PropertyType)) ||
-        matchingListingTypes.includes(p.listing_type)
+        matchingListingTypes.includes(p.listing_type as "sale")
       );
     });
   }

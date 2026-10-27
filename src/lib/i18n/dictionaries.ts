@@ -21,7 +21,6 @@ export type Dictionary = {
       propertyType: string;
       priceRange: string;
       all: string;
-      rent: string;
       sale: string;
       clear: string;
       submit: string;
@@ -59,7 +58,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
         propertyType: "Tipo de Propiedad",
         priceRange: "Rango de precio",
         all: "Todos",
-        rent: "Alquiler",
         sale: "Venta",
         clear: "Limpiar filtros",
         submit: "Filtrar",
@@ -95,7 +93,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
         propertyType: "Property Type",
         priceRange: "Price range",
         all: "All",
-        rent: "Rent",
         sale: "Sale",
         clear: "Clear filters",
         submit: "Filter",

@@ -20,7 +20,7 @@ export const propertySchema = z
   .object({
     title: z.string().min(4, "El título es muy corto").max(120),
     description: z.string().min(20, "Agregá una descripción más completa"),
-    listingType: z.enum(["rent", "sale"]),
+    listingType: z.enum(["sale"]),
     propertyType: z.enum(PROPERTY_TYPE_VALUES).optional(),
     price: z.coerce.number().positive("El precio debe ser mayor a 0"),
     currency: z.enum(["PYG", "USD"]).default("PYG"),
