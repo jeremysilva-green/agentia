@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/Badge";
 import { InteractiveBackground } from "@/components/InteractiveBackground";
 import { copy } from "@/lib/copy";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { PROPERTY_TYPE_LABELS, isPropertyType } from "@/lib/constants/propertyTypes";
 
 const statusLabel = {
   available: copy.property.available,
@@ -32,42 +33,79 @@ const statusLabel = {
   draft: "Borrador",
 } as const;
 
+// Listing descriptions are agent-written free text: emojis and line breaks
+// make for a poor search snippet.
+function toPlainText(text: string | null | undefined) {
+  return (text ?? "")
+    .replace(/\p{Extended_Pictographic}|\uFE0F|\u200D/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ agentSlug: string; propertyId: string }>;
 }): Promise<Metadata> {
-  const { propertyId } = await params;
+  const { agentSlug, propertyId } = await params;
   const property = await getPropertyForPublicView(propertyId);
   if (!property) return {};
 
   const siteUrl = getSiteUrl();
   const imageUrl = `${siteUrl}/api/property-card/${propertyId}`;
+  // Same URL whatever ?ref= the visitor arrived with — affiliate links would
+  // otherwise look like duplicate pages to Google.
+  const canonical = `${siteUrl}/agentes/${agentSlug}/propiedades/${propertyId}`;
+  const listingTitle = property.title.trim();
+  const operation = property.listing_type === "rent" ? "en alquiler" : "en venta";
+  const formatPrice = (value: number) =>
+    new Intl.NumberFormat("es-PY", { style: "currency", currency: property.currency, maximumFractionDigits: 0 }).format(value);
+
+  let title: string;
+  let description: string;
+
   // Modelo listings have no public price — property.price is the private
-  // precio contado and must never reach a crawler-visible description.
-  const description =
-    property.listing_kind === "modelo"
-      ? `Construimos en tu terreno · Cuota desde ${new Intl.NumberFormat("es-PY", {
-          style: "currency",
-          currency: property.currency,
-          maximumFractionDigits: 0,
-        }).format(property.model_installment_from ?? 0)}/mes`
-      : `${property.city} · ${new Intl.NumberFormat("es-PY", {
-          style: "currency",
-          currency: property.currency,
-        }).format(property.price)}`;
+  // precio contado and must never reach a crawler-visible title or description.
+  if (property.listing_kind === "modelo") {
+    title = `${listingTitle} – Construimos en tu terreno`;
+    description = `Construimos en tu terreno · Cuota desde ${formatPrice(property.model_installment_from ?? 0)}/mes`;
+  } else if (property.listing_kind === "proyecto_en_pozo") {
+    title = `${listingTitle} – Proyecto en ${property.city} desde ${formatPrice(property.price)}`;
+    description = `${property.city} · Desde ${formatPrice(property.price)}. ${toPlainText(property.description)}`;
+  } else {
+    const typeLabel =
+      property.property_type && isPropertyType(property.property_type)
+        ? PROPERTY_TYPE_LABELS[property.property_type].es
+        : null;
+    title = typeLabel
+      ? `${typeLabel} ${operation} en ${property.city} – ${formatPrice(property.price)}`
+      : `${listingTitle} – ${property.city} – ${formatPrice(property.price)}`;
+
+    const facts = [
+      property.area_m2 ? `${property.area_m2} m²` : null,
+      property.bedrooms ? `${property.bedrooms} dorm.` : null,
+      property.bathrooms ? `${property.bathrooms} ${property.bathrooms === 1 ? "baño" : "baños"}` : null,
+    ].filter(Boolean);
+    description = [`${listingTitle}.`, facts.length ? `${facts.join(", ")}.` : null, toPlainText(property.description)]
+      .filter(Boolean)
+      .join(" ");
+  }
+  if (description.length > 155) description = `${description.slice(0, 154).trimEnd()}…`;
 
   return {
-    title: `${property.title} — ${copy.brand}`,
+    title: `${title} | ${copy.brand}`,
     description,
+    alternates: { canonical },
     openGraph: {
-      title: property.title,
+      title,
       description,
+      type: "website",
+      url: canonical,
       images: [{ url: imageUrl, width: 1080, height: 1350 }],
     },
     twitter: {
       card: "summary_large_image",
-      title: property.title,
+      title,
       description,
       images: [imageUrl],
     },

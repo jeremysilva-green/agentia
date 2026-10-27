@@ -431,6 +431,18 @@ Superseding §43's approach: instead of a one-off `/v1/payments` checkout + a se
 - [x] **Merged `preview` into `main` and pushed** (fast-forward, `26213c9..d2838dc`) — this also caught `main` up on 75 commits it had quietly fallen behind on (everything built on `preview` since the forgot-password flow), not just this session's dLocal Go work. Production env vars for `DLOCAL_GO_*`/`FACTURASEND_*`/`INTERNAL_BILLING_SECRET` were already in place from §43, so no new secrets were needed.
 - [x] **Test data cleaned up**: the 4 dLocal Go sandbox subscriptions were deactivated via the API, and the test agent (`Test Sandbox Agente`), its 4 `subscriptions`/payments, all 5 `billing_invoices` rows (invoice numbers 5/7/8/9/10), its `profiles`/`agent_profiles` rows, and its auth user (plus 2 orphaned auth users from earlier failed setup attempts) were all deleted. The one thing kept: the real `sifen_cities` row for Asunción (departamento 1/distrito 1/ciudad 1) added while building the test — that's correct reference data the table needed anyway, not test data.
 
+## 45. Básico plan reworked — 6 properties, 3 lifetime free AI-enhancer tries, shared upgrade modal — ✅ pushed
+
+Free-plan changes meant to turn the limits into upgrade triggers for engaged agents instead of walls for new ones. Pushed to `preview` and `main` together at `844b08c` (fast-forward). Migration `0079` was run by the user in Supabase before the push.
+
+- [x] **Property cap 3 → 6.** `BASICO_PROPERTY_LIMIT` and `BASICO_FREE_ENHANCE_TRIES` now live in `lib/plans.ts` as the single source of truth (server cap, downgrade enforcement, subscription usage bar, cancel-confirm copy, homepage/pricing cards all read from them). Downgrade behaviour unchanged: newest 6 stay visible, older ones unpublished (never deleted) and auto-restored on re-upgrade.
+- [x] **3 free AI-enhancer tries, lifetime (not monthly).** Migration `0079_free_enhance_tries.sql`: `agent_ai_credits.free_tries_used` plus atomic `try_charge_free_enhance` / `refund_free_enhance` (execute revoked from clients — service role only). `/api/ai-enhance` now lets anyone without active paid access use the free path; at 0 it returns 402 `code: "free_limit"`. Failed generations refund the try. Widget shows "Te quedan N de 3 mejoras gratis"; at 0, Generar opens the upgrade modal.
+- [x] **Shared `UpgradeModal`** (property cap, enhancer at 0, locked video button): Pro highlighted "Recomendado", Fundador (hidden when sold out) and MLS listed with price + one-line pitch, CTA to `/panel/suscripcion`.
+- [x] **Locked "Generar video" button with a Pro badge** under "Editar" on each card in `/panel/propiedades` for non-paid agents; opens the upgrade modal. Only rendered inside the agent panel (layout redirects non-agents), so never on the public portal or for affiliates.
+- [ ] **Not yet verified in a browser**: the live free-enhancer flow end to end (3 tries → blocked → modal) and the 7th-property modal on production.
+- [ ] **Open decision**: the modal's per-plan CTAs all link to `/panel/suscripcion` rather than starting checkout directly — fine for now, could be wired straight to `selectPlan` + dLocal Go later to cut a click.
+- [ ] **Pre-existing, not touched**: the older `try_charge_ai_credit` / `refund_ai_credit` RPCs (migration `0056`) are still executable by any authenticated client — worth revoking the same way `0079` does.
+
 ## Standing rules (not action items — just don't forget these)
 
 - Never push to Supabase or deploy to production without explicit go-ahead per migration/change, reviewed locally first

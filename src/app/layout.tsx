@@ -5,6 +5,7 @@ import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { getSiteUrl } from "@/lib/siteUrl";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,7 +30,17 @@ const rubik = localFont({
   display: "swap",
 });
 
+// Default share image for every page without its own (listing pages and
+// short links set their own openGraph, which replaces this one). 1640x856 is
+// ~1.91:1, the ratio WhatsApp/Facebook show as a full-width preview.
+// og:title/description are deliberately left out so each page's own <title>
+// and description are used as the fallback instead of the root's.
+const SHARE_IMAGE = { url: "/Agentia-Thumbnail.png", width: 1640, height: 856, alt: "Agentia — Portal Inmobiliario Inteligente" };
+
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
+  openGraph: { type: "website", siteName: "Agentia", locale: "es_PY", images: [SHARE_IMAGE] },
+  twitter: { card: "summary_large_image", images: [SHARE_IMAGE.url] },
   title: "AGENTIA | Portal Inmobiliario Inteligente",
   // Doubles as the "/" landing page's description — /agentes (the
   // marketplace, formerly at "/") has its own route-level metadata override.
