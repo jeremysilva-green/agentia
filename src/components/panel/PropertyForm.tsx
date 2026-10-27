@@ -196,7 +196,7 @@ export function PropertyForm({
         value={values.description}
         onChange={setField("description")}
         error={fieldError("description")}
-        placeholder="Contale al comprador por qué esta propiedad es especial..."
+        placeholder="Describí la zona, el estado de la propiedad y lo que incluye (ambientes, patio, quincho, cochera...). Cuanto más detalle, mejor posicionamiento en Google."
         className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
       />
 

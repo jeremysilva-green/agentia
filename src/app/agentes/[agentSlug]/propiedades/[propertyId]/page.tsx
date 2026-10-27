@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { MapPin, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getPropertyForPublicView } from "@/lib/data/agentPortfolio";
 import { PropertyGallery } from "@/components/property/PropertyGallery";
-import { PropertyVideo } from "@/components/property/PropertyVideo";
-import { PropertyInstagramReel } from "@/components/property/PropertyInstagramReel";
+import { PropertyVideos } from "@/components/property/PropertyVideos";
 import { PropertyMap } from "@/components/property/PropertyMap";
 import { ChatWidget } from "@/components/property/ChatWidget";
 import { AgendarModal } from "@/components/property/AgendarModal";
@@ -177,8 +177,55 @@ export default async function PropertyDetailPage({
   const priceSuffix = isModelo || property.listing_type === "rent" ? "/mes" : "";
   const priceLabelPlain = priceSuffix ? `${priceFormatted} ${priceSuffix}` : priceFormatted;
 
+  // schema.org structured data. Modelo listings never expose their private
+  // precio contado — no Offer is emitted for them at all.
+  const plainDescription = (property.description ?? "")
+    .replace(/\p{Extended_Pictographic}|\uFE0F|\u200D/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateListing",
+    name: property.title.trim(),
+    url: canonicalUrl,
+    description: plainDescription || undefined,
+    image: imageUrls.length > 0 ? imageUrls : undefined,
+    datePosted: property.created_at,
+    ...(isModelo
+      ? {}
+      : {
+          offers: {
+            "@type": "Offer",
+            price: property.price,
+            priceCurrency: property.currency,
+            availability: property.status === "available" ? "https://schema.org/InStock" : "https://schema.org/SoldOut",
+            seller: { "@type": "RealEstateAgent", name: agentName, url: `${siteUrl}/agentes/${agentSlug}` },
+          },
+        }),
+    mainEntity: {
+      "@type": "Accommodation",
+      address: {
+        "@type": "PostalAddress",
+        ...(property.address && !isModelo ? { streetAddress: property.address } : {}),
+        addressLocality: property.city,
+        addressCountry: "PY",
+      },
+      ...(property.lat != null && property.lng != null && !isModelo
+        ? { geo: { "@type": "GeoCoordinates", latitude: property.lat, longitude: property.lng } }
+        : {}),
+      ...(property.bedrooms ? { numberOfBedrooms: property.bedrooms } : {}),
+      ...(property.bathrooms ? { numberOfBathroomsTotal: property.bathrooms } : {}),
+      ...(property.area_m2 ? { floorSize: { "@type": "QuantitativeValue", value: property.area_m2, unitCode: "MTK" } } : {}),
+    },
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#161616]">
+      <script
+        type="application/ld+json"
+        // "<" escaped so listing text can never close the script tag early.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <InteractiveBackground dotColor="rgb(255 255 255 / 0.05)" spotColor="rgb(255 255 255 / 0)" />
       <div className="relative mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-3">
         <LeadTracker propertyId={propertyId} refCode={ref} />
@@ -204,6 +251,11 @@ export default async function PropertyDetailPage({
                 {statusLabel[property.status]}
               </Badge>
             </div>
+            {!isModelo && !isProyectoEnPozo && (
+              <Badge className="self-start border-white/15! bg-white/5! text-white/80!">
+                {property.listing_type === "rent" ? "En alquiler" : "En venta"}
+              </Badge>
+            )}
             {isModelo && (
               <Badge className="self-start border-transparent! bg-emerald-700! text-white!">
                 Construimos en tu terreno
@@ -222,9 +274,8 @@ export default async function PropertyDetailPage({
             </p>
           </div>
 
-          <PropertyGallery imageUrls={imageUrls} title={property.title} />
-          <PropertyVideo url={property.youtube_url} />
-          <PropertyInstagramReel url={property.instagram_reel_url} />
+          <PropertyGallery imageUrls={imageUrls} title={property.title.trim()} />
+          <PropertyVideos youtubeUrl={property.youtube_url} instagramUrl={property.instagram_reel_url} />
 
           <FactsGrid
             areaM2={property.area_m2}
@@ -282,7 +333,12 @@ export default async function PropertyDetailPage({
                   )}
                   <span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-neutral-900 bg-emerald-400" />
                 </span>
-                <p className="font-display text-sm font-medium text-white">{agentName}</p>
+                <Link
+                  href={`/agentes/${agentSlug}`}
+                  className="font-display text-sm font-medium text-white transition-colors hover:text-emerald-400"
+                >
+                  {agentName}
+                </Link>
               </div>
 
               <div className="mt-4 flex flex-col gap-2.5">

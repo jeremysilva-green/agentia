@@ -60,7 +60,7 @@ export function PropertyGallery({ imageUrls, title }: { imageUrls: string[]; tit
         <div key={active} className="animate-fade-in absolute inset-0">
           <Image
             src={imageUrls[active]}
-            alt={title}
+            alt={`${title} – foto ${active + 1}`}
             fill
             className="object-cover"
             sizes="800px"
@@ -196,7 +196,7 @@ function PropertyLightbox({
           else if (delta < -SWIPE_THRESHOLD) go(index + 1);
         }}
       >
-        <Image src={imageUrls[index]} alt={title} fill className="object-contain" sizes="100vw" />
+        <Image src={imageUrls[index]} alt={`${title} – foto ${index + 1}`} fill className="object-contain" sizes="100vw" />
         {imageUrls.length > 1 && (
           <>
             <button

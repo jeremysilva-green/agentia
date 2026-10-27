@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createPortal } from "react-dom";
 import { Check, Crown, Globe, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { PLANS, BASICO_PROPERTY_LIMIT, BASICO_FREE_ENHANCE_TRIES, type PlanId } from "@/lib/plans";
@@ -45,7 +46,11 @@ export function UpgradeModal({
   const { title, body } = COPY[reason];
   const tiers = TIERS.filter((t) => t.id !== "fundador" || fundadorSeatsRemaining > 0);
 
-  return (
+  // Portaled to <body>: this is opened from inside transformed cards (hover
+  // lift, Reveal animation), which turn `position: fixed` into "fixed to the
+  // card" and made the modal flicker inside it. Safe without a mount check
+  // since `open` can only become true after a client-side click.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div
         className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-emerald-400 bg-black/90 p-5 shadow-xl backdrop-blur-md ring-1 ring-emerald-400"
@@ -102,6 +107,7 @@ export function UpgradeModal({
           </span>
         </Link>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
