@@ -11,7 +11,13 @@ import { TypologyEditor, type TypologyRow } from "@/components/panel/TypologyEdi
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { COVERAGE_QUICK_PICKS } from "@/lib/constants/coverageCities";
 import { LISTABLE_PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
-import { AGENT_COMMISSION_PCT, AFFILIATE_COMMISSION_PCT, MODELO_REFERRAL_REWARD_PCT } from "@/lib/constants/commission";
+import {
+  AGENT_COMMISSION_PCT,
+  AGENT_COMMISSION_MAX_PCT,
+  AFFILIATE_SHARE_DEFAULT_PCT,
+  AFFILIATE_SHARE_MAX_PCT,
+  MODELO_REFERRAL_REWARD_PCT,
+} from "@/lib/constants/commission";
 import { NEGOTIATION_OPTIONS } from "@/lib/constants/negotiation";
 import {
   PROYECTO_EN_POZO_COMMISSION_TRIGGERS,
@@ -93,8 +99,15 @@ export function PropertyForm({
   );
   const [includesLand, setIncludesLand] = useState(defaultValues?.model_includes_land ?? "no_terreno_cliente");
   const [modelFinancingType, setModelFinancingType] = useState(defaultValues?.model_financing_type ?? "che_roga_pora");
-  const [referralRewardType, setReferralRewardType] = useState<"percentage" | "fixed">(
-    defaultValues?.referral_reward_type ?? (kind === "modelo" ? "fixed" : "percentage")
+  const [commissionAgentType, setCommissionAgentType] = useState<"percentage" | "fixed">(
+    defaultValues?.commission_agent_type ?? "percentage"
+  );
+  const [commissionVatIncluded, setCommissionVatIncluded] = useState(defaultValues?.commission_vat_included ?? false);
+  // Proyecto en Pozo: "commission_share" = % of the agent's commission, or "fixed".
+  const [referralRewardType, setReferralRewardType] = useState<"commission_share" | "fixed">(
+    defaultValues?.referral_reward_type === "fixed" || (kind === "modelo" && !defaultValues?.referral_reward_type)
+      ? "fixed"
+      : "commission_share"
   );
   // React resets uncontrolled <form> fields after every action call — even
   // when the action returns a validation error rather than throwing — so
@@ -123,8 +136,23 @@ export function PropertyForm({
     modelDownPaymentText: defaultValues?.model_down_payment_text ?? "",
     modelQualifyingRequirements: defaultValues?.model_qualifying_requirements ?? "",
     commissionTriggerLabel: defaultValues?.commission_trigger_label ?? "",
-    commissionAgentPct: defaultValues?.commission_agent_pct != null ? String(defaultValues.commission_agent_pct) : "",
-    referralRewardValue: defaultValues?.referral_reward_value != null ? String(defaultValues.referral_reward_value) : "",
+    commissionAgentAmount: defaultValues?.commission_agent_amount != null ? String(defaultValues.commission_agent_amount) : "",
+    commissionAgentPct:
+      defaultValues?.commission_agent_pct != null
+        ? String(defaultValues.commission_agent_pct)
+        : kind === "standard"
+          ? String(AGENT_COMMISSION_PCT)
+          : "",
+    referralRewardValue:
+      kind === "standard"
+        ? String(
+            defaultValues?.referral_reward_type === "commission_share" && defaultValues.referral_reward_value != null
+              ? defaultValues.referral_reward_value
+              : AFFILIATE_SHARE_DEFAULT_PCT
+          )
+        : defaultValues?.referral_reward_value != null
+          ? String(defaultValues.referral_reward_value)
+          : "",
   });
   const setField = (name: string) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setValues((prev) => ({ ...prev, [name]: e.target.value }));
@@ -141,13 +169,76 @@ export function PropertyForm({
   }
 
   const priceNum = Number(price) || 0;
-  const agentCommission = priceNum * (AGENT_COMMISSION_PCT / 100);
-  const affiliateCommission = priceNum * (AFFILIATE_COMMISSION_PCT / 100);
+  // Standard listings: the agent sets their own commission and the share of it
+  // that goes to the affiliate (10% of a 5.5% commission = 0.55% of the price).
+  const agentPct = Number(values.commissionAgentPct) || 0;
+  const sharePct = Number(values.referralRewardValue) || 0;
+  const agentFixedAmount = Number(values.commissionAgentAmount) || 0;
+  const agentCommission = commissionAgentType === "fixed" ? agentFixedAmount : priceNum * (agentPct / 100);
+  const affiliateCommission = agentCommission * (sharePct / 100);
   // What the agent actually keeps if the sale comes through an affiliate's
   // referral — the worst case, since not every sale involves one.
   const netCommission = agentCommission - affiliateCommission;
   const formatMoney = (amount: number) =>
     `${currency} ${amount.toLocaleString("es-PY", { maximumFractionDigits: 0 })}`;
+
+  // "% | Monto fijo" switch, the matching input and the IVA checkbox — shared by
+  // standard listings and Proyecto en Pozo.
+  const agentCommissionFields = (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium text-slate-700">Tu comisión</p>
+        <PillTabs
+          options={[
+            { value: "percentage", label: "%" },
+            { value: "fixed", label: "Monto fijo" },
+          ]}
+          value={commissionAgentType}
+          onChange={(v) => setCommissionAgentType(v as "percentage" | "fixed")}
+        />
+      </div>
+      <input type="hidden" name="commissionAgentType" value={commissionAgentType} />
+      {commissionAgentType === "percentage" ? (
+        <Input
+          id="commissionAgentPct"
+          name="commissionAgentPct"
+          type="number"
+          min="0.1"
+          max={AGENT_COMMISSION_MAX_PCT}
+          step="0.01"
+          aria-label="Tu comisión (%)"
+          value={values.commissionAgentPct}
+          onChange={setField("commissionAgentPct")}
+          error={fieldError("commissionAgentPct")}
+          className="bg-white!"
+        />
+      ) : (
+        <Input
+          id="commissionAgentAmount"
+          name="commissionAgentAmount"
+          type="number"
+          min="0"
+          step="1"
+          aria-label={`Tu comisión (${currency})`}
+          placeholder={`Monto en ${currency}`}
+          value={values.commissionAgentAmount}
+          onChange={setField("commissionAgentAmount")}
+          error={fieldError("commissionAgentAmount")}
+          className="bg-white!"
+        />
+      )}
+      <label className="flex items-center gap-2 text-xs text-slate-600">
+        <input
+          type="checkbox"
+          name="commissionVatIncluded"
+          checked={commissionVatIncluded}
+          onChange={(e) => setCommissionVatIncluded(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
+        />
+        La comisión incluye IVA
+      </label>
+    </div>
+  );
 
   const attributionDefault = kind === "modelo" ? "365" : "180";
   const commissionTriggerOptions = (
@@ -283,22 +374,49 @@ export function PropertyForm({
               placeholder="sin puntos ni comas"
               className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
             />
-            {/* Proyecto en Pozo sets its own commission % below, in "Comisión
-                y referidos" — the standard 5.5%/1% preview doesn't apply
-                there and would be misleading shown twice. */}
+            {/* Proyecto en Pozo / Modelo set their own commission in "Comisión
+                y referidos" below; standard listings set it right here. */}
             {kind === "standard" && (
-              <div className="flex flex-col gap-1 pt-1 text-xs text-slate-500">
-                <div className="flex items-center justify-between">
-                  <span>Comisión Agente ({AGENT_COMMISSION_PCT}%)</span>
-                  <span className="font-medium text-slate-700">{formatMoney(agentCommission)}</span>
+              <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 pt-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {agentCommissionFields}
+                  <Input
+                    id="referralRewardValue"
+                    name="referralRewardValue"
+                    type="number"
+                    min="0"
+                    max={AFFILIATE_SHARE_MAX_PCT}
+                    step="0.5"
+                    label={`Para el referido (% de tu comisión, hasta ${AFFILIATE_SHARE_MAX_PCT}%)`}
+                    value={values.referralRewardValue}
+                    onChange={setField("referralRewardValue")}
+                    error={fieldError("referralRewardValue")}
+                    className="bg-white!"
+                  />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span>Comisión Referido ({AFFILIATE_COMMISSION_PCT}%)</span>
-                  <span className="font-medium text-slate-700">{formatMoney(affiliateCommission)}</span>
-                </div>
-                <div className="flex items-center justify-between border-t border-slate-200 pt-1">
-                  <span className="font-medium text-slate-700">Tu comisión total</span>
-                  <span className="font-semibold text-emerald-700">{formatMoney(netCommission)}</span>
+                <input type="hidden" name="referralRewardType" value="commission_share" />
+                <div className="flex flex-col gap-1 text-xs text-slate-500">
+                  <div className="flex items-center justify-between">
+                    <span>
+                      Comisión Agente (
+                      {commissionAgentType === "fixed" ? "monto fijo" : `${agentPct.toLocaleString("es-PY")}%`},{" "}
+                      {commissionVatIncluded ? "IVA incluido" : "sin IVA"})
+                    </span>
+                    <span className="font-medium text-slate-700">{formatMoney(agentCommission)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>
+                      Comisión Referido ({sharePct.toLocaleString("es-PY")}% de tu comisión
+                      {priceNum > 0 &&
+                        ` = ${((affiliateCommission / priceNum) * 100).toLocaleString("es-PY", { maximumFractionDigits: 2 })}% del precio`}
+                      )
+                    </span>
+                    <span className="font-medium text-slate-700">{formatMoney(affiliateCommission)}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-slate-200 pt-1">
+                    <span className="font-medium text-slate-700">Tu comisión si hay referido</span>
+                    <span className="font-semibold text-emerald-700">{formatMoney(netCommission)}</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -609,18 +727,22 @@ export function PropertyForm({
             </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              id="commissionAgentPct"
-              name="commissionAgentPct"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              label={kind === "modelo" ? "Tu comisión por contrato (% o Gs.)" : "Tu comisión (%)"}
-              value={values.commissionAgentPct}
-              onChange={setField("commissionAgentPct")}
-              className="bg-white!"
-            />
+            {kind === "proyecto_en_pozo" ? (
+              agentCommissionFields
+            ) : (
+              <Input
+                id="commissionAgentPct"
+                name="commissionAgentPct"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                label={kind === "modelo" ? "Tu comisión por contrato (% o Gs.)" : "Tu comisión (%)"}
+                value={values.commissionAgentPct}
+                onChange={setField("commissionAgentPct")}
+                className="bg-white!"
+              />
+            )}
             <SingleSelectDropdown
               name="commissionTriggerLabel"
               label="Se cobra cuando"
@@ -647,11 +769,11 @@ export function PropertyForm({
                   <p className="text-sm font-medium text-slate-700">Recompensa para el referido</p>
                   <PillTabs
                     options={[
-                      { value: "percentage", label: "% de tu comisión" },
+                      { value: "commission_share", label: "% de tu comisión" },
                       { value: "fixed", label: "Monto fijo" },
                     ]}
                     value={referralRewardType}
-                    onChange={(v) => setReferralRewardType(v as "percentage" | "fixed")}
+                    onChange={(v) => setReferralRewardType(v as "commission_share" | "fixed")}
                     className="self-start"
                   />
                   <input type="hidden" name="referralRewardType" value={referralRewardType} />
@@ -661,8 +783,9 @@ export function PropertyForm({
                   name="referralRewardValue"
                   type="number"
                   min="0"
+                  max={referralRewardType === "fixed" ? undefined : AFFILIATE_SHARE_MAX_PCT}
                   step="0.01"
-                  label={referralRewardType === "fixed" ? "Monto para el referido (Gs.)" : "Porcentaje para el referido"}
+                  label={referralRewardType === "fixed" ? "Monto para el referido (Gs.)" : `% de tu comisión (hasta ${AFFILIATE_SHARE_MAX_PCT}%)`}
                   value={values.referralRewardValue}
                   onChange={setField("referralRewardValue")}
                   className="bg-white!"

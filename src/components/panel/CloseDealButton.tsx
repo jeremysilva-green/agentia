@@ -5,24 +5,26 @@ import { CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { closeLeadDeal } from "@/lib/actions/leads";
-import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { resolveListingCommission, type ListingCommissionInput } from "@/lib/constants/commission";
 import { copy } from "@/lib/copy";
 
 export function CloseDealButton({
   leadId,
   defaultPrice,
   currency,
+  commission,
 }: {
   leadId: string;
   defaultPrice: number;
   currency: string;
+  commission: ListingCommissionInput;
 }) {
   const [open, setOpen] = useState(false);
   const [price, setPrice] = useState(defaultPrice);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const commissionAmount = Math.round(price * (AFFILIATE_COMMISSION_PCT / 100));
+  const commissionAmount = Math.round(resolveListingCommission(commission, price).affiliateAmount);
 
   function handleConfirm() {
     setError(null);
@@ -72,7 +74,7 @@ export function CloseDealButton({
               />
               <div className="rounded-xl bg-emerald-50 p-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-emerald-700">
-                  {copy.panel.commissionDue} ({AFFILIATE_COMMISSION_PCT}%)
+                  {copy.panel.commissionDue} ({resolveListingCommission(commission, price).affiliatePctOfPrice.toLocaleString("es-PY", { maximumFractionDigits: 2 })}%)
                 </p>
                 <p className="text-lg font-semibold text-emerald-800">
                   {currency} {commissionAmount.toLocaleString("es-PY")}

@@ -28,8 +28,9 @@ export function AffiliateTermsContent({ date }: { date: string }) {
         <p className="mt-1">
           Cuando una propiedad sea vendida como resultado de la promoción o referencia realizada
           mediante el enlace único asignado al Afiliado, el Afiliado tendrá derecho a recibir una
-          comisión equivalente al <strong>1% (uno por ciento)</strong> del valor total de la
-          operación de compraventa, conforme a los presentes términos.
+          comisión equivalente al <strong>porcentaje de la comisión del Agente indicado en la
+          publicación de la propiedad</strong> (por defecto el 10%, hasta un máximo del 20%), conforme
+          a los presentes términos.
         </p>
         <p className="mt-2">
           El Agente responsable de la propiedad será quien deba reconocer y pagar directamente dicha
@@ -90,7 +91,7 @@ export function AffiliateTermsContent({ date }: { date: string }) {
           garante del pago de las comisiones generadas por los Agentes</strong>.
         </p>
         <p className="mt-2">
-          La obligación de pagar el 1% corresponde exclusivamente al Agente responsable de la
+          La obligación de pagar dicha comisión corresponde exclusivamente al Agente responsable de la
           propiedad y de la operación realizada.
         </p>
         <p className="mt-2">

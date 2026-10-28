@@ -158,7 +158,10 @@ export interface Database {
           model_qualifying_requirements: string | null;
           commission_trigger_label: string | null;
           commission_agent_pct: number | null;
-          referral_reward_type: "percentage" | "fixed" | null;
+          commission_agent_type: "percentage" | "fixed";
+          commission_agent_amount: number | null;
+          commission_vat_included: boolean;
+          referral_reward_type: "percentage" | "fixed" | "commission_share" | null;
           referral_reward_value: number | null;
           referral_attribution_days: number | null;
           created_at: string;
@@ -210,7 +213,10 @@ export interface Database {
           model_qualifying_requirements?: string | null;
           commission_trigger_label?: string | null;
           commission_agent_pct?: number | null;
-          referral_reward_type?: "percentage" | "fixed" | null;
+          commission_agent_type?: "percentage" | "fixed";
+          commission_agent_amount?: number | null;
+          commission_vat_included?: boolean;
+          referral_reward_type?: "percentage" | "fixed" | "commission_share" | null;
           referral_reward_value?: number | null;
           referral_attribution_days?: number | null;
         };

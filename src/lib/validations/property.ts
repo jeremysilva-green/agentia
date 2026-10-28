@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AGENT_COMMISSION_MAX_PCT, AFFILIATE_SHARE_MAX_PCT } from "@/lib/constants/commission";
 import { PROPERTY_TYPE_VALUES } from "@/lib/constants/propertyTypes";
 import { isLikelyGoogleMapsUrl } from "@/lib/googleMaps";
 import { isLikelyYoutubeUrl } from "@/lib/youtube";
@@ -90,7 +91,10 @@ export const propertySchema = z
     // Comisión y referidos (Proyecto en Pozo / Modelo only)
     commissionTriggerLabel: optionalTrimmedString,
     commissionAgentPct: optionalPercentage,
-    referralRewardType: z.enum(["percentage", "fixed"]).optional(),
+    commissionAgentType: z.enum(["percentage", "fixed"]).default("percentage"),
+    commissionAgentAmount: optionalPositiveNumber,
+    commissionVatIncluded: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
+    referralRewardType: z.enum(["percentage", "fixed", "commission_share"]).optional(),
     referralRewardValue: optionalPositiveNumber,
     referralAttributionDays: optionalNonNegativeInt,
   })
@@ -108,6 +112,33 @@ export const propertySchema = z
           code: "custom",
           path: ["typologyName"],
           message: "Agregá al menos una tipología.",
+        });
+      }
+    }
+    if (data.commissionAgentType === "fixed" && data.commissionAgentAmount == null) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["commissionAgentAmount"],
+        message: "Ingresá el monto de tu comisión.",
+      });
+    }
+    if (data.referralRewardType === "commission_share" && data.referralRewardValue != null && data.referralRewardValue > AFFILIATE_SHARE_MAX_PCT) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["referralRewardValue"],
+        message: `El referido puede recibir hasta el ${AFFILIATE_SHARE_MAX_PCT}% de tu comisión.`,
+      });
+    }
+    if (data.listingKind === "standard") {
+      if (
+        data.commissionAgentType === "percentage" &&
+        data.commissionAgentPct != null &&
+        (data.commissionAgentPct <= 0 || data.commissionAgentPct > AGENT_COMMISSION_MAX_PCT)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["commissionAgentPct"],
+          message: `La comisión debe estar entre 0,1% y ${AGENT_COMMISSION_MAX_PCT}%.`,
         });
       }
     }

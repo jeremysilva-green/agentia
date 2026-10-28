@@ -1,3 +1,4 @@
+import type { ListingCommissionInput } from "@/lib/constants/commission";
 import type { Database } from "@/types/database.types";
 
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -47,6 +48,9 @@ export type LeadPipelineRow = Lead & {
   property_title: string;
   property_price: number;
   property_currency: string;
+  // How this listing splits the commission, so the close-deal dialog can show
+  // the affiliate's reward for whatever final price the agent enters.
+  commission_config: ListingCommissionInput;
   affiliate_username: string | null;
   affiliate_phone: string | null;
   affiliate_alias: string | null;

@@ -38,7 +38,7 @@ export const copy = {
     asAgentExclusive: "Agente Exclusivo",
     asAgentExclusiveDesc: "Prioridad en resultados y leads exclusivos, sin compartir.",
     asUser: "Afiliado",
-    asUserDesc: "Generá enlaces de afiliado y ganá 1% de una venta.",
+    asUserDesc: "Generá enlaces de afiliado y ganá una parte de la comisión de una venta.",
     free: "Gratis",
     perMonth: "/mes",
     email: "Correo electrónico",

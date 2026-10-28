@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { AFFILIATE_COMMISSION_PCT, resolveListingCommission } from "@/lib/constants/commission";
 import { isLeadStatus, type LeadStatus } from "@/lib/constants/leadStatus";
 import { getSiteUrl } from "@/lib/siteUrl";
 import { generateCommissionAgreementPdf } from "@/lib/reports/commissionAgreementPdf";
@@ -126,7 +126,7 @@ export async function closeLeadDeal(
   const { data: lead } = await supabase
     .from("leads")
     .select(
-      "id, buyer_name, referral_code, commission_confirmed_at, property_id, affiliate_link_id, properties!inner(title, agent_id, currency, referral_reward_type, referral_reward_value, agent_profiles(profiles(full_name, username, phone))), affiliate_links(profiles(full_name, username))"
+      "id, buyer_name, referral_code, commission_confirmed_at, property_id, affiliate_link_id, properties!inner(title, agent_id, currency, commission_agent_pct, commission_agent_type, commission_agent_amount, referral_reward_type, referral_reward_value, agent_profiles(profiles(full_name, username, phone))), affiliate_links(profiles(full_name, username))"
     )
     .eq("id", leadId)
     .single();
@@ -142,7 +142,10 @@ export async function closeLeadDeal(
       title: string;
       agent_id: string;
       currency: string;
-      referral_reward_type: "percentage" | "fixed" | null;
+      commission_agent_pct: number | null;
+      commission_agent_type: "percentage" | "fixed";
+      commission_agent_amount: number | null;
+      referral_reward_type: "percentage" | "fixed" | "commission_share" | null;
       referral_reward_value: number | null;
       agent_profiles: { profiles: { full_name: string | null; username: string; phone: string | null } | null } | null;
     } | null;
@@ -165,10 +168,19 @@ export async function closeLeadDeal(
   // to compute a percentage from at all) — null for every standard listing,
   // which keeps today's 1%-of-sale-price computation exactly as before.
   const isFixedReward = detail.properties.referral_reward_type === "fixed";
-  const commissionPct = isFixedReward ? null : (detail.properties.referral_reward_value ?? AFFILIATE_COMMISSION_PCT);
+  // commission_share (standard listings): the reward is a share of the agent's
+  // commission, stored as its equivalent % of the sale price so the deal
+  // report and agreement keep reading commission_pct the same way.
+  const commissionPct = isFixedReward
+    ? null
+    : detail.properties.referral_reward_type === "commission_share"
+      ? resolveListingCommission(detail.properties, salePrice).affiliatePctOfPrice
+      : (detail.properties.referral_reward_value ?? AFFILIATE_COMMISSION_PCT);
   const commissionAmount = isFixedReward
     ? (detail.properties.referral_reward_value ?? 0)
-    : Math.round(salePrice * (commissionPct! / 100));
+    : detail.properties.referral_reward_type === "commission_share"
+      ? Math.round(resolveListingCommission(detail.properties, salePrice).affiliateAmount)
+      : Math.round(salePrice * (commissionPct! / 100));
 
   const pdfBytes = await generateDealReportPdf({
     propertyTitle: detail.properties.title,

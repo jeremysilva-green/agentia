@@ -8,7 +8,11 @@ import { propertySchema, type PropertyInput } from "@/lib/validations/property";
 import { extractLatLngFromMapsUrl } from "@/lib/googleMaps";
 import { fieldErrorsFrom, firstIssueMessage } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
-import { MODELO_REFERRAL_REWARD_PCT } from "@/lib/constants/commission";
+import {
+  MODELO_REFERRAL_REWARD_PCT,
+  AGENT_COMMISSION_PCT,
+  AFFILIATE_SHARE_DEFAULT_PCT,
+} from "@/lib/constants/commission";
 import { BASICO_PROPERTY_LIMIT } from "@/lib/plans";
 
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
@@ -271,6 +275,9 @@ function readPropertyForm(formData: FormData) {
 
     commissionTriggerLabel: formData.get("commissionTriggerLabel") || undefined,
     commissionAgentPct: formData.get("commissionAgentPct") || undefined,
+    commissionAgentType: formData.get("commissionAgentType") || undefined,
+    commissionAgentAmount: formData.get("commissionAgentAmount") || undefined,
+    commissionVatIncluded: formData.get("commissionVatIncluded") || undefined,
     referralRewardType: formData.get("referralRewardType") || undefined,
     referralRewardValue: formData.get("referralRewardValue") || undefined,
     referralAttributionDays: formData.get("referralAttributionDays") || undefined,
@@ -338,12 +345,31 @@ function listingKindFields(data: PropertyInput) {
     model_down_payment_text: data.modelDownPaymentText ?? null,
     model_qualifying_requirements: data.modelQualifyingRequirements ?? null,
     commission_trigger_label: data.commissionTriggerLabel ?? null,
-    commission_agent_pct: data.commissionAgentPct ?? null,
+    // Standard listings always carry their commission (default 5.5%) and the
+    // affiliate's share of it (default 10%, capped by the validation).
+    commission_agent_pct:
+      data.listingKind === "standard" ? (data.commissionAgentPct ?? AGENT_COMMISSION_PCT) : (data.commissionAgentPct ?? null),
+    // Fixed-amount commission only applies to standard and Proyecto en Pozo;
+    // Modelo keeps its single "tu comisión" figure.
+    commission_agent_type: data.listingKind === "modelo" ? "percentage" : data.commissionAgentType,
+    commission_agent_amount:
+      data.listingKind !== "modelo" && data.commissionAgentType === "fixed" ? (data.commissionAgentAmount ?? null) : null,
+    commission_vat_included: data.commissionVatIncluded,
     // Modelo's referral reward is fixed at MODELO_REFERRAL_REWARD_PCT, not
     // agent-configurable — enforced here rather than trusting the submitted
     // form fields, which the modelo form no longer even renders as editable.
-    referral_reward_type: data.listingKind === "modelo" ? "percentage" : (data.referralRewardType ?? null),
-    referral_reward_value: data.listingKind === "modelo" ? MODELO_REFERRAL_REWARD_PCT : (data.referralRewardValue ?? null),
+    referral_reward_type:
+      data.listingKind === "modelo"
+        ? "percentage"
+        : data.listingKind === "standard"
+          ? "commission_share"
+          : (data.referralRewardType ?? null),
+    referral_reward_value:
+      data.listingKind === "modelo"
+        ? MODELO_REFERRAL_REWARD_PCT
+        : data.listingKind === "standard"
+          ? (data.referralRewardValue ?? AFFILIATE_SHARE_DEFAULT_PCT)
+          : (data.referralRewardValue ?? null),
     referral_attribution_days: data.referralAttributionDays ?? null,
   };
 }

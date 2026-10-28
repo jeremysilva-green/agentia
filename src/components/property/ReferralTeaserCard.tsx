@@ -4,13 +4,22 @@ import { useState, useTransition, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Link2, Check } from "lucide-react";
 import { generateAffiliateLink } from "@/lib/actions/affiliate";
-import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
 
 // Generic counterpart to ModeloReferralCard, for standard/proyecto_en_pozo
 // listings — those have a real public price, so the reward is a percentage
-// of the sale ("1% si se vende") rather than a fixed amount. Reuses the same
+// of the sale  rather than a fixed amount (set per listing by the agent). Reuses the same
 // generateAffiliateLink action and auth_required → /ingresar redirect.
-export function ReferralTeaserCard({ propertyId, propertyPath }: { propertyId: string; propertyPath: string }) {
+export function ReferralTeaserCard({
+  propertyId,
+  propertyPath,
+  rewardPct,
+}: {
+  propertyId: string;
+  propertyPath: string;
+  // The affiliate's reward as a % of the sale price — set per listing.
+  rewardPct: number;
+}) {
+  const rewardLabel = `${rewardPct.toLocaleString("es-PY", { maximumFractionDigits: 2 })}%`;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
@@ -42,14 +51,14 @@ export function ReferralTeaserCard({ propertyId, propertyPath }: { propertyId: s
   return (
     <div className="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-700 to-emerald-950 p-5 text-white">
       <div className="flex items-center justify-between">
-        <span className="font-display text-3xl font-semibold">{AFFILIATE_COMMISSION_PCT}%</span>
+        <span className="font-display text-3xl font-semibold">{rewardLabel}</span>
         <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase">
           Afiliados
         </span>
       </div>
       <p className="mt-3 text-base font-semibold">¿Conocés a alguien interesado?</p>
       <p className="mt-1.5 text-sm text-emerald-100">
-        Compartí esta propiedad con tu link de afiliado y ganá el {AFFILIATE_COMMISSION_PCT}% si se vende.
+        Compartí esta propiedad con tu link de afiliado y ganá el {rewardLabel} del precio si se vende.
       </p>
       <button
         type="button"

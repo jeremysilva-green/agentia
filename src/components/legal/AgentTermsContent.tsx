@@ -45,11 +45,12 @@ export function AgentTermsContent({ date }: { date: string }) {
         <p className="mt-1">
           Cuando una propiedad publicada por el Agente sea vendida como resultado de la promoción,
           referencia o intervención de un Afiliado a través de su enlace único, el Agente se obliga a
-          reconocer y pagar al Afiliado una comisión equivalente al{" "}
-          <strong>1% (uno por ciento)</strong> del valor total de la operación de compraventa.
+          reconocer y pagar al Afiliado la parte de su comisión que el Agente haya indicado en la
+          publicación de la propiedad{" "}
+          (<strong>por defecto el 10% de la comisión del Agente, hasta un máximo del 20%</strong>).
         </p>
         <p className="mt-2">
-          El 1% se vuelve exigible una vez que la compraventa haya sido formalizada y el Agente haya
+          Dicha comisión se vuelve exigible una vez que la compraventa haya sido formalizada y el Agente haya
           recibido efectivamente su comisión.
         </p>
         <p className="mt-2">

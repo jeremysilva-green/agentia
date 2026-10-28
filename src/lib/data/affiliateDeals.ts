@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { resolveListingCommission } from "@/lib/constants/commission";
 import type { AffiliateLeadRow, AffiliateSaleNotice, Lead } from "@/types/domain";
 
 export async function getAffiliateLeads(userId: string): Promise<AffiliateLeadRow[]> {
@@ -54,7 +54,7 @@ export async function getAffiliateSaleNotifications(userId: string): Promise<Aff
   const [{ data: properties }, { data: closedLeads }] = await Promise.all([
     supabase
       .from("properties")
-      .select("id, title, price, sold_at, agent_profiles(profiles(full_name, username, phone))")
+      .select("id, title, price, sold_at, commission_agent_pct, commission_agent_type, commission_agent_amount, referral_reward_type, referral_reward_value, agent_profiles(profiles(full_name, username, phone))")
       .in("id", propertyIds)
       .eq("status", "sold"),
     supabase
@@ -69,6 +69,11 @@ export async function getAffiliateSaleNotifications(userId: string): Promise<Aff
     title: string;
     price: number;
     sold_at: string | null;
+    commission_agent_pct: number | null;
+    commission_agent_type: "percentage" | "fixed";
+    commission_agent_amount: number | null;
+    referral_reward_type: "percentage" | "fixed" | "commission_share" | null;
+    referral_reward_value: number | null;
     agent_profiles: { profiles: { full_name: string | null; username: string; phone: string | null } | null } | null;
   };
 
@@ -81,7 +86,7 @@ export async function getAffiliateSaleNotifications(userId: string): Promise<Aff
       // Only leads closed via "Trato cerrado" have a real, agreed commission
       // amount. Otherwise estimate it off the list price so the affiliate at
       // least has a ballpark before they reach out.
-      const commissionAmount = lead?.commission_amount ?? Math.round(property.price * (AFFILIATE_COMMISSION_PCT / 100));
+      const commissionAmount = lead?.commission_amount ?? Math.round(property.price * (resolveListingCommission(property, property.price).affiliatePctOfPrice / 100));
       return {
         id: property.id,
         property_id: property.id,

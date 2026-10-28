@@ -23,8 +23,8 @@ const roles = [
       "CRM, marketing y chatbot con IA",
       "Una red de afiliados vendiendo por vos",
     ],
-    big: "5,5%",
-    small: "de comisión por operación",
+    big: "Tu tarifa",
+    small: "fijás tu comisión en cada propiedad",
     star: false,
   },
   {
@@ -33,8 +33,8 @@ const roles = [
     titleNote: "(referido)",
     tag: "Registro sin costo",
     items: ["Elegí cualquier propiedad", "Compartí tu link único", "Cobrá si se vende por tu enlace"],
-    big: "1%",
-    small: "del valor de la operación",
+    big: "10%+",
+    small: "de la comisión del agente",
     star: true,
   },
   {
@@ -65,7 +65,7 @@ const feedEvents = [
   { icon: "msg", title: "Nuevo lead: Carlos R.", text: "Llegó por el link de María", time: "09:47" },
   { icon: "bot", title: "Chatbot calificó al lead", text: "Presupuesto y zona confirmados", time: "09:48" },
   { icon: "db", title: "Guardado en tu CRM", text: "Visita agendada para el sábado", time: "10:02" },
-  { icon: "shield", title: "Venta cerrada", text: "Comisiones asignadas: agente 5,5% · afiliado 1%", time: "✓" },
+  { icon: "shield", title: "Venta cerrada", text: "Comisiones asignadas: la del agente y la del afiliado", time: "✓" },
 ];
 
 export default function QueEsAgentiaPage() {
@@ -499,8 +499,8 @@ export default function QueEsAgentiaPage() {
               </h3>
               <p>Cuando la venta se concreta por tu enlace.</p>
               <div className={styles.money}>
-                1%
-                <small>del valor de la operación, registrado a tu nombre</small>
+                10%+
+                <small>de la comisión del agente, registrado a tu nombre</small>
               </div>
             </div>
           </div>

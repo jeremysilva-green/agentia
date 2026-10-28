@@ -128,6 +128,7 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                     leadId={row.id}
                     defaultPrice={row.property_price}
                     currency={row.property_currency}
+                    commission={row.commission_config}
                   />
                 )}
                 {row.commission_confirmed_at && row.affiliate_link_id && !row.commission_agreement_accepted_at && (

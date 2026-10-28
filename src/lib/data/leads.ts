@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PROPERTY_TYPE_LABELS, isPropertyType } from "@/lib/constants/propertyTypes";
+import type { ListingCommissionInput } from "@/lib/constants/commission";
 import type { Lead, LeadPipelineRow } from "@/types/domain";
 
 export async function getAgentLeadPipeline(agentId: string): Promise<LeadPipelineRow[]> {
@@ -8,13 +9,22 @@ export async function getAgentLeadPipeline(agentId: string): Promise<LeadPipelin
   const { data } = await supabase
     .from("leads")
     .select(
-      "*, properties(title, price, currency), affiliate_links(profiles(username, phone, alias, qr_url, avatar_url)), client_requests(property_type, city)"
+      "*, properties(title, price, currency, commission_agent_pct, commission_agent_type, commission_agent_amount, referral_reward_type, referral_reward_value), affiliate_links(profiles(username, phone, alias, qr_url, avatar_url)), client_requests(property_type, city)"
     )
     .eq("agent_id", agentId)
     .order("created_at", { ascending: false });
 
   type Row = Lead & {
-    properties: { title: string; price: number; currency: string } | null;
+    properties: {
+      title: string;
+      price: number;
+      currency: string;
+      commission_agent_pct: number | null;
+      commission_agent_type: "percentage" | "fixed";
+      commission_agent_amount: number | null;
+      referral_reward_type: "percentage" | "fixed" | "commission_share" | null;
+      referral_reward_value: number | null;
+    } | null;
     affiliate_links: {
       profiles: { username: string; phone: string | null; alias: string | null; qr_url: string | null; avatar_url: string | null } | null;
     } | null;
@@ -35,6 +45,11 @@ export async function getAgentLeadPipeline(agentId: string): Promise<LeadPipelin
       property_title: properties?.title ?? fallbackTitle,
       property_price: properties?.price ?? 0,
       property_currency: properties?.currency ?? "PYG",
+      commission_config: properties ?? {
+        commission_agent_pct: null,
+        referral_reward_type: null,
+        referral_reward_value: null,
+      },
       affiliate_username: affiliate_links?.profiles?.username ?? null,
       affiliate_phone: affiliate_links?.profiles?.phone ?? null,
       affiliate_alias: affiliate_links?.profiles?.alias ?? null,

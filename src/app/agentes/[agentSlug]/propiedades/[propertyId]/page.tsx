@@ -16,6 +16,7 @@ import { PublicShareButton } from "@/components/property/PublicShareButton";
 import { LeadTracker } from "@/components/property/LeadTracker";
 import { TypologiesTable } from "@/components/property/TypologiesTable";
 import { ModeloReferralCard } from "@/components/property/ModeloReferralCard";
+import { resolveListingCommission } from "@/lib/constants/commission";
 import { ReferralTeaserCard } from "@/components/property/ReferralTeaserCard";
 import { FactsGrid } from "@/components/property/FactsGrid";
 import { ReadMoreText } from "@/components/property/ReadMoreText";
@@ -365,7 +366,11 @@ export default async function PropertyDetailPage({
             />
           )}
           {!isModelo && !isOwner && (
-            <ReferralTeaserCard propertyId={propertyId} propertyPath={canonicalUrl.replace(siteUrl, "")} />
+            <ReferralTeaserCard
+              propertyId={propertyId}
+              propertyPath={canonicalUrl.replace(siteUrl, "")}
+              rewardPct={resolveListingCommission(property, property.price).affiliatePctOfPrice}
+            />
           )}
         </div>
 

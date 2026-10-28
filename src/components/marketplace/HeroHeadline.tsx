@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
 const PHRASES = [
   "La plataforma de ventas inmobiliarias más inteligente del Paraguay.",
   "Agentes verificados con los mejores portafolios.",
-  "Compartí tus enlaces de afiliado y ganá 1% de cada venta.",
+  "Compartí tus enlaces de afiliado y ganá una parte de la comisión de cada venta.",
 ];
 
 export function HeroHeadline({

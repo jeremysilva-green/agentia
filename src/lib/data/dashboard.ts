@@ -38,7 +38,7 @@ export async function getAgentMonthlyTrend(agentId: string, months = 6): Promise
   const [{ data: soldRows }, { data: viewRows }] = await Promise.all([
     supabase
       .from("properties")
-      .select("sold_at, price, currency")
+      .select("sold_at, price, currency, commission_agent_pct")
       .eq("agent_id", agentId)
       .eq("status", "sold")
       .gte("sold_at", rangeStart.toISOString()),
@@ -66,7 +66,7 @@ export async function getAgentMonthlyTrend(agentId: string, months = 6): Promise
     const bucket = buckets.get(`${d.getFullYear()}-${d.getMonth()}`);
     if (!bucket) continue;
     bucket.soldCount += 1;
-    if (row.currency !== "USD") bucket.netIncomePYG += row.price * (AGENT_COMMISSION_PCT / 100);
+    if (row.currency !== "USD") bucket.netIncomePYG += row.price * ((row.commission_agent_pct ?? AGENT_COMMISSION_PCT) / 100);
   }
 
   for (const row of viewRows ?? []) {
@@ -105,7 +105,7 @@ export async function getAgentDashboardStats(agentId: string): Promise<AgentDash
       .eq("properties.agent_id", agentId),
     supabase
       .from("properties")
-      .select("price, currency")
+      .select("price, currency, commission_agent_pct")
       .eq("agent_id", agentId)
       .eq("status", "sold")
       .gte("sold_at", monthStartIso),
@@ -129,9 +129,17 @@ export async function getAgentDashboardStats(agentId: string): Promise<AgentDash
 
   let totalSalesThisMonthPYG = 0;
   let totalSalesThisMonthUSD = 0;
+  let netIncomePYG = 0;
+  let netIncomeUSD = 0;
   for (const row of soldThisMonth ?? []) {
-    if (row.currency === "USD") totalSalesThisMonthUSD += row.price;
-    else totalSalesThisMonthPYG += row.price;
+    const commission = row.price * ((row.commission_agent_pct ?? AGENT_COMMISSION_PCT) / 100);
+    if (row.currency === "USD") {
+      totalSalesThisMonthUSD += row.price;
+      netIncomeUSD += commission;
+    } else {
+      totalSalesThisMonthPYG += row.price;
+      netIncomePYG += commission;
+    }
   }
 
   return {
@@ -141,8 +149,8 @@ export async function getAgentDashboardStats(agentId: string): Promise<AgentDash
     soldThisMonthCount: soldThisMonth?.length ?? 0,
     totalSalesThisMonthPYG,
     totalSalesThisMonthUSD,
-    netIncomePYG: totalSalesThisMonthPYG * (AGENT_COMMISSION_PCT / 100),
-    netIncomeUSD: totalSalesThisMonthUSD * (AGENT_COMMISSION_PCT / 100),
+    netIncomePYG,
+    netIncomeUSD,
     viewsThisMonth: viewsThisMonth ?? 0,
     chatsThisMonth: chatsThisMonth ?? 0,
     leadsThisMonth: leadsThisMonth ?? 0,

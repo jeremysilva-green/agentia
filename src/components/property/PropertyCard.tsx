@@ -1,3 +1,4 @@
+import { resolveListingCommission } from "@/lib/constants/commission";
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, User, BedDouble, Bath, Ruler } from "lucide-react";
@@ -28,6 +29,10 @@ const statusLabel = {
 };
 
 function formatCommissionBadge(property: PropertyWithImages): string | undefined {
+  if (property.referral_reward_type === "commission_share") {
+    const { affiliatePctOfPrice } = resolveListingCommission(property, property.price);
+    return `${affiliatePctOfPrice.toLocaleString("es-PY", { maximumFractionDigits: 2 })}%`;
+  }
   if (property.referral_reward_type === "percentage" && property.referral_reward_value != null) {
     return `${property.referral_reward_value}%`;
   }

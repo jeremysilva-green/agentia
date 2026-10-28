@@ -6,7 +6,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/cn";
 import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
-import { AFFILIATE_COMMISSION_PCT } from "@/lib/constants/commission";
+import { AFFILIATE_SHARE_DEFAULT_PCT } from "@/lib/constants/commission";
 import styles from "./HomePage.module.css";
 
 // react-compare-slider computes some of its inline styles differently
@@ -89,7 +89,7 @@ const aiList = [
 
 const starStats = [
   { value: "Gs. 0", label: "costo por adelantado" },
-  { value: `${AFFILIATE_COMMISSION_PCT}%`, label: "para el afiliado, solo si se vende" },
+  { value: "Vos decidís", label: "tu comisión y el premio al afiliado, solo si se vende" },
   { value: "24/7", label: "tu propiedad circulando" },
 ];
 
@@ -102,7 +102,7 @@ const starFlow = [
 
 const affCards = [
   { icon: "link", title: "Tu link por propiedad", text: "Generá un enlace único para cada propiedad y compartilo donde quieras." },
-  { icon: "cash", big: `${AFFILIATE_COMMISSION_PCT}%`, text: "de comisión por cada venta cerrada a través de tu link." },
+  { icon: "cash", big: `${AFFILIATE_SHARE_DEFAULT_PCT}%+`, text: "de la comisión del agente por cada venta cerrada a través de tu link." },
   { icon: "chart", title: "Panel simple", text: "Clics, leads, ventas y comisiones, siempre a la vista." },
   { icon: "shield", title: "Riesgo cero", text: "Sin stock, sin oficina, sin costos fijos." },
 ];
