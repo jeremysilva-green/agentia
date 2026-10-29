@@ -5,7 +5,6 @@ import { cn } from "@/lib/cn";
 
 const PHRASES = [
   "El portal inmobiliario más inteligente de Paraguay.",
-  "Único con red de afiliados.",
   "Agentes verificados con los mejores portafolios.",
   "Compartí tus enlaces y ganá comisiones por cada venta.",
 ];
