@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
 const PHRASES = [
-  "La plataforma de ventas inmobiliarias más inteligente del Paraguay.",
+  "El portal inmobiliario más inteligente de Paraguay.",
+  "Único con red de afiliados.",
   "Agentes verificados con los mejores portafolios.",
-  "Compartí tus enlaces de afiliado y ganá una parte de la comisión de cada venta.",
+  "Compartí tus enlaces y ganá comisiones por cada venta.",
 ];
 
 export function HeroHeadline({
