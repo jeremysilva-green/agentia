@@ -25,6 +25,7 @@ import {
   ATTRIBUTION_WINDOW_OPTIONS,
 } from "@/lib/constants/commissionTriggers";
 import { cn } from "@/lib/cn";
+import { Building2, FileText, Hammer, Home, Layers, Lock, MapPin, Send, Video, Wallet, type LucideIcon } from "lucide-react";
 import type { Property, PropertyTypology, PropertyCoverageCity } from "@/types/domain";
 import type { PropertyActionState } from "@/lib/actions/properties";
 
@@ -66,6 +67,33 @@ const MODEL_FINANCING_TYPE_OPTIONS = [
   { value: "bancaria", label: "Bancaria" },
   { value: "propia", label: "Propia" },
 ];
+
+function FormSection({
+  icon: Icon,
+  title,
+  hint,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-[22px] border border-[var(--line)] bg-[var(--ink-2)] p-5 sm:p-6">
+      <header className="mb-5 flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[var(--em)]/40 bg-[var(--em)]/12 text-[var(--em-2)]">
+          <Icon size={17} />
+        </span>
+        <div className="min-w-0">
+          <h2 className="font-display text-base font-semibold text-white">{title}</h2>
+          {hint && <p className="text-xs text-[var(--muted)]">{hint}</p>}
+        </div>
+      </header>
+      <div className="flex flex-col gap-4">{children}</div>
+    </section>
+  );
+}
 
 export function PropertyForm({
   action,
@@ -246,7 +274,8 @@ export function PropertyForm({
   ).map((t) => ({ value: t, label: t }));
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} className="pf-dark flex flex-col gap-5">
+      <FormSection icon={Layers} title="Tipo de publicación">
       <div className="flex flex-col gap-1.5">
         <PillTabs
           options={LISTING_KIND_OPTIONS}
@@ -267,7 +296,9 @@ export function PropertyForm({
           </p>
         )}
       </div>
+      </FormSection>
 
+      <FormSection icon={FileText} title="Información básica" hint="Lo primero que ve el cliente en la ficha.">
       <Input
         id="title"
         name="title"
@@ -293,6 +324,22 @@ export function PropertyForm({
 
       <input type="hidden" name="listingType" value={defaultValues?.listing_type ?? "sale"} />
 
+        <div className="grid gap-4 sm:grid-cols-2">
+        <SingleSelectDropdown
+          name="propertyType"
+          label="Tipo de propiedad"
+          showAllOption={false}
+          defaultValue={defaultValues?.property_type ?? ""}
+          options={[
+            { value: "", label: "Sin especificar" },
+            ...LISTABLE_PROPERTY_TYPE_VALUES.map((type) => ({
+              value: type,
+              label: PROPERTY_TYPE_LABELS[type].es,
+            })),
+          ]}
+          buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
+          panelClassName="border-slate-200! bg-slate-50!"
+        />
       {(kind === "standard" || kind === "proyecto_en_pozo") && (
         <div className="flex flex-col gap-1.5">
           <SingleSelectDropdown
@@ -310,24 +357,12 @@ export function PropertyForm({
           )}
         </div>
       )}
+        </div>
+      </FormSection>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <SingleSelectDropdown
-          name="propertyType"
-          label="Tipo de propiedad"
-          showAllOption={false}
-          defaultValue={defaultValues?.property_type ?? ""}
-          options={[
-            { value: "", label: "Sin especificar" },
-            ...LISTABLE_PROPERTY_TYPE_VALUES.map((type) => ({
-              value: type,
-              label: PROPERTY_TYPE_LABELS[type].es,
-            })),
-          ]}
-          buttonClassName="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-          panelClassName="border-slate-200! bg-slate-50!"
-        />
-        {kind !== "modelo" && (
+      {kind !== "modelo" && (
+        <FormSection icon={Wallet} title="Precio y comisión" hint="Tu comisión y la del referido se calculan sobre el precio.">
+        {(
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="price" className="text-sm font-medium text-slate-700">
@@ -422,10 +457,12 @@ export function PropertyForm({
             )}
           </div>
         )}
-      </div>
+      
+        </FormSection>
+      )}
 
       {kind === "proyecto_en_pozo" && (
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <FormSection icon={Building2} title="Detalles del proyecto" hint="Entrega, unidades, tipologías y plan de pago.">
           <Input
             id="developerName"
             name="developerName"
@@ -524,11 +561,11 @@ export function PropertyForm({
               buttonClassName="bg-white!"
             />
           </div>
-        </div>
+        </FormSection>
       )}
 
       {kind === "modelo" && (
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <FormSection icon={Hammer} title="Detalles del modelo" hint="Cobertura, plazos, materiales y financiación.">
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium text-slate-700">Zona de cobertura</p>
@@ -713,19 +750,19 @@ export function PropertyForm({
               className="bg-white!"
             />
           </div>
-        </div>
+        </FormSection>
       )}
 
       {(kind === "proyecto_en_pozo" || kind === "modelo") && (
-        <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">Comisión y referidos</p>
-            <p className="text-xs text-slate-500">
-              {kind === "proyecto_en_pozo"
-                ? "En proyectos, la comisión la paga la desarrolladora y suele ser distinta al 5%."
-                : "Como no hay precio público, el referido ve un monto fijo."}
-            </p>
-          </div>
+        <FormSection
+          icon={Wallet}
+          title="Comisión y referidos"
+          hint={
+            kind === "proyecto_en_pozo"
+              ? "En proyectos, la comisión la paga la desarrolladora y suele ser distinta al 5%."
+              : "Como no hay precio público, el referido ve un monto fijo."
+          }
+        >
           <div className="grid gap-4 sm:grid-cols-2">
             {kind === "proyecto_en_pozo" ? (
               agentCommissionFields
@@ -812,10 +849,12 @@ export function PropertyForm({
                 ? `El referido cobra ${currency} ${(Number(values.referralRewardValue) || 0).toLocaleString("es-PY")} cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" con alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`
                 : `El referido cobra cuando se cumpla "${values.commissionTriggerLabel || "la condición acordada"}" de una unidad vendida a alguien que llegó por su link, hasta ${attributionDefault} días después del primer contacto.`}
           </p>
-        </div>
+        </FormSection>
       )}
 
       {kind !== "modelo" && (
+        <FormSection icon={MapPin} title="Ubicación">
+      {(
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-slate-700">Ciudad</label>
@@ -846,8 +885,28 @@ export function PropertyForm({
           />
         </div>
       )}
+      {(
+        <div className="flex flex-col gap-1.5">
+          <Input
+            id="mapsUrl"
+            name="mapsUrl"
+            label="Enlace de Google Maps"
+            placeholder="https://maps.app.goo.gl/..."
+            value={values.mapsUrl}
+            onChange={setField("mapsUrl")}
+            error={fieldError("mapsUrl")}
+            className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
+          />
+          <p className="text-xs text-slate-500">
+            Pegá el enlace para compartir de Google Maps — lo usamos para el mapa en la ficha de la propiedad.
+          </p>
+        </div>
+      )}
+        </FormSection>
+      )}
 
       {kind === "standard" && (
+        <FormSection icon={Home} title="Características">
         <div className="grid gap-4 sm:grid-cols-4">
           <Input
             id="bedrooms"
@@ -898,26 +957,11 @@ export function PropertyForm({
             panelClassName="border-slate-200! bg-slate-50!"
           />
         </div>
+        </FormSection>
       )}
 
-      {kind !== "modelo" && (
-        <div className="flex flex-col gap-1.5">
-          <Input
-            id="mapsUrl"
-            name="mapsUrl"
-            label="Enlace de Google Maps"
-            placeholder="https://maps.app.goo.gl/..."
-            value={values.mapsUrl}
-            onChange={setField("mapsUrl")}
-            error={fieldError("mapsUrl")}
-            className="bg-white! focus:border-emerald-600! focus:ring-emerald-500/20!"
-          />
-          <p className="text-xs text-slate-500">
-            Pegá el enlace para compartir de Google Maps — lo usamos para el mapa en la ficha de la propiedad.
-          </p>
-        </div>
-      )}
-
+      <FormSection icon={Video} title="Videos" hint="Opcionales — se muestran en la ficha junto a las fotos.">
+        <div className="grid gap-4 sm:grid-cols-2">
       <div className="flex flex-col gap-1.5">
         <Input
           id="youtubeUrl"
@@ -933,7 +977,6 @@ export function PropertyForm({
           Opcional — se muestra en la ficha de la propiedad junto a las fotos.
         </p>
       </div>
-
       <div className="flex flex-col gap-1.5">
         <Input
           id="instagramReelUrl"
@@ -949,7 +992,10 @@ export function PropertyForm({
           Opcional — se muestra en la ficha de la propiedad junto a las fotos.
         </p>
       </div>
+        </div>
+      </FormSection>
 
+      <FormSection icon={Lock} title="Negociación (privado)">
       <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
         <div>
           <p className="text-sm font-semibold text-amber-900">Tipo de negociación (privado)</p>
@@ -983,7 +1029,9 @@ export function PropertyForm({
           </div>
         )}
       </div>
+      </FormSection>
 
+      <FormSection icon={Send} title="Publicación">
       <div className="grid gap-4 sm:grid-cols-2">
         <SingleSelectDropdown
           name="status"
@@ -1008,14 +1056,14 @@ export function PropertyForm({
           Publicada (visible en el sitio)
         </label>
       </div>
-
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+        {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      </FormSection>
 
       <Button
         type="submit"
         size="lg"
         disabled={pending}
-        className="self-start bg-emerald-600! text-white! hover:bg-emerald-700!"
+        className="w-full bg-[var(--em)]! text-white! shadow-[0_12px_34px_-12px_var(--em-glow)] hover:bg-[var(--em-2)]! sm:w-auto sm:self-start sm:px-10"
       >
         {pending ? "Guardando..." : submitLabel}
       </Button>

@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { Card } from "@/components/ui/Card";
 import { PropertyForm } from "@/components/panel/PropertyForm";
 import { PropertyPhotoManager } from "@/components/panel/PropertyPhotoManager";
 import { DeletePropertyButton } from "@/components/panel/DeletePropertyButton";
@@ -44,24 +43,22 @@ export default async function EditarPropiedadPage({
         <DeletePropertyButton propertyId={propertyId} />
       </div>
 
-      <Card className="border-slate-400! bg-slate-300! p-6 sm:p-8">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Fotos</h2>
+      <section className="pf-dark rounded-[22px] border border-[var(--line)] bg-[var(--ink-2)] p-5 sm:p-6">
+        <h2 className="mb-4 font-display text-base font-semibold text-white">Fotos</h2>
         <PropertyPhotoManager
           propertyId={propertyId}
           agentId={user.id}
           initialImages={images ?? []}
         />
-      </Card>
+      </section>
 
-      <Card className="border-slate-400! bg-slate-300! p-6 sm:p-8">
-        <PropertyForm
-          action={boundUpdate}
-          defaultValues={property}
-          defaultTypologies={typologies ?? []}
-          defaultCoverageCities={coverageCities ?? []}
-          submitLabel="Guardar cambios"
-        />
-      </Card>
+      <PropertyForm
+        action={boundUpdate}
+        defaultValues={property}
+        defaultTypologies={typologies ?? []}
+        defaultCoverageCities={coverageCities ?? []}
+        submitLabel="Guardar cambios"
+      />
     </div>
   );
 }
