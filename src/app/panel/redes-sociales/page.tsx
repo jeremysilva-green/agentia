@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Lock, ArrowRight, Crown } from "lucide-react";
-import { getAgentSocialSharesForAgent } from "@/lib/data/agentSocialShares";
 import { listMarketingVideosForAgent } from "@/lib/data/marketingVideos";
-import { AgentSocialSharesTable } from "@/components/panel/AgentSocialSharesTable";
+import { listPropertyFlyersForAgent } from "@/lib/data/propertyFlyers";
+import { PropertyFlyersGrid } from "@/components/panel/PropertyFlyersGrid";
 import { MarketingVideosGrid } from "@/components/panel/MarketingVideosGrid";
 import { getAgentContext } from "@/lib/data/panel";
 import { getSiteUrl } from "@/lib/siteUrl";
@@ -19,8 +19,8 @@ export default async function RedesSocialesPage() {
 
   const eligibleForVideo = hasActiveProAccess(ctx.subscription);
 
-  const [rows, videos] = await Promise.all([
-    getAgentSocialSharesForAgent(ctx.userId),
+  const [flyers, videos] = await Promise.all([
+    listPropertyFlyersForAgent(ctx.userId),
     eligibleForVideo ? listMarketingVideosForAgent(ctx.userId) : Promise.resolve([]),
   ]);
 
@@ -34,11 +34,27 @@ export default async function RedesSocialesPage() {
           </div>
           <h1 className="mt-1 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">Redes Sociales</h1>
           <p className="text-[15px] text-[var(--muted)]">
-            Enlaces cortos e imágenes promocionales que generaste para compartir tus propiedades.
+            Flyers de tus propiedades con su enlace corto, listos para descargar y compartir.
           </p>
         </div>
         <Reveal>
-          <AgentSocialSharesTable rows={rows} siteUrl={getSiteUrl()} />
+          {flyers.length === 0 ? (
+            <EmptyState
+              message={
+                <>
+                  Todavía no guardaste ningún flyer. Creá uno con el botón &quot;Flyer&quot; que aparece en cada
+                  propiedad.
+                </>
+              }
+              action={
+                <Link href="/panel/propiedades" className="text-sm font-semibold text-[var(--em-2)] hover:text-white">
+                  Ver mis propiedades
+                </Link>
+              }
+            />
+          ) : (
+            <PropertyFlyersGrid flyers={flyers} siteUrl={getSiteUrl()} />
+          )}
         </Reveal>
       </div>
 

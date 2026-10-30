@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { copy } from "@/lib/copy";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { getPublicStorageUrl } from "@/lib/storage";
 
 // Mirrors /s/[code] (the affiliate short-link resolver) but for an agent
 // sharing their own listing — resolves against agent_social_shares instead
@@ -32,7 +33,17 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   if (!share?.properties) return {};
 
   const siteUrl = getSiteUrl();
-  const imageUrl = `${siteUrl}/api/property-card/${share.property_id}`;
+  // The agent's saved flyer is the preview when there is one; older shares
+  // keep the original promo card.
+  const { data: flyer } = await createServiceClient()
+    .from("property_flyers")
+    .select("storage_path")
+    .eq("property_id", share.property_id)
+    .maybeSingle();
+  const imageUrl = flyer
+    ? getPublicStorageUrl("property-flyers", flyer.storage_path)
+    : `${siteUrl}/api/property-card/${share.property_id}`;
+  const imageSize = flyer ? { width: 1520, height: 2062 } : { width: 1080, height: 1350 };
   const description = new Intl.NumberFormat("es-PY", {
     style: "currency",
     currency: share.properties.currency,
@@ -44,7 +55,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
     openGraph: {
       title: share.properties.title,
       description,
-      images: [{ url: imageUrl, width: 1080, height: 1350 }],
+      images: [{ url: imageUrl, ...imageSize }],
     },
     twitter: {
       card: "summary_large_image",

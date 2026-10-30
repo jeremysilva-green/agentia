@@ -18,9 +18,13 @@ export default async function AffiliateAvisosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-white">{copy.affiliatePanel.avisos}</h1>
-        <p className="text-sm text-slate-300">{copy.affiliatePanel.avisosSubtitle}</p>
+      <div>
+        <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--em-2)] uppercase">
+          <span className="panel-pulse-dot" />
+          Ventas de tus referidos
+        </div>
+        <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">{copy.affiliatePanel.avisos}</h1>
+        <p className="mt-2 text-[15px] text-[var(--muted)]">{copy.affiliatePanel.avisosSubtitle}</p>
       </div>
       <AffiliateSaleNotices
         notices={notices}

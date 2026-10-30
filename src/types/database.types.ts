@@ -1159,6 +1159,80 @@ export interface Database {
           },
         ];
       };
+      affiliate_flyers: {
+        Row: {
+          id: string;
+          property_id: string;
+          user_id: string;
+          storage_path: string;
+          accent_color: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          user_id: string;
+          storage_path: string;
+          accent_color?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["affiliate_flyers"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_flyers_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: false;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "affiliate_flyers_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      property_flyers: {
+        Row: {
+          id: string;
+          property_id: string;
+          agent_id: string;
+          storage_path: string;
+          accent_color: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          property_id: string;
+          agent_id: string;
+          storage_path: string;
+          accent_color?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["property_flyers"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "property_flyers_property_id_fkey";
+            columns: ["property_id"];
+            isOneToOne: true;
+            referencedRelation: "properties";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "property_flyers_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "agent_profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       agent_social_shares: {
         Row: {
           id: string;

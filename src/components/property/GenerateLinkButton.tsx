@@ -4,6 +4,7 @@ import { useState, useTransition, type MouseEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Link2, Check } from "lucide-react";
 import { generateAffiliateLink } from "@/lib/actions/affiliate";
+import { FlyerDialog } from "@/components/property/FlyerDialog";
 
 // Fired on a successful copy when `dark` is set, so the page-level
 // <CopyToast/> (mounted once, far away in the component tree) can react —
@@ -14,11 +15,14 @@ export const LINK_COPIED_EVENT = "market:link-copied";
 export function GenerateLinkButton({
   propertyId,
   propertyPath,
+  title,
   badge,
   dark = false,
 }: {
   propertyId: string;
   propertyPath: string;
+  // Listing title, used by the flyer dialog that opens after the link is made.
+  title: string;
   // Only rendered when provided (e.g. "1%" / "Gs. 500.000") — existing
   // callers that don't pass it get the exact same button as before.
   badge?: string;
@@ -28,6 +32,7 @@ export function GenerateLinkButton({
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [flyerOpen, setFlyerOpen] = useState(false);
 
   function handleClick(e: MouseEvent) {
     e.preventDefault();
@@ -51,6 +56,8 @@ export function GenerateLinkButton({
       setCopied(true);
       if (dark) window.dispatchEvent(new Event(LINK_COPIED_EVENT));
       setTimeout(() => setCopied(false), 2500);
+      // The link is made and copied; the same click offers the flyer for it.
+      setFlyerOpen(true);
     });
   }
 
@@ -73,6 +80,16 @@ export function GenerateLinkButton({
         )}
       </button>
       {error && <p className="text-xs text-red-600">{error}</p>}
+      {flyerOpen && (
+        <FlyerDialog
+          propertyId={propertyId}
+          title={title}
+          redirectTo="/panel-afiliado/enlaces"
+          // Affiliates have no logo of their own: the flyer starts without one.
+          defaultNoLogo
+          onClose={() => setFlyerOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -43,3 +43,25 @@ export async function loadBrandFonts(): Promise<LoadedFont[]> {
 
   return cachedFonts;
 }
+
+const FLYER_FONT_WEIGHTS = [300, 400, 500, 600, 700, 800] as const;
+
+type FlyerFont = { name: string; data: Buffer; weight: (typeof FLYER_FONT_WEIGHTS)[number]; style: "normal" };
+
+let cachedFlyerFonts: FlyerFont[] | null = null;
+
+/** Figtree (OFL) in the six weights the property flyer uses; Satori reads .woff but not .woff2. */
+export async function loadFlyerFonts(): Promise<FlyerFont[]> {
+  if (cachedFlyerFonts) return cachedFlyerFonts;
+
+  cachedFlyerFonts = await Promise.all(
+    FLYER_FONT_WEIGHTS.map(async (weight) => ({
+      name: "Figtree",
+      data: await readFile(path.join(FONT_DIR, "figtree", `figtree-latin-${weight}-normal.woff`)),
+      weight,
+      style: "normal" as const,
+    }))
+  );
+
+  return cachedFlyerFonts;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircle, Download } from "lucide-react";
-import { Badge } from "@/components/ui/Badge";
+import { PanelBadge } from "@/components/panel/theme/PanelBadge";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { getPublicStorageUrl } from "@/lib/storage";
 import { LEAD_STATUS_LABELS } from "@/lib/constants/leadStatus";
@@ -22,16 +22,16 @@ export function AffiliateDealsTable({
 }) {
   if (deals.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+      <div className="rounded-[24px] border border-dashed border-[var(--line)] bg-[var(--ink-2)] p-8 text-center text-sm text-[var(--muted)]">
         {copy.affiliatePanel.empty}
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-[22px] border border-[var(--line)] bg-[var(--ink-2)]">
       <table className="w-full min-w-[760px] text-left text-xs">
-        <thead className="border-b border-slate-200 bg-slate-50 text-[11px] uppercase tracking-wide text-slate-500">
+        <thead className="border-b border-[var(--line)] bg-black/30 text-[11px] uppercase tracking-wide text-[var(--muted)]">
           <tr>
             <th className="w-[220px] px-3 py-3 font-medium">{copy.affiliatePanel.property}</th>
             <th className="w-[160px] px-3 py-3 font-medium">{copy.affiliatePanel.agent}</th>
@@ -40,7 +40,7 @@ export function AffiliateDealsTable({
             <th className="w-[160px] px-3 py-3 font-medium">{copy.panel.report}</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+        <tbody className="divide-y divide-white/[0.06]">
           {deals.map((deal) => {
             const reportUrl = deal.report_path ? getPublicStorageUrl("deal-reports", deal.report_path) : null;
             const contactMessage = `Hola ${deal.agent_name}! Soy afiliado en Agentia y quería consultarte sobre "${deal.property_title}".`;
@@ -49,10 +49,10 @@ export function AffiliateDealsTable({
             return (
               <tr key={deal.id} className="align-top">
                 <td className="px-3 py-3">
-                  <p className="truncate font-medium text-slate-900">{deal.property_title}</p>
-                  <p className="text-slate-400">{deal.referral_code}</p>
+                  <p className="truncate font-medium text-white">{deal.property_title}</p>
+                  <p className="text-[#7d7d7d]">{deal.referral_code}</p>
                 </td>
-                <td className="px-3 py-3 text-slate-700">
+                <td className="px-3 py-3 text-[#d5d5d5]">
                   <p className="truncate">{deal.agent_name}</p>
                   {deal.agent_phone && (
                     <a
@@ -66,14 +66,14 @@ export function AffiliateDealsTable({
                     </a>
                   )}
                 </td>
-                <td className="px-3 py-3 text-slate-500">
+                <td className="px-3 py-3 text-[var(--muted)]">
                   <p>{dateFmt(deal.referral_date)}</p>
-                  <p className="text-slate-400">→ {dateFmt(deal.protected_until)}</p>
+                  <p className="text-[#7d7d7d]">→ {dateFmt(deal.protected_until)}</p>
                 </td>
                 <td className="px-3 py-3">
-                  <Badge tone={deal.commission_confirmed_at ? "success" : "neutral"}>
+                  <PanelBadge tone={deal.commission_confirmed_at ? "emerald" : "neutral"}>
                     {LEAD_STATUS_LABELS[deal.status]}
-                  </Badge>
+                  </PanelBadge>
                 </td>
                 <td className="px-3 py-3">
                   {deal.commission_confirmed_at && reportUrl && (
@@ -82,7 +82,7 @@ export function AffiliateDealsTable({
                         href={reportUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 hover:text-slate-900"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-[#bdbdbd] hover:text-white"
                       >
                         <Download size={12} />
                         {copy.panel.downloadReport}

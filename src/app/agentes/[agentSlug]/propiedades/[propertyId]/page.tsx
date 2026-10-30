@@ -11,7 +11,7 @@ import { PropertyMap } from "@/components/property/PropertyMap";
 import { ChatWidget } from "@/components/property/ChatWidget";
 import { AgendarModal } from "@/components/property/AgendarModal";
 import { ShareButton } from "@/components/property/ShareButton";
-import { AgentShareButton } from "@/components/property/AgentShareButton";
+import { FlyerButton } from "@/components/property/FlyerButton";
 import { PublicShareButton } from "@/components/property/PublicShareButton";
 import { LeadTracker } from "@/components/property/LeadTracker";
 import { TypologiesTable } from "@/components/property/TypologiesTable";
@@ -351,7 +351,7 @@ export default async function PropertyDetailPage({
                 )}
                 {!isOwner && <AgendarModal propertyId={propertyId} refCode={ref} />}
                 {isUserRole && <ShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
-                {isOwner && <AgentShareButton propertyId={propertyId} propertyUrl={canonicalUrl} />}
+                {isOwner && <FlyerButton propertyId={propertyId} title={property.title} />}
                 {!isOwner && !isUserRole && <PublicShareButton title={property.title} url={canonicalUrl} />}
               </div>
             </div>

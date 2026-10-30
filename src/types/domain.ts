@@ -22,6 +22,7 @@ export type AgentAvailability = Database["public"]["Tables"]["agent_availability
 export type Agendamiento = Database["public"]["Tables"]["agendamientos"]["Row"];
 export type ShortLink = Database["public"]["Tables"]["short_links"]["Row"];
 export type MarketingVideo = Database["public"]["Tables"]["marketing_videos"]["Row"];
+export type PropertyFlyer = Database["public"]["Tables"]["property_flyers"]["Row"];
 export type AgentSocialShare = Database["public"]["Tables"]["agent_social_shares"]["Row"];
 export type PanelSectionView = Database["public"]["Tables"]["panel_section_views"]["Row"];
 export type AffiliateSectionView = Database["public"]["Tables"]["affiliate_section_views"]["Row"];

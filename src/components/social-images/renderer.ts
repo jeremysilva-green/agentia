@@ -1,7 +1,8 @@
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 import { PropertyTemplate } from "./templates/PropertyTemplate";
-import { loadBrandFonts } from "./fonts";
+import { PropertyFlyer, FLYER_WIDTH, FLYER_HEIGHT, type PropertyFlyerProps } from "./templates/PropertyFlyer";
+import { loadBrandFonts, loadFlyerFonts } from "./fonts";
 import {
   FORMAT_DIMENSIONS,
   type PropertySocialCardProps,
@@ -25,5 +26,15 @@ export async function renderPropertyCard(
   );
 
   const resvg = new Resvg(svg, { fitTo: { mode: "width", value: width } });
+  return resvg.render().asPng();
+}
+
+/** Property flyer (1520 x 2062): data in, PNG buffer out. */
+export async function renderPropertyFlyer(props: PropertyFlyerProps): Promise<Buffer> {
+  const fonts = await loadFlyerFonts();
+
+  const svg = await satori(PropertyFlyer(props), { width: FLYER_WIDTH, height: FLYER_HEIGHT, fonts });
+
+  const resvg = new Resvg(svg, { fitTo: { mode: "width", value: FLYER_WIDTH } });
   return resvg.render().asPng();
 }

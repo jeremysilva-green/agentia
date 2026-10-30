@@ -5,12 +5,11 @@ import { MapPin, User, BedDouble, Bath, Ruler } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { GenerateLinkButton } from "@/components/property/GenerateLinkButton";
-import { AgentShareButton } from "@/components/property/AgentShareButton";
+import { FlyerButton } from "@/components/property/FlyerButton";
 import { FavoriteButton } from "@/components/property/FavoriteButton";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/cn";
 import { copy } from "@/lib/copy";
-import { getSiteUrl } from "@/lib/siteUrl";
 import { getCoverageSummaryLabel } from "@/lib/constants/coverageCities";
 import type { PropertyWithImages } from "@/types/domain";
 
@@ -195,9 +194,15 @@ export async function PropertyCard({
               {agentName && <span className="truncate text-[13px] text-[#cfcfcf]">{agentName}</span>}
             </div>
             {isOwner ? (
-              <AgentShareButton propertyId={property.id} propertyUrl={`${getSiteUrl()}${propertyPath}`} compact />
+              <FlyerButton propertyId={property.id} title={property.title} compact />
             ) : (
-              <GenerateLinkButton propertyId={property.id} propertyPath={propertyPath} badge={commissionBadge} dark />
+              <GenerateLinkButton
+                propertyId={property.id}
+                propertyPath={propertyPath}
+                title={property.title}
+                badge={commissionBadge}
+                dark
+              />
             )}
           </div>
         </div>
@@ -257,9 +262,9 @@ export async function PropertyCard({
         <div className="flex items-center justify-between gap-2 border-t border-slate-100 px-4 py-3">
           <p className="text-sm font-semibold text-prussian">{priceNode}</p>
           {isOwner ? (
-            <AgentShareButton propertyId={property.id} propertyUrl={`${getSiteUrl()}${propertyPath}`} compact />
+            <FlyerButton propertyId={property.id} title={property.title} compact />
           ) : (
-            <GenerateLinkButton propertyId={property.id} propertyPath={propertyPath} />
+            <GenerateLinkButton propertyId={property.id} propertyPath={propertyPath} title={property.title} />
           )}
         </div>
       </div>

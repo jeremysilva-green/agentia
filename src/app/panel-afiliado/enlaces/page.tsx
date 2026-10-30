@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getAffiliateLinksForUser } from "@/lib/data/affiliateLinks";
-import { AffiliateLinksTable } from "@/components/panel/AffiliateLinksTable";
+import { PropertyFlyersGrid } from "@/components/panel/PropertyFlyersGrid";
+import { listAffiliateFlyersForUser } from "@/lib/data/affiliateFlyers";
+import { getSiteUrl } from "@/lib/siteUrl";
+import { EmptyState } from "@/components/panel/theme/EmptyState";
 import { copy } from "@/lib/copy";
 
 export default async function AffiliateLinksPage() {
@@ -11,18 +13,27 @@ export default async function AffiliateLinksPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/ingresar");
 
-  const [rows, { data: profile }] = await Promise.all([
-    getAffiliateLinksForUser(user.id),
-    supabase.from("profiles").select("username").eq("id", user.id).single(),
-  ]);
+  const flyers = await listAffiliateFlyersForUser(user.id);
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-display text-2xl font-semibold text-white">{copy.affiliatePanel.myLinks}</h1>
-        <p className="text-sm text-slate-300">{copy.affiliatePanel.myLinksSubtitle}</p>
+      <div>
+        <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.12em] text-[var(--em-2)] uppercase">
+          <span className="panel-pulse-dot" />
+          Marketing
+        </div>
+        <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">{copy.affiliatePanel.myLinks}</h1>
+        <p className="mt-2 text-[15px] text-[var(--muted)]">
+          Flyers con tu foto y tu enlace de afiliado, listos para descargar y compartir. Creá uno con &quot;Generar
+          link&quot; en cualquier propiedad.
+        </p>
       </div>
-      <AffiliateLinksTable rows={rows} affiliateUsername={profile?.username ?? ""} />
+
+      {flyers.length === 0 ? (
+        <EmptyState message="Todavía no guardaste ningún flyer. Tocá “Generar link” en una propiedad para crear el primero." />
+      ) : (
+        <PropertyFlyersGrid flyers={flyers} siteUrl={getSiteUrl()} owner="affiliate" />
+      )}
     </div>
   );
 }

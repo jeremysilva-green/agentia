@@ -14,6 +14,7 @@ import {
   Link2,
   UserRound,
   Menu,
+  X,
   Bell,
   FileSignature,
   LayoutDashboard,
@@ -112,19 +113,15 @@ export function PanelNav({
         data-tour="tour-panel-nav-mobile"
         aria-label={open ? "Cerrar menú" : current?.label ?? "Abrir menú"}
         aria-expanded={open}
-        className="grid h-11 w-11 place-items-center rounded-[13px] border border-[var(--line)] bg-[var(--ink-2)] text-white lg:hidden"
+        className="flex h-11 items-center gap-2.5 rounded-[13px] border border-[var(--line)] bg-[var(--ink-2)] px-3.5 text-sm font-semibold text-white lg:hidden"
       >
-        <Menu size={19} />
+        {open ? <X size={19} /> : <Menu size={19} />}
+        {current?.label ?? "Menú"}
       </button>
 
-      {open && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setOpen(false)} />}
-
-      <div
-        className={cn(
-          "lg:sticky lg:top-6 lg:block",
-          open ? "fixed inset-x-4 top-[72px] z-50" : "hidden"
-        )}
-      >
+      {/* On mobile the list opens right below the toggle (not over it), so the
+          button stays visible and tapping it again closes the menu. */}
+      <div className={cn("lg:sticky lg:top-6 lg:block", open ? "mt-2 block" : "hidden")}>
         <div className="flex flex-col gap-1 rounded-2xl border border-[var(--line)] bg-[var(--ink-2)]/95 p-4 backdrop-blur-md">
           <div ref={listRef} className="relative flex flex-col gap-0.5">
             <div
