@@ -6,6 +6,8 @@ import { ListingKindToggle } from "@/components/marketplace/ListingKindToggle";
 import { MarketplaceSearchPanel } from "@/components/marketplace/MarketplaceSearchPanel";
 import { BackToTopButton } from "@/components/BackToTopButton";
 import { HeroHeadline } from "@/components/marketplace/HeroHeadline";
+import { AiEnhanceBanner } from "@/components/marketplace/AiEnhanceBanner";
+import { createClient } from "@/lib/supabase/server";
 import { PropertyCard } from "@/components/property/PropertyCard";
 import { getDictionary } from "@/lib/i18n/locale";
 import { parsePropertyTypeParam } from "@/lib/constants/propertyTypes";
@@ -52,6 +54,17 @@ export default async function HomePage({
   // view isn't currently selected.
   const [agents, properties] = await Promise.all([getMarketplaceAgents(filters), getMarketplaceProperties(filters)]);
 
+  // "Mejorar con IA" is an agent tool: visitors are sent to sign in first and
+  // land on it afterwards, agents go straight there, and affiliates (who can't
+  // use it) don't see the banner.
+  const AI_ENHANCE_PATH = "/panel/servicios/mejorar-con-ia";
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const role = user ? (await supabase.from("profiles").select("role").eq("id", user.id).single()).data?.role : null;
+  const aiEnhanceHref = !user ? `/ingresar?next=${encodeURIComponent(AI_ENHANCE_PATH)}` : role === "agent" ? AI_ENHANCE_PATH : null;
+
   const propertyCards = properties.map((property) => {
     const agentProfile = property.agent_profiles?.profiles;
     const agentName = agentProfile?.full_name || agentProfile?.username || "";
@@ -75,6 +88,12 @@ export default async function HomePage({
         <div className="relative z-10 flex flex-col gap-4 text-center sm:text-left">
           <HeroHeadline fallback={dict.home.title} animated={locale === "es"} dark />
         </div>
+
+        {aiEnhanceHref && (
+          <div className="relative z-10">
+            <AiEnhanceBanner href={aiEnhanceHref} />
+          </div>
+        )}
 
         {/* z-30, above the toggle/grid sections below (both z-10): those are
             later siblings that'd otherwise paint over this panel's own

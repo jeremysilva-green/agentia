@@ -43,8 +43,15 @@ export function AgentCard({
             sizes="(min-width: 1024px) 16vw, (min-width: 768px) 22vw, (min-width: 640px) 30vw, 45vw"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <User className="text-[var(--muted)]" size={28} />
+          // No photo yet: a soft, blurred stand-in portrait (head and shoulders
+          // shapes) under a low-opacity dark green wash, with the icon on top.
+          <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-b from-[#2f3a35] to-[#0f1311]">
+            <div aria-hidden className="absolute inset-0 scale-110 blur-[11px]">
+              <div className="absolute top-[17%] left-1/2 h-[36%] w-[34%] -translate-x-1/2 rounded-full bg-[#6b5e53]" />
+              <div className="absolute -bottom-[8%] left-1/2 h-[46%] w-[84%] -translate-x-1/2 rounded-[50%] bg-[#2c3833]" />
+            </div>
+            <div aria-hidden className="absolute inset-0 bg-[#064e32]/35" />
+            <User className="relative text-[var(--em-2)]" size={34} />
           </div>
         )}
         <div
