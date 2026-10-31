@@ -1,5 +1,6 @@
 "use server";
 
+import { tidyPropertyTitle, capitalizeFirst } from "@/lib/propertyTitle";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -411,6 +412,17 @@ async function saveListingKindChildren(
   }
 }
 
+// Modelo listings are named projects, so those only get capitalized.
+async function titleForSave(data: PropertyInput): Promise<string> {
+  if (data.listingKind === "modelo") return capitalizeFirst(data.title);
+  return tidyPropertyTitle(data.title, {
+    city: data.city,
+    address: data.address,
+    listingType: data.listingType,
+    propertyType: data.propertyType,
+  });
+}
+
 export async function createProperty(
   _prevState: PropertyActionState,
   formData: FormData
@@ -434,11 +446,13 @@ export async function createProperty(
   const map = await resolveMapCoordinates(parsed.data.mapsUrl);
   if (map.error) return { error: map.error };
 
+  const title = await titleForSave(parsed.data);
+
   const { data, error } = await supabase
     .from("properties")
     .insert({
       agent_id: user.id,
-      title: parsed.data.title,
+      title,
       description: parsed.data.description,
       listing_type: parsed.data.listingType,
       property_type: parsed.data.propertyType ?? null,
@@ -505,10 +519,15 @@ export async function updateProperty(
 
   const { data: current } = await supabase
     .from("properties")
-    .select("status, sold_at")
+    .select("status, sold_at, title")
     .eq("id", propertyId)
     .eq("agent_id", user.id)
     .single();
+
+  // Only re-tidy when the agent actually changed the title, so editing other
+  // fields never rewrites a title they kept on purpose.
+  const title =
+    parsed.data.title.trim() === current?.title ? current.title : await titleForSave(parsed.data);
 
   const soldAt =
     parsed.data.status === "sold"
@@ -518,7 +537,7 @@ export async function updateProperty(
   const { error } = await supabase
     .from("properties")
     .update({
-      title: parsed.data.title,
+      title,
       description: parsed.data.description,
       listing_type: parsed.data.listingType,
       property_type: parsed.data.propertyType ?? null,
