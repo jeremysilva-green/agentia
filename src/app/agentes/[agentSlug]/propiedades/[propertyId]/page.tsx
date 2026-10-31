@@ -345,7 +345,6 @@ export default async function PropertyDetailPage({
                   <ChatWidget
                     propertyId={propertyId}
                     agentName={agentName}
-                    agentAvatarUrl={agentProfile?.profiles?.avatar_url ?? null}
                     refCode={ref}
                   />
                 )}

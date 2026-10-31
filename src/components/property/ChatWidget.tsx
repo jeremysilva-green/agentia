@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
-import { X, Send, User } from "lucide-react";
+import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { copy } from "@/lib/copy";
 
@@ -37,17 +37,16 @@ function getVisitorId() {
 export function ChatWidget({
   propertyId,
   agentName,
-  agentAvatarUrl,
   refCode,
 }: {
   propertyId: string;
   agentName: string;
-  agentAvatarUrl: string | null;
   refCode?: string;
 }) {
+  const firstName = agentName.trim().split(/\s+/)[0] || agentName;
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    { role: "assistant", text: copy.chat.greeting(agentName) },
+    { role: "assistant", text: copy.chat.greeting(firstName) },
   ]);
   const [input, setInput] = useState("");
   const [isPending, setIsPending] = useState(false);
@@ -109,59 +108,61 @@ export function ChatWidget({
       </Button>
 
       {open && (
-        <div className="fixed bottom-4 right-4 z-50 flex h-[min(560px,80vh)] w-[min(360px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-emerald-500 bg-emerald-50 shadow-2xl">
-          <div className="flex items-center gap-2.5 border-b border-slate-100 bg-emerald-600 px-4 py-3 text-white">
-            <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/20">
-              {agentAvatarUrl ? (
-                <Image src={agentAvatarUrl} alt={agentName} fill className="object-cover" sizes="32px" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <User size={16} />
-                </div>
-              )}
+        <div className="fixed bottom-4 right-4 z-50 flex h-[min(560px,80vh)] w-[min(360px,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-[#13c47f]/30 bg-[#08110d] shadow-[0_24px_70px_rgba(0,0,0,0.6)]">
+          <div className="flex items-center gap-2.5 border-b border-[#13c47f]/20 bg-gradient-to-r from-[#0a3d2a] to-[#0a8f5c] px-4 py-3 text-white">
+            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full bg-[#08110d] ring-2 ring-[#13c47f]/60">
+              <Image src="/agentia-icon.png" alt="Agentia" fill className="object-cover" sizes="36px" />
             </div>
-            <p className="flex-1 truncate font-display text-sm font-medium text-white">{agentName}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-display text-sm font-medium leading-tight text-white">
+                {copy.chat.assistantLabel(firstName)}
+              </p>
+              <p className="flex items-center gap-1.5 text-[11px] leading-tight text-emerald-100/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#13c47f]" />
+                Agentia
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="text-white/80 transition-colors hover:text-white"
+              className="rounded-md p-1 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
               aria-label="Cerrar"
             >
               <X size={18} />
             </button>
           </div>
 
-          <div ref={scrollRef} className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
+          <div ref={scrollRef} className="flex flex-1 flex-col gap-2 overflow-y-auto bg-[#08110d] p-3">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-snug ${
                   message.role === "user"
-                    ? "self-end bg-prussian text-white"
-                    : "self-start bg-emerald-600 text-white"
+                    ? "self-end rounded-br-md bg-gradient-to-br from-[#13c47f] to-[#0a8f5c] text-white"
+                    : "self-start rounded-bl-md border border-white/10 bg-white/[0.07] text-slate-100"
                 }`}
               >
                 {message.text}
               </div>
             ))}
             {isPending && (
-              <div className="self-start rounded-2xl bg-emerald-600 px-3 py-2 text-sm text-emerald-100">
+              <div className="self-start rounded-2xl rounded-bl-md border border-white/10 bg-white/[0.07] px-3 py-2 text-sm text-emerald-300">
                 {copy.chat.typing}
               </div>
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-emerald-100 bg-emerald-50 p-2.5">
+          <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-white/10 bg-[#0b1813] p-2.5">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={copy.chat.inputPlaceholder}
-              className="h-9 flex-1 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-emerald-600"
+              className="h-9 flex-1 rounded-lg border border-white/10 bg-white/[0.06] px-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-[#13c47f]"
             />
             <button
               type="submit"
               disabled={isPending || !input.trim()}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#13c47f] text-[#04140d] transition-colors hover:bg-[#2ee09a] disabled:opacity-40"
               aria-label={copy.chat.send}
             >
               <Send size={15} />

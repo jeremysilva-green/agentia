@@ -87,7 +87,9 @@ export const copy = {
     scheduleSuccess: "¡Listo! Te vamos a contactar pronto.",
   },
   chat: {
-    greeting: (agentName: string) => `¡Hola! Soy ${agentName}. ¿En qué te puedo ayudar con esta propiedad?`,
+    greeting: (agentFirstName: string) =>
+      `¡Hola! Soy el asistente de ${agentFirstName}. ¿En qué te puedo ayudar con esta propiedad?`,
+    assistantLabel: (agentFirstName: string) => `Asistente de ${agentFirstName}`,
     typing: "...",
     inputPlaceholder: "Escribí tu mensaje...",
     send: "Enviar",
