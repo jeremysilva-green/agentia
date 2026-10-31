@@ -1,14 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import sharp from "sharp";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getPublicStorageUrl } from "@/lib/storage";
-import { resizeToDataUri } from "@/lib/serverImage";
+import { resizeToDataUri, trimLetterbox } from "@/lib/serverImage";
 
 const BASE_WIDTH = 1080;
 const BASE_HEIGHT = 1350;
 const DESCRIPTION_LIMIT = 300;
-const GREEN = "#16a34a";
+const GREEN = "#13c47f";
 
 // Route Handlers render outside the RSC client boundary, so lucide-react's
 // ("use client") icon components can't be used here — inlined as raw SVG
@@ -98,7 +99,8 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
       return null;
     }
     const buffer = Buffer.from(await response.arrayBuffer());
-    return await resizeToDataUri(buffer);
+    // Photos uploaded with black/white/grey bars would show them inside the frame.
+    return await resizeToDataUri(await trimLetterbox(buffer));
   } catch (err) {
     console.error("[property-card] image fetch threw", url, err);
     return null;
@@ -111,7 +113,7 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
 export const maxDuration = 30;
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  available: { bg: "#ecfdf5", color: "#047857", label: "Disponible" },
+  available: { bg: GREEN, color: "#04140d", label: "Disponible" },
   sold: { bg: "#f1f5f9", color: "#475569", label: "Vendida" },
   rented: { bg: "#fffbeb", color: "#b45309", label: "Alquilada" },
   draft: { bg: "#f1f5f9", color: "#475569", label: "Borrador" },
@@ -168,7 +170,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
   // and text overflowing past the card's right edge. Stripping it restores
   // normal wrapping; \n\n is left alone since Satori/CSS already collapses
   // it into ordinary whitespace between paragraphs.
-  const cleanDescription = property.description.replace(/\r/g, "");
+  // Emojis are stripped too: the brand fonts have no glyphs for them, so they
+  // would render as empty boxes (or a mismatched color emoji) on the card.
+  const cleanDescription = property.description
+    .replace(/\r/g, "")
+    .replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\uFE0F\u200D\u20E3]/gu, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
   const description =
     cleanDescription.length > DESCRIPTION_LIMIT
       ? `${cleanDescription.slice(0, DESCRIPTION_LIMIT).trim()}…`
@@ -177,11 +185,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
   const dotBgUri = buildDotBackground(width, height);
 
   const pad = px(28);
-  const imageHeight = Math.round(height * 0.4);
+  const imageHeight = Math.round(height * 0.48);
   // agentia-04.png is 5947x943 (~6.31:1) — a full wordmark (house icon + "AGENTIA" text).
   const LOGO_ASPECT_RATIO = 943 / 5947;
-  const logoWidth = px(260);
-  const logoHeight = Math.round(logoWidth * LOGO_ASPECT_RATIO);
   const headerLogoHeight = px(56);
   const headerLogoWidth = Math.round(headerLogoHeight / LOGO_ASPECT_RATIO);
 
@@ -190,7 +196,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
   if (property.bathrooms != null) stats.push({ icon: BathIcon, text: `${property.bathrooms} Baños` });
   if (property.area_m2 != null) stats.push({ icon: RulerIcon, text: `${property.area_m2}m²` });
 
-  return new ImageResponse(
+  const rendered = new ImageResponse(
     (
       <div
         style={{
@@ -216,7 +222,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
             display: "flex",
             flexDirection: "column",
             flex: 1,
-            padding: `${px(44)}px ${pad}px 0`,
+            padding: `${px(44)}px ${pad}px ${pad}px`,
           }}
         >
           <div style={{ display: "flex", alignItems: "center", marginBottom: px(32) }}>
@@ -229,13 +235,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              background: "#ffffff",
+              background: "linear-gradient(180deg, #0f1c16 0%, #0a1210 100%)",
+              border: `${px(2)}px solid rgba(19,196,127,0.35)`,
               borderTopLeftRadius: px(48),
               borderTopRightRadius: px(48),
               borderBottomLeftRadius: px(48),
               borderBottomRightRadius: px(48),
               overflow: "hidden",
-              boxShadow: "0 20px 40px rgba(15,23,42,0.12)",
+              boxShadow: "0 20px 60px rgba(19,196,127,0.18)",
               paddingBottom: px(44),
             }}
           >
@@ -245,6 +252,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                 width: "100%",
                 height: imageHeight,
                 display: "flex",
+                overflow: "hidden",
+                borderTopLeftRadius: px(46),
+                borderTopRightRadius: px(46),
               }}
             >
               {coverDataUri ? (
@@ -253,7 +263,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                   src={coverDataUri}
                   width={width}
                   height={imageHeight}
-                  style={{ objectFit: "cover", width: "100%", height: "100%" }}
+                  style={{ objectFit: "cover", width: "100%", height: "100%", borderTopLeftRadius: px(46), borderTopRightRadius: px(46) }}
                   alt=""
                 />
               ) : (
@@ -327,7 +337,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                   display: "flex",
                   fontFamily: "ClashSemibold",
                   fontSize: px(52),
-                  color: "#0f172a",
+                  color: "#ffffff",
                   lineHeight: 1.15,
                   textAlign: "center",
                   marginTop: px(36),
@@ -337,7 +347,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: px(10), marginTop: px(14) }}>
                 <MapPinIcon size={px(28)} color={GREEN} />
-                <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(34), color: "#64748b" }}>
+                <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(34), color: "#9fb3aa" }}>
                   {cityLine}
                 </div>
               </div>
@@ -347,11 +357,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                   {stats.map((stat, i) => (
                     <div key={stat.text} style={{ display: "flex", alignItems: "center" }}>
                       {i > 0 && (
-                        <div style={{ display: "flex", width: px(2), height: px(34), background: "#e2e8f0", margin: `0 ${px(24)}px` }} />
+                        <div style={{ display: "flex", width: px(2), height: px(34), background: "rgba(255,255,255,0.18)", margin: `0 ${px(24)}px` }} />
                       )}
                       <div style={{ display: "flex", alignItems: "center", gap: px(12) }}>
                         <stat.icon size={px(34)} color={GREEN} />
-                        <div style={{ display: "flex", fontFamily: "ClashSemibold", fontSize: px(34), color: "#0f172a" }}>
+                        <div style={{ display: "flex", fontFamily: "ClashSemibold", fontSize: px(34), color: "#ffffff" }}>
                           {stat.text}
                         </div>
                       </div>
@@ -367,7 +377,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
                   wordBreak: "break-word",
                   fontFamily: "ClashLight",
                   fontSize: px(30),
-                  color: "#64748b",
+                  color: "#b4c4bc",
                   lineHeight: 1.4,
                   textAlign: "left",
                   marginTop: px(34),
@@ -379,23 +389,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
           </div>
         </div>
 
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            background: "#000000",
-            borderTop: `${px(6)}px solid ${GREEN}`,
-            padding: `${px(28)}px ${pad}px`,
-          }}
-        >
-          <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(26), color: "#ffffff" }}>
-            www.agentia.com.py
-          </div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={logoDataUri} width={logoWidth} height={logoHeight} alt="Agentia" />
-        </div>
       </div>
     ),
     {
@@ -405,16 +398,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
         { name: "ClashSemibold", data: semiboldFont, style: "normal", weight: 600 },
         { name: "ClashLight", data: lightFont, style: "normal", weight: 300 },
       ],
-      // This route had no caching at all — every request (DB lookup, fetch +
-      // resize the cover photo, Satori/resvg render) took 3+ seconds on
-      // every single hit, including repeat crawler fetches of the exact
-      // same URL. Confirmed via real-world symptom: WhatsApp's link-preview
-      // crawler never showed an image, consistent with it timing out before
-      // a cold, uncached render finished. Cache at Vercel's edge so only
-      // the first hit per property+width pays the render cost.
-      headers: {
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-      },
     }
   );
+
+  // WhatsApp's link-preview crawler drops og:images over ~300 KB, and the raw
+  // PNG is ~1.1 MB — so it never showed. Re-encode as JPEG (~150 KB) and set
+  // the cache headers on our own Response (ImageResponse's `headers` option
+  // didn't reach the live site: it served a bare "cache-control: public"),
+  // so only the first hit per property+width pays the 3+ second render.
+  const png = Buffer.from(await rendered.arrayBuffer());
+  const jpeg = await sharp(png).flatten({ background: "#000000" }).jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+  return new Response(new Uint8Array(jpeg), {
+    headers: {
+      "Content-Type": "image/jpeg",
+      "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+    },
+  });
 }
