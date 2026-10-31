@@ -6,10 +6,14 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { getPublicStorageUrl } from "@/lib/storage";
 import { resizeToDataUri, trimLetterbox } from "@/lib/serverImage";
 
-const BASE_WIDTH = 1080;
-const BASE_HEIGHT = 1350;
-const DESCRIPTION_LIMIT = 300;
 const GREEN = "#13c47f";
+
+// "landscape" (1200x630) is the standard link-preview shape; "vertical"
+// (1080x1350) is 4:5.
+const FORMATS = {
+  landscape: { width: 1200, height: 630 },
+  vertical: { width: 1080, height: 1350 },
+};
 
 // Route Handlers render outside the RSC client boundary, so lucide-react's
 // ("use client") icon components can't be used here — inlined as raw SVG
@@ -66,24 +70,6 @@ function RulerIcon(props: { size: number; color: string }) {
   );
 }
 
-function MapPinIcon(props: { size: number; color: string }) {
-  return (
-    <Icon {...props}>
-      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" />
-      <circle cx="12" cy="10" r="3" />
-    </Icon>
-  );
-}
-
-function buildDotBackground(width: number, height: number) {
-  const spacing = 28;
-  const radius = 1.6;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><pattern id="dots" x="0" y="0" width="${spacing}" height="${spacing}" patternUnits="userSpaceOnUse"><circle cx="${
-    spacing / 2
-  }" cy="${spacing / 2}" r="${radius}" fill="rgba(22,163,74,0.45)" /></pattern></defs><rect width="100%" height="100%" fill="#12100e" /><rect width="100%" height="100%" fill="url(#dots)" /></svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-}
-
 // Fetches an image server-side and converts it to a data URI, instead of
 // handing next/og's ImageResponse a raw remote URL to fetch+decode
 // internally — that path has no error handling at all, so any transient
@@ -91,7 +77,7 @@ function buildDotBackground(width: number, height: number) {
 // unusually large or malformed file) 500s the entire route. Pre-fetching
 // here lets a failure degrade gracefully to the existing placeholder UI
 // instead of taking down the whole image response.
-async function fetchImageAsDataUri(url: string): Promise<string | null> {
+async function fetchImageAsDataUri(url: string): Promise<{ dataUri: string; landscape: boolean } | null> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -100,11 +86,33 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
     }
     const buffer = Buffer.from(await response.arrayBuffer());
     // Photos uploaded with black/white/grey bars would show them inside the frame.
-    return await resizeToDataUri(await trimLetterbox(buffer));
+    const trimmed = await trimLetterbox(buffer);
+    // Measured after rotate(), so a sideways phone photo counts by how it displays.
+    const rotated = await sharp(trimmed).rotate().toBuffer({ resolveWithObject: true });
+    return {
+      dataUri: await resizeToDataUri(rotated.data),
+      landscape: rotated.info.width >= rotated.info.height,
+    };
   } catch (err) {
     console.error("[property-card] image fetch threw", url, err);
     return null;
   }
+}
+
+// How many gallery photos to look through for a horizontal one before giving
+// up and cropping the first photo.
+const MAX_PHOTOS_TO_TRY = 6;
+
+async function pickCoverDataUri(urls: string[], preferLandscape: boolean): Promise<string | null> {
+  if (urls.length === 0) return null;
+  let first: string | null = null;
+  for (const url of urls.slice(0, preferLandscape ? MAX_PHOTOS_TO_TRY : 1)) {
+    const image = await fetchImageAsDataUri(url);
+    if (!image) continue;
+    if (!preferLandscape || image.landscape) return image.dataUri;
+    first ??= image.dataUri;
+  }
+  return first;
 }
 
 // Fetching + resizing a large agent-uploaded cover photo can run past
@@ -112,20 +120,13 @@ async function fetchImageAsDataUri(url: string): Promise<string | null> {
 // catchable error (confirmed via Vercel logs: 500 with zero log output).
 export const maxDuration = 30;
 
-const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }> = {
-  available: { bg: GREEN, color: "#04140d", label: "Disponible" },
-  sold: { bg: "#f1f5f9", color: "#475569", label: "Vendida" },
-  rented: { bg: "#fffbeb", color: "#b45309", label: "Alquilada" },
-  draft: { bg: "#f1f5f9", color: "#475569", label: "Borrador" },
-};
-
 export async function GET(request: Request, { params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
   const service = createServiceClient();
 
   const { data: property } = await service
     .from("properties")
-    .select("*, property_images(*), property_coverage_cities(*)")
+    .select("bedrooms, bathrooms, area_m2, property_images(storage_path, position)")
     .eq("id", propertyId)
     .eq("published", true)
     .single();
@@ -134,280 +135,112 @@ export async function GET(request: Request, { params }: { params: Promise<{ prop
     return new Response("No encontrado", { status: 404 });
   }
 
-  const cover = [...(property.property_images ?? [])].sort((a, b) => a.position - b.position)[0];
-  const coverUrl = cover ? getPublicStorageUrl("property-photos", cover.storage_path) : null;
+  const format = new URL(request.url).searchParams.get("format") === "vertical" ? "vertical" : "landscape";
 
-  const [semiboldFont, lightFont, logoBytes, coverDataUri] = await Promise.all([
+  // The landscape card prefers the first horizontal photo of the gallery; if
+  // every photo is vertical it falls back to cropping the first one.
+  const photoUrls = [...(property.property_images ?? [])]
+    .sort((a, b) => a.position - b.position)
+    .map((image) => getPublicStorageUrl("property-photos", image.storage_path));
+
+  const [semiboldFont, coverDataUri] = await Promise.all([
     readFile(join(process.cwd(), "font", "ClashDisplay-Semibold.otf")),
-    readFile(join(process.cwd(), "font", "ClashDisplay-Light.otf")),
-    readFile(join(process.cwd(), "assets", "agentia-04.png")),
-    coverUrl ? fetchImageAsDataUri(coverUrl) : Promise.resolve(null),
+    pickCoverDataUri(photoUrls, format === "landscape"),
   ]);
-  const logoDataUri = `data:image/png;base64,${logoBytes.toString("base64")}`;
 
-  const { searchParams } = new URL(request.url);
-  const width = Math.min(BASE_WIDTH, Math.max(120, Number(searchParams.get("w")) || BASE_WIDTH));
-  const height = Math.round(width * (BASE_HEIGHT / BASE_WIDTH));
-  const scale = width / BASE_WIDTH;
-  const px = (value: number) => Math.round(value * scale);
-
-  const status = STATUS_STYLES[property.status] ?? STATUS_STYLES.available;
-  const isModelo = property.listing_kind === "modelo";
-  // Modelo listings have no public price — property.price is the private
-  // precio contado and must never render into this publicly-fetched image.
-  const price = new Intl.NumberFormat("es-PY", {
-    style: "currency",
-    currency: property.currency,
-    maximumFractionDigits: 0,
-  }).format(isModelo ? property.model_installment_from ?? 0 : property.price);
-  const cityLine = isModelo
-    ? (property.property_coverage_cities ?? []).map((c) => c.city).join(", ") || property.city
-    : property.city;
-
-  // Stray \r (from text pasted out of Windows/Word, \r\n line endings)
-  // corrupts Satori's text-wrapping badly — confirmed by reproducing it in
-  // isolation: dropped spaces ("Lapropiedad"), misaligned wrapped lines,
-  // and text overflowing past the card's right edge. Stripping it restores
-  // normal wrapping; \n\n is left alone since Satori/CSS already collapses
-  // it into ordinary whitespace between paragraphs.
-  // Emojis are stripped too: the brand fonts have no glyphs for them, so they
-  // would render as empty boxes (or a mismatched color emoji) on the card.
-  const cleanDescription = property.description
-    .replace(/\r/g, "")
-    .replace(/[\p{Extended_Pictographic}\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\uFE0F\u200D\u20E3]/gu, "")
-    .replace(/[ \t]{2,}/g, " ")
-    .trim();
-  const description =
-    cleanDescription.length > DESCRIPTION_LIMIT
-      ? `${cleanDescription.slice(0, DESCRIPTION_LIMIT).trim()}…`
-      : cleanDescription;
-
-  const dotBgUri = buildDotBackground(width, height);
-
-  const pad = px(28);
-  const imageHeight = Math.round(height * 0.48);
-  // agentia-04.png is 5947x943 (~6.31:1) — a full wordmark (house icon + "AGENTIA" text).
-  const LOGO_ASPECT_RATIO = 943 / 5947;
-  const headerLogoHeight = px(56);
-  const headerLogoWidth = Math.round(headerLogoHeight / LOGO_ASPECT_RATIO);
+  const { width, height } = FORMATS[format];
+  const vertical = format === "vertical";
+  // Everything scales off the canvas width so both shapes keep the same look.
+  const px = (value: number) => Math.round((value * width) / 1080);
 
   const stats: { icon: typeof BedIcon; text: string }[] = [];
   if (property.bedrooms != null) stats.push({ icon: BedIcon, text: `${property.bedrooms} Hab.` });
   if (property.bathrooms != null) stats.push({ icon: BathIcon, text: `${property.bathrooms} Baños` });
   if (property.area_m2 != null) stats.push({ icon: RulerIcon, text: `${property.area_m2}m²` });
 
+  const fade = (direction: "top" | "bottom", size: number) => ({
+    display: "flex" as const,
+    position: "absolute" as const,
+    left: 0,
+    right: 0,
+    [direction]: 0,
+    height: size,
+    backgroundImage: `linear-gradient(to ${direction === "top" ? "bottom" : "top"}, rgba(0,0,0,0.88), rgba(0,0,0,0))`,
+  });
+
   const rendered = new ImageResponse(
     (
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={dotBgUri}
-          width={width}
-          height={height}
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
-          alt=""
-        />
+      <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", background: "#12100e" }}>
+        {coverDataUri && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={coverDataUri}
+            width={width}
+            height={height}
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+            alt=""
+          />
+        )}
 
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            padding: `${px(44)}px ${pad}px ${pad}px`,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", marginBottom: px(32) }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoDataUri} width={headerLogoWidth} height={headerLogoHeight} alt="Agentia" />
-          </div>
+        {stats.length > 0 && <div style={fade("bottom", px(vertical ? 420 : 300))} />}
 
+        {stats.length > 0 && (
           <div
             style={{
+              position: "absolute",
+              left: px(48),
+              right: px(48),
+              bottom: px(vertical ? 56 : 44),
               display: "flex",
-              flexDirection: "column",
               alignItems: "center",
-              background: "linear-gradient(180deg, #0f1c16 0%, #0a1210 100%)",
-              border: `${px(2)}px solid rgba(19,196,127,0.35)`,
-              borderTopLeftRadius: px(48),
-              borderTopRightRadius: px(48),
-              borderBottomLeftRadius: px(48),
-              borderBottomRightRadius: px(48),
-              overflow: "hidden",
-              boxShadow: "0 20px 60px rgba(19,196,127,0.18)",
-              paddingBottom: px(44),
+              justifyContent: "center",
             }}
           >
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                height: imageHeight,
-                display: "flex",
-                overflow: "hidden",
-                borderTopLeftRadius: px(46),
-                borderTopRightRadius: px(46),
-              }}
-            >
-              {coverDataUri ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={coverDataUri}
-                  width={width}
-                  height={imageHeight}
-                  style={{ objectFit: "cover", width: "100%", height: "100%", borderTopLeftRadius: px(46), borderTopRightRadius: px(46) }}
-                  alt=""
-                />
-              ) : (
-                <div style={{ display: "flex", width: "100%", height: "100%", background: "#e2e8f0" }} />
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: "60%",
-                  backgroundImage: "linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0))",
-                }}
-              />
-
-              <div
-                style={{
-                  display: "flex",
-                  position: "absolute",
-                  top: px(24),
-                  left: px(24),
-                  padding: `${px(12)}px ${px(26)}px`,
-                  borderRadius: 999,
-                  background: status.bg,
-                  color: status.color,
-                  fontFamily: "ClashSemibold",
-                  fontSize: px(30),
-                }}
-              >
-                {status.label}
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: px(28),
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "flex-end", gap: px(12) }}>
-                  <div style={{ display: "flex", fontFamily: "ClashSemibold", fontSize: px(72), color: "#ffffff", lineHeight: 1 }}>
-                    {price}
+            {stats.map((stat, i) => (
+              <div key={stat.text} style={{ display: "flex", alignItems: "center" }}>
+                {i > 0 && (
+                  <div
+                    style={{
+                      display: "flex",
+                      width: px(2),
+                      height: px(40),
+                      background: "rgba(255,255,255,0.35)",
+                      margin: `0 ${px(vertical ? 32 : 28)}px`,
+                    }}
+                  />
+                )}
+                <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
+                  <stat.icon size={px(vertical ? 44 : 40)} color={GREEN} />
+                  <div
+                    style={{
+                      display: "flex",
+                      fontFamily: "ClashSemibold",
+                      fontSize: px(vertical ? 44 : 40),
+                      color: "#ffffff",
+                    }}
+                  >
+                    {stat.text}
                   </div>
-                  {isModelo && (
-                    <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(30), color: "#e2e8f0", paddingBottom: px(8) }}>
-                      /mes
-                    </div>
-                  )}
                 </div>
               </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                width: "100%",
-                padding: `0 ${px(28)}px`,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  fontFamily: "ClashSemibold",
-                  fontSize: px(52),
-                  color: "#ffffff",
-                  lineHeight: 1.15,
-                  textAlign: "center",
-                  marginTop: px(36),
-                }}
-              >
-                {property.title}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: px(10), marginTop: px(14) }}>
-                <MapPinIcon size={px(28)} color={GREEN} />
-                <div style={{ display: "flex", fontFamily: "ClashLight", fontSize: px(34), color: "#9fb3aa" }}>
-                  {cityLine}
-                </div>
-              </div>
-
-              {stats.length > 0 && (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginTop: px(38) }}>
-                  {stats.map((stat, i) => (
-                    <div key={stat.text} style={{ display: "flex", alignItems: "center" }}>
-                      {i > 0 && (
-                        <div style={{ display: "flex", width: px(2), height: px(34), background: "rgba(255,255,255,0.18)", margin: `0 ${px(24)}px` }} />
-                      )}
-                      <div style={{ display: "flex", alignItems: "center", gap: px(12) }}>
-                        <stat.icon size={px(34)} color={GREEN} />
-                        <div style={{ display: "flex", fontFamily: "ClashSemibold", fontSize: px(34), color: "#ffffff" }}>
-                          {stat.text}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  alignSelf: "stretch",
-                  wordBreak: "break-word",
-                  fontFamily: "ClashLight",
-                  fontSize: px(30),
-                  color: "#b4c4bc",
-                  lineHeight: 1.4,
-                  textAlign: "left",
-                  marginTop: px(34),
-                }}
-              >
-                {description}
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-
+        )}
       </div>
     ),
     {
       width,
       height,
-      fonts: [
-        { name: "ClashSemibold", data: semiboldFont, style: "normal", weight: 600 },
-        { name: "ClashLight", data: lightFont, style: "normal", weight: 300 },
-      ],
+      fonts: [{ name: "ClashSemibold", data: semiboldFont, style: "normal", weight: 600 }],
     }
   );
 
   // WhatsApp's link-preview crawler drops og:images over ~300 KB, and the raw
-  // PNG is ~1.1 MB — so it never showed. Re-encode as JPEG (~150 KB) and set
-  // the cache headers on our own Response (ImageResponse's `headers` option
-  // didn't reach the live site: it served a bare "cache-control: public"),
-  // so only the first hit per property+width pays the 3+ second render.
+  // PNG is ~1 MB — so it never showed. Re-encode as JPEG and set the cache
+  // headers on our own Response (ImageResponse's `headers` option didn't reach
+  // the live site), so only the first hit per property pays the render.
   const png = Buffer.from(await rendered.arrayBuffer());
-  const jpeg = await sharp(png).flatten({ background: "#000000" }).jpeg({ quality: 80, mozjpeg: true }).toBuffer();
+  const jpeg = await sharp(png).flatten({ background: "#000000" }).jpeg({ quality: 82, mozjpeg: true }).toBuffer();
   return new Response(new Uint8Array(jpeg), {
     headers: {
       "Content-Type": "image/jpeg",

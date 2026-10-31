@@ -102,7 +102,7 @@ export async function generateMetadata({
       description,
       type: "website",
       url: canonical,
-      images: [{ url: imageUrl, width: 1080, height: 1350 }],
+      images: [{ url: imageUrl, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",

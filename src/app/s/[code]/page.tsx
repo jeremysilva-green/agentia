@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
   const imageUrl = flyer
     ? getPublicStorageUrl("property-flyers", flyer.storage_path)
     : `${siteUrl}/api/property-card/${link.property_id}`;
-  const imageSize = flyer ? { width: 1520, height: 2062 } : { width: 1080, height: 1350 };
+  const imageSize = flyer ? { width: 1520, height: 2062 } : { width: 1200, height: 630 };
   const description = new Intl.NumberFormat("es-PY", {
     style: "currency",
     currency: link.properties.currency,
