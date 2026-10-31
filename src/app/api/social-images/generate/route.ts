@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { renderPropertyCard } from "@/components/social-images/renderer";
+import { renderCarouselSlide } from "@/components/social-images/renderer";
 import { getPropertyForSocialCard } from "@/lib/data/social-image-property";
 
 /**
@@ -45,7 +45,9 @@ export async function POST(req: NextRequest) {
 
   try {
     const propertyData = await getPropertyForSocialCard(propertyId);
-    const png = await renderPropertyCard(propertyData, "instagram-feed");
+    // Slide 1 of the 2-image carousel Make posts to Buffer (the second image is
+    // the static logo slide), so the counter reads 1/2.
+    const png = await renderCarouselSlide({ photoDataUri: propertyData.imageDataUri, current: 1, total: 2 });
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

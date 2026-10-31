@@ -65,3 +65,31 @@ export async function loadFlyerFonts(): Promise<FlyerFont[]> {
 
   return cachedFlyerFonts;
 }
+
+type CarouselFont = { name: string; data: Buffer; weight: 300 | 400 | 500 | 600 | 700; style: "normal" | "italic" };
+
+let cachedCarouselFonts: CarouselFont[] | null = null;
+
+/** Poppins (OFL) as used by the Instagram carousel slide: light italic for the website, the rest upright. */
+export async function loadCarouselFonts(): Promise<CarouselFont[]> {
+  if (cachedCarouselFonts) return cachedCarouselFonts;
+
+  const files: { weight: CarouselFont["weight"]; style: CarouselFont["style"] }[] = [
+    { weight: 300, style: "italic" },
+    { weight: 400, style: "normal" },
+    { weight: 500, style: "normal" },
+    { weight: 600, style: "normal" },
+    { weight: 700, style: "normal" },
+  ];
+
+  cachedCarouselFonts = await Promise.all(
+    files.map(async ({ weight, style }) => ({
+      name: "Poppins",
+      data: await readFile(path.join(FONT_DIR, "poppins", `poppins-latin-${weight}-${style}.woff`)),
+      weight,
+      style,
+    }))
+  );
+
+  return cachedCarouselFonts;
+}
