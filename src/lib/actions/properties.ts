@@ -15,6 +15,9 @@ import {
 } from "@/lib/constants/commission";
 import { BASICO_PROPERTY_LIMIT } from "@/lib/plans";
 
+// The only host whose saves are allowed to queue an Instagram post.
+const INSTAGRAM_POSTING_HOST = "agentia.com.py";
+
 const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu69529c8ywufui3xok";
 
 // Queues an Instagram post for a property save (create or update) by
@@ -30,6 +33,15 @@ async function queueInstagramPost(propertyId: string, agentId: string, listingKi
   // price branch regardless of this guard — see route.tsx) and would leak
   // a Modelo listing's private precio contado into a public Instagram post.
   if (listingKind !== "standard") return;
+  // Only the real site posts to Instagram. A listing saved from localhost (or a
+  // preview deployment) would send Make a link it can't use — localhost isn't
+  // reachable and isn't https, which made the scenario fail and switch itself
+  // off — and would put test listings on the real Instagram account.
+  const siteUrl = getSiteUrl();
+  if (new URL(siteUrl).hostname !== INSTAGRAM_POSTING_HOST) {
+    console.info(`[queueInstagramPost] skipped: ${siteUrl} is not ${INSTAGRAM_POSTING_HOST}`);
+    return;
+  }
   try {
     const service = createServiceClient();
 
