@@ -162,7 +162,7 @@ export function ChatWidget({
             <button
               type="submit"
               disabled={isPending || !input.trim()}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#13c47f] text-[#04140d] transition-colors hover:bg-[#2ee09a] disabled:opacity-40"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#13c47f] text-[#04140d] transition-colors hover:bg-[#2ee09a] disabled:cursor-default disabled:hover:bg-[#13c47f]"
               aria-label={copy.chat.send}
             >
               <Send size={15} />
