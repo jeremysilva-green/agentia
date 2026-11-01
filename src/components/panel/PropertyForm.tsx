@@ -430,6 +430,23 @@ export function PropertyForm({
                   />
                 </div>
                 <input type="hidden" name="referralRewardType" value="commission_share" />
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <SingleSelectDropdown
+                    name="referralAttributionDays"
+                    label="Ventana de atribución"
+                    showAllOption={false}
+                    defaultValue={
+                      defaultValues?.referral_attribution_days != null
+                        ? String(defaultValues.referral_attribution_days)
+                        : attributionDefault
+                    }
+                    options={ATTRIBUTION_WINDOW_OPTIONS}
+                    buttonClassName="bg-white!"
+                  />
+                  <p className="self-end pb-2 text-xs text-slate-500">
+                    Tiempo que el referido queda protegido desde el primer contacto de su cliente.
+                  </p>
+                </div>
                 <div className="flex flex-col gap-1 text-xs text-slate-500">
                   <div className="flex items-center justify-between">
                     <span>
