@@ -26,7 +26,7 @@ export default async function SolicitudesPage() {
         <h1 className="mt-2 font-display text-[clamp(28px,4vw,40px)] font-semibold text-white">{copy.panel.solicitudes}</h1>
       </div>
 
-      <div className="grid gap-7 lg:grid-cols-2">
+      <div className="flex flex-col gap-9">
         <Reveal className="flex flex-col gap-3.5">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-xl border border-[#13c47f33] bg-[#13c47f17] text-[var(--em-2)]">
