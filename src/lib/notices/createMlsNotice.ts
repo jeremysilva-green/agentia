@@ -1,5 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendMlsNoticeEmail } from "@/lib/email/sendMlsNoticeEmail";
+import { generateMlsNoticeReceiptPdf } from "@/lib/reports/mlsNoticeReceiptPdf";
+import { MLS_NOTICE_TYPE_LABELS } from "@/lib/notices/typeLabels";
 import type { Database } from "@/types/database.types";
 
 type MlsNoticeType = Database["public"]["Tables"]["mls_notices"]["Row"]["type"];
@@ -44,7 +46,36 @@ export async function createMlsNotice(params: {
   const email = authUser?.user?.email;
 
   if (email) {
-    const result = await sendMlsNoticeEmail({ to: email, title: params.title, body: params.body, eventAt: params.eventAt });
+    // The receipt PDF travels with the email. It's also stored (same path the
+    // "Descargar comprobante" button uses) so the panel link reuses it; a
+    // failure on either step just sends the email without the attachment.
+    let receipt: { filename: string; content: Uint8Array } | undefined;
+    try {
+      const pdfBytes = await generateMlsNoticeReceiptPdf({
+        title: params.title,
+        body: params.body,
+        typeLabel: MLS_NOTICE_TYPE_LABELS[params.type] ?? params.type,
+        eventAt: params.eventAt,
+        referenceId: notice.id,
+      });
+      receipt = { filename: "comprobante-aviso-agentia.pdf", content: pdfBytes };
+
+      const receiptPath = `${notice.id}-comprobante.pdf`;
+      const { error: uploadError } = await service.storage
+        .from("mls-notice-receipts")
+        .upload(receiptPath, pdfBytes, { contentType: "application/pdf", upsert: true });
+      if (!uploadError) await service.from("mls_notices").update({ receipt_storage_path: receiptPath }).eq("id", notice.id);
+    } catch (err) {
+      console.error("[createMlsNotice] receipt PDF failed, emailing without it", err);
+    }
+
+    const result = await sendMlsNoticeEmail({
+      to: email,
+      title: params.title,
+      body: params.body,
+      eventAt: params.eventAt,
+      receipt,
+    });
     await service
       .from("mls_notices")
       .update(

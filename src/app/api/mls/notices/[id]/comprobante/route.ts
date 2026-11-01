@@ -3,11 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { generateMlsNoticeReceiptPdf } from "@/lib/reports/mlsNoticeReceiptPdf";
 import { getPublicStorageUrl } from "@/lib/storage";
-
-const TYPE_LABELS: Record<string, string> = {
-  membership_activated: "Membresía MLS activada",
-  membership_deactivated: "Membresía MLS inactiva",
-};
+import { MLS_NOTICE_TYPE_LABELS } from "@/lib/notices/typeLabels";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -40,7 +36,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const pdfBytes = await generateMlsNoticeReceiptPdf({
     title: notice.title,
     body: notice.body,
-    typeLabel: TYPE_LABELS[notice.type] ?? notice.type,
+    typeLabel: MLS_NOTICE_TYPE_LABELS[notice.type] ?? notice.type,
     eventAt: new Date(notice.event_at),
     referenceId: notice.id,
   });

@@ -41,6 +41,8 @@ export async function sendMlsNoticeEmail(params: {
   title: string;
   body: string;
   eventAt: Date;
+  /** Receipt PDF ("comprobante") sent along with the notice. */
+  receipt?: { filename: string; content: Uint8Array };
 }): Promise<{ success: true } | { success: false; error: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -56,15 +58,15 @@ export async function sendMlsNoticeEmail(params: {
   });
 
   try {
-    // Reuses the already-verified facturacion@ sender — a dedicated
-    // avisos@agentia.com.py address needs its own Resend domain
-    // verification before swapping this in.
     const resend = new Resend(apiKey);
     const { error: sendError } = await resend.emails.send({
-      from: "Agentia <facturacion@agentia.com.py>",
+      from: "Agentia <info@agentia.com.py>",
       to: params.to,
       subject: params.title,
       html,
+      attachments: params.receipt
+        ? [{ filename: params.receipt.filename, content: Buffer.from(params.receipt.content) }]
+        : undefined,
     });
 
     if (sendError) return { success: false, error: sendError.message };
