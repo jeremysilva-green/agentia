@@ -35,8 +35,6 @@ export function MarketplaceSearchPanel({
   const [q, setQ] = useState(searchParams.get("q") ?? "");
   const [minPriceDisplay, setMinPriceDisplay] = useState(formatGs(searchParams.get("minPrice") ?? ""));
   const [maxPriceDisplay, setMaxPriceDisplay] = useState(formatGs(searchParams.get("maxPrice") ?? ""));
-  const minPriceRef = useRef<HTMLInputElement>(null);
-  const maxPriceRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function navigateQ(next: string) {
@@ -60,10 +58,8 @@ export function MarketplaceSearchPanel({
     };
   }, []);
 
-  function handlePriceInput(display: string, setDisplay: (v: string) => void, hidden: HTMLInputElement | null) {
-    const digits = display.replace(/\D/g, "");
-    setDisplay(formatGs(digits));
-    if (hidden) hidden.value = digits;
+  function handlePriceInput(display: string, setDisplay: (v: string) => void) {
+    setDisplay(formatGs(display.replace(/\D/g, "")));
   }
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -153,22 +149,20 @@ export function MarketplaceSearchPanel({
             <div className="flex h-[52px] items-center gap-2 rounded-[15px] border border-[var(--line)] bg-black/30 px-3.5 transition-colors focus-within:border-[var(--em)] focus-within:ring-4 focus-within:ring-[#13c47f1f]">
               <Banknote size={16} className="shrink-0 text-[var(--em-2)]" />
               <input
-                ref={minPriceRef}
                 value={minPriceDisplay}
-                onChange={(e) => handlePriceInput(e.target.value, setMinPriceDisplay, minPriceRef.current)}
+                onChange={(e) => handlePriceInput(e.target.value, setMinPriceDisplay)}
                 placeholder="Gs. Mín."
                 className="w-full min-w-0 bg-transparent text-[14.5px] font-semibold text-white placeholder:font-medium placeholder:text-[#6a6a6a] focus:outline-none"
               />
               <span className="text-[#555]">–</span>
               <input
-                ref={maxPriceRef}
                 value={maxPriceDisplay}
-                onChange={(e) => handlePriceInput(e.target.value, setMaxPriceDisplay, maxPriceRef.current)}
+                onChange={(e) => handlePriceInput(e.target.value, setMaxPriceDisplay)}
                 placeholder="Gs. Máx."
                 className="w-full min-w-0 bg-transparent text-[14.5px] font-semibold text-white placeholder:font-medium placeholder:text-[#6a6a6a] focus:outline-none"
               />
-              <input type="hidden" name="minPrice" defaultValue={activeMin} />
-              <input type="hidden" name="maxPrice" defaultValue={activeMax} />
+              <input type="hidden" name="minPrice" value={minPriceDisplay.replace(/\D/g, "")} />
+              <input type="hidden" name="maxPrice" value={maxPriceDisplay.replace(/\D/g, "")} />
             </div>
             <button
               type="submit"
