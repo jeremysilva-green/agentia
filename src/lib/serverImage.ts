@@ -93,3 +93,143 @@ export async function trimLetterbox(buffer: Buffer): Promise<Buffer> {
     return buffer;
   }
 }
+
+// Some agents upload a finished flyer (cream frame, title banner, text panel,
+// logo footer) instead of a plain photo. These numbers decide whether an image
+// is one, and where the real photo sits inside it.
+const FRAME_WORK_WIDTH = 360; // analysis runs on a small copy
+const FRAME_RING_SHARE = 0.015; // outer ring of the image sampled for the frame color
+const FRAME_RING_MIN_MATCH = 0.9; // share of the ring that must be the frame color
+const FRAME_MIN_BACKGROUND_SHARE = 0.2; // the frame color must cover at least this much of the image
+const FRAME_COLOR_DISTANCE = 26; // max per-channel difference to count as "frame color"
+const FRAME_PHOTO_LINE_MAX_BACKGROUND = 0.4; // a row/column with less frame color than this is photo
+const FRAME_MAX_GAP_SHARE = 0.015; // thin lines or pins inside the photo don't split it
+const FRAME_INSET_SHARE = 0.02; // drops the photo's own thin border line
+const FRAME_MIN_PHOTO_SHARE = 0.3; // never keep less than this of each dimension
+
+function longestRun(isPhoto: boolean[], maxGap: number): [number, number] | null {
+  let best: [number, number] | null = null;
+  let start = -1;
+  let last = -1;
+  for (let i = 0; i <= isPhoto.length; i++) {
+    const photo = i < isPhoto.length && isPhoto[i];
+    if (photo) {
+      if (start === -1) start = i;
+      last = i;
+    } else if (start !== -1 && (i >= isPhoto.length || i - last > maxGap)) {
+      if (!best || last - start > best[1] - best[0]) best = [start, last];
+      start = -1;
+    }
+  }
+  return best;
+}
+
+/**
+ * When the upload is a designed flyer, returns just the photo inside it:
+ * the frame color is read from the image's outer ring, then the rows and
+ * columns that are mostly that color (banner, text panel, margins) are cut
+ * away. Anything that isn't clearly a frame around a photo comes back
+ * untouched, so ordinary photos are never cropped. Text drawn onto the photo
+ * itself stays; only the flyer's own frame and text blocks go.
+ */
+export async function cropDesignedFrame(buffer: Buffer): Promise<Buffer> {
+  try {
+    const original = await sharp(buffer).rotate().toBuffer();
+    const meta = await sharp(original).metadata();
+    const W = meta.width ?? 0;
+    const H = meta.height ?? 0;
+    if (!W || !H) return buffer;
+
+    const { data, info } = await sharp(original)
+      .resize({ width: FRAME_WORK_WIDTH, withoutEnlargement: true })
+      .removeAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const w = info.width;
+    const h = info.height;
+    const px = (x: number, y: number) => (y * w + x) * 3;
+
+    // Frame color: the most common color (coarse buckets) in the outer ring.
+    const ringX = Math.max(2, Math.round(w * FRAME_RING_SHARE));
+    const ringY = Math.max(2, Math.round(h * FRAME_RING_SHARE));
+    const inRing = (x: number, y: number) => x < ringX || x >= w - ringX || y < ringY || y >= h - ringY;
+    const buckets = new Map<string, { count: number; r: number; g: number; b: number }>();
+    let ringTotal = 0;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (!inRing(x, y)) continue;
+        const i = px(x, y);
+        const key = `${data[i] >> 4}-${data[i + 1] >> 4}-${data[i + 2] >> 4}`;
+        const entry = buckets.get(key) ?? { count: 0, r: 0, g: 0, b: 0 };
+        entry.count++;
+        entry.r += data[i];
+        entry.g += data[i + 1];
+        entry.b += data[i + 2];
+        buckets.set(key, entry);
+        ringTotal++;
+      }
+    }
+    const top = [...buckets.values()].sort((a, b) => b.count - a.count)[0];
+    if (!top) return buffer;
+    const bg = [top.r / top.count, top.g / top.count, top.b / top.count];
+    const isBackground = (x: number, y: number) => {
+      const i = px(x, y);
+      return (
+        Math.abs(data[i] - bg[0]) <= FRAME_COLOR_DISTANCE &&
+        Math.abs(data[i + 1] - bg[1]) <= FRAME_COLOR_DISTANCE &&
+        Math.abs(data[i + 2] - bg[2]) <= FRAME_COLOR_DISTANCE
+      );
+    };
+
+    let ringMatch = 0;
+    let allMatch = 0;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (!isBackground(x, y)) continue;
+        allMatch++;
+        if (inRing(x, y)) ringMatch++;
+      }
+    }
+    if (ringMatch / ringTotal < FRAME_RING_MIN_MATCH) return buffer;
+    if (allMatch / (w * h) < FRAME_MIN_BACKGROUND_SHARE) return buffer;
+
+    const rowBg = new Array<number>(h).fill(0);
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) if (isBackground(x, y)) rowBg[y]++;
+    }
+    const rows = longestRun(
+      rowBg.map((count) => count / w < FRAME_PHOTO_LINE_MAX_BACKGROUND),
+      Math.round(h * FRAME_MAX_GAP_SHARE)
+    );
+    if (!rows) return buffer;
+
+    // Columns are measured only inside the photo rows found above.
+    const colBg = new Array<number>(w).fill(0);
+    for (let y = rows[0]; y <= rows[1]; y++) {
+      for (let x = 0; x < w; x++) if (isBackground(x, y)) colBg[x]++;
+    }
+    const rowSpan = rows[1] - rows[0] + 1;
+    const cols = longestRun(
+      colBg.map((count) => count / rowSpan < FRAME_PHOTO_LINE_MAX_BACKGROUND),
+      Math.round(w * FRAME_MAX_GAP_SHARE)
+    );
+    if (!cols) return buffer;
+
+    const insetX = Math.round(w * FRAME_INSET_SHARE);
+    const insetY = Math.round(h * FRAME_INSET_SHARE);
+    const scaleX = W / w;
+    const scaleY = H / h;
+    const left = Math.round((cols[0] + insetX) * scaleX);
+    const topPx = Math.round((rows[0] + insetY) * scaleY);
+    const width = Math.round((cols[1] - cols[0] + 1 - 2 * insetX) * scaleX);
+    const height = Math.round((rows[1] - rows[0] + 1 - 2 * insetY) * scaleY);
+    if (width < W * FRAME_MIN_PHOTO_SHARE || height < H * FRAME_MIN_PHOTO_SHARE) return buffer;
+    if (width >= W * 0.97 && height >= H * 0.97) return buffer;
+
+    return await sharp(original)
+      .extract({ left, top: topPx, width: Math.min(width, W - left), height: Math.min(height, H - topPx) })
+      .toBuffer();
+  } catch {
+    return buffer;
+  }
+}

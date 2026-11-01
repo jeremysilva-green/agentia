@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { ListingType, PropertySocialCardProps } from "@/components/social-images/types";
-import { resizeToDataUri, trimLetterbox } from "@/lib/serverImage";
+import { cropDesignedFrame, resizeToDataUri, trimLetterbox } from "@/lib/serverImage";
 
 // If the project already has a service-role client factory (e.g. in
 // src/lib/supabase/server.ts), use that instead of this inline one —
@@ -77,7 +77,7 @@ export async function getPropertyForSocialCard(
   // 8.9MB) don't blow Satori's SVG parser buffer limit either.
   const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
   // Solid black/white bars baked into the upload are cropped so the photo fills the frame.
-  const imageDataUri = await resizeToDataUri(await trimLetterbox(imageBuffer));
+  const imageDataUri = await resizeToDataUri(await trimLetterbox(await cropDesignedFrame(imageBuffer)));
 
   const listingType: ListingType = "sale";
 
