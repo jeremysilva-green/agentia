@@ -60,40 +60,40 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
   return (
     <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--ink-2)]">
       <div className="max-h-[560px] overflow-auto">
-        <table className="w-full min-w-[920px] text-left text-xs">
+        <table className="w-full table-fixed text-left text-xs max-md:min-w-[820px]">
           <thead className="sticky top-0 z-10 border-b border-[var(--line)] bg-white/[0.04] text-[11px] font-bold tracking-wide text-[#8d8d8d] uppercase">
           <tr>
-            <th className="whitespace-nowrap px-4 py-3 font-bold">{copy.panel.buyer}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-bold">
+            <th className="w-[23%] px-3 py-3 font-bold">{copy.panel.buyer}</th>
+            <th className="w-[27%] px-3 py-3 font-bold">
               {copy.panel.properties} · {copy.panel.referralCode}
             </th>
-            <th className="whitespace-nowrap px-4 py-3 font-bold">
+            <th className="w-[18%] px-3 py-3 font-bold">
               {copy.panel.date} · {copy.panel.traffic}
             </th>
-            <th className="whitespace-nowrap px-4 py-3 font-bold">{copy.panel.status}</th>
-            <th className="whitespace-nowrap px-4 py-3 font-bold">{copy.panel.agreement}</th>
+            <th className="w-[16%] px-3 py-3 font-bold">{copy.panel.status}</th>
+            <th className="w-[16%] px-3 py-3 font-bold">{copy.panel.agreement}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.05]">
           {rows.map((row) => (
             <tr key={row.id} className="align-middle transition-colors hover:bg-white/[0.03]">
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 <div className="flex items-center gap-3">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[var(--em-2)] to-[var(--em)] text-[13px] font-bold text-white">
                     {initials(row.buyer_name)}
                   </span>
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold whitespace-nowrap text-white">{row.buyer_name}</p>
-                    <p className="flex items-center gap-1 text-[12.5px] whitespace-nowrap text-[var(--muted)]">
+                    <p className="truncate text-sm font-semibold text-white">{row.buyer_name}</p>
+                    <p className="flex items-center gap-1 text-[12.5px] text-[var(--muted)]">
                       <Phone size={11} />
                       {row.buyer_phone}
                     </p>
                   </div>
                 </div>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 <div className="flex flex-col items-start gap-1.5">
-                  <span className="inline-flex items-center gap-1.5 text-sm font-medium whitespace-nowrap text-[#e8e8e8]">
+                  <span className="inline-flex items-start gap-1.5 text-sm font-medium break-words text-[#e8e8e8]">
                     {row.property_title}
                     {row.property_id && (
                       <a
@@ -110,7 +110,7 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                   <CodeChip code={row.referral_code} />
                 </div>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 <div className="flex flex-col items-start gap-1.5">
                   <span className="text-sm whitespace-nowrap text-[#e0e0e0]">{formatDate(row.referral_date)}</span>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap text-[#cfcfcf]">
@@ -119,10 +119,10 @@ function LeadsForMonth({ rows, agentSlug }: { rows: LeadPipelineRow[]; agentSlug
                   </span>
                 </div>
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 <LeadStatusSelect leadId={row.id} status={row.status} hasAffiliate={Boolean(row.affiliate_link_id)} />
               </td>
-              <td className="px-4 py-3">
+              <td className="px-3 py-3">
                 {!row.commission_confirmed_at && row.affiliate_link_id && (
                   <CloseDealButton
                     leadId={row.id}

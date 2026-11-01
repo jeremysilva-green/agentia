@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type ChangeEvent } from "react";
+import { ChevronDown } from "lucide-react";
 import { updateLeadStatus } from "@/lib/actions/leads";
 import { LEAD_STATUS_VALUES, LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/constants/leadStatus";
 
@@ -62,7 +63,7 @@ export function LeadStatusSelect({
           onChange={handleChange}
           disabled={isPending}
           style={{ borderColor: `${dotColor}66`, background: `${dotColor}1a` }}
-          className="h-9 min-w-[150px] appearance-none rounded-xl border pr-7 pl-7 text-[13.5px] font-semibold text-white outline-none transition-colors disabled:opacity-60"
+          className="h-9 w-full min-w-[120px] appearance-none rounded-xl border pr-7 pl-7 text-[13.5px] font-semibold text-white outline-none transition-colors disabled:opacity-60"
         >
           {options.map((value) => (
             <option key={value} value={value} className="bg-[#151515] text-white">
@@ -75,6 +76,11 @@ export function LeadStatusSelect({
             </option>
           )}
         </select>
+        <ChevronDown
+          size={15}
+          className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-white/80"
+          aria-hidden
+        />
       </div>
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>

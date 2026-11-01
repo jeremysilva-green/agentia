@@ -30,14 +30,14 @@ export function AffiliateDealsTable({
 
   return (
     <div className="overflow-x-auto rounded-[22px] border border-[var(--line)] bg-[var(--ink-2)]">
-      <table className="w-full min-w-[760px] text-left text-xs">
+      <table className="w-full table-fixed text-left text-xs max-md:min-w-[700px]">
         <thead className="border-b border-[var(--line)] bg-black/30 text-[11px] uppercase tracking-wide text-[var(--muted)]">
           <tr>
-            <th className="w-[220px] px-3 py-3 font-medium">{copy.affiliatePanel.property}</th>
-            <th className="w-[160px] px-3 py-3 font-medium">{copy.affiliatePanel.agent}</th>
-            <th className="w-[150px] px-3 py-3 font-medium">{copy.panel.referralWindow}</th>
-            <th className="w-[110px] px-3 py-3 font-medium">{copy.panel.status}</th>
-            <th className="w-[160px] px-3 py-3 font-medium">{copy.panel.report}</th>
+            <th className="w-[28%] px-3 py-3 font-medium">{copy.affiliatePanel.property}</th>
+            <th className="w-[22%] px-3 py-3 font-medium">{copy.affiliatePanel.agent}</th>
+            <th className="w-[20%] px-3 py-3 font-medium">{copy.panel.referralWindow}</th>
+            <th className="w-[14%] px-3 py-3 font-medium">{copy.panel.status}</th>
+            <th className="w-[16%] px-3 py-3 font-medium">{copy.panel.report}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-white/[0.06]">
