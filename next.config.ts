@@ -33,6 +33,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [{ source: "/encuesta", destination: "/encuesta.html" }];
   },
+  // Visitors skip the landing page (src/app/page.tsx, kept in the repo) and
+  // go straight to the public agents portal. Temporary (307) so the landing
+  // can come back without browsers having cached a permanent redirect.
+  async redirects() {
+    return [{ source: "/", destination: "/agentes", permanent: false }];
+  },
   async headers() {
     return [
       { source: "/encuesta", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
