@@ -67,7 +67,7 @@ export default function ServiciosPage() {
             className="relative block h-[360px] overflow-hidden rounded-xl border border-neutral-800 bg-black transition-colors hover:border-emerald-500/60"
           >
             <video
-              src="/servicios/textos-dinamicos.mp4"
+              src="/servicios/textos-dinamicos-v2.mp4"
               autoPlay
               loop
               muted
@@ -76,9 +76,6 @@ export default function ServiciosPage() {
               aria-label="Vista previa de Textos Dinámicos"
               className="h-full w-full object-cover"
             />
-            <span className="absolute bottom-3 left-3 rounded-md bg-black/60 px-2 py-1 font-display text-xs font-semibold uppercase tracking-wide text-white">
-              Pro · Fundador · MLS — 2 pruebas gratis
-            </span>
           </Link>
         </div>
       </div>
