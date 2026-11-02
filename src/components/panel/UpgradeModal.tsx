@@ -4,9 +4,9 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { Check, Crown, Globe, X } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { PLANS, BASICO_PROPERTY_LIMIT, BASICO_FREE_ENHANCE_TRIES, type PlanId } from "@/lib/plans";
+import { PLANS, BASICO_PROPERTY_LIMIT, BASICO_FREE_ENHANCE_TRIES, BASICO_FREE_MOTION_TRIES, type PlanId } from "@/lib/plans";
 
-export type UpgradeReason = "properties" | "enhancer" | "video";
+export type UpgradeReason = "properties" | "enhancer" | "video" | "motion";
 
 const COPY: Record<UpgradeReason, { title: string; body: string }> = {
   properties: {
@@ -16,6 +16,10 @@ const COPY: Record<UpgradeReason, { title: string; body: string }> = {
   enhancer: {
     title: "Usaste tus mejoras gratis",
     body: `Ya probaste las ${BASICO_FREE_ENHANCE_TRIES} mejoras con IA del plan Básico. Con un plan pago seguís mejorando todas las fotos de tus propiedades.`,
+  },
+  motion: {
+    title: "Usaste tus pruebas de Textos Dinámicos",
+    body: `Ya probaste los ${BASICO_FREE_MOTION_TRIES} videos gratis del plan Básico. Con un plan pago animás todos los videos que quieras.`,
   },
   video: {
     title: "Video automático para tus propiedades",

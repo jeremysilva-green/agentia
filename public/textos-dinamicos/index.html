@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Textos animados · Agentia</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&display=swap">
+<style>
+@font-face{font-family:"Inter";src:url(assets/fonts/Inter-Medium.ttf) format("truetype");font-weight:500}
+@font-face{font-family:"Inter";src:url(assets/fonts/Inter-Bold.ttf) format("truetype");font-weight:700}
+@font-face{font-family:"Inter";src:url(assets/fonts/Inter-MediumItalic.ttf) format("truetype");font-weight:500;font-style:italic}
+@font-face{font-family:"Instrument Serif";src:url(assets/fonts/InstrumentSerif-Regular.ttf) format("truetype")}
+@font-face{font-family:"MT Mont";src:url(assets/fonts/Montserrat-Thin.ttf) format("truetype");font-weight:100}
+@font-face{font-family:"MT Pop";src:url(assets/fonts/poppins-latin-900-normal.woff) format("woff");font-weight:900}
+@font-face{font-family:"MT Pop";src:url(assets/fonts/poppins-latin-800-normal.woff) format("woff");font-weight:800}
+:root{
+  --ink:#0e0e0e; --panel:#151515; --panel2:#1c1c1c; --line:#262626; --line2:#333;
+  --text:#f6f6f4; --muted:#a3a3a0; --dim:#6e6e6b;
+  --em:#0a8f5c; --em2:#12b374; --emsoft:rgba(10,143,92,.14);
+  --accent:#0a8f5c; --err:#ff6b6b; --r:20px;
+  --display:"Clash Display","Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ink);color:var(--text);font:500 15px/1.45 Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--em);display:grid;place-items:center;flex:none}
+.mark img{width:24px;height:24px;display:block}
+.brand h1{font:600 28px/1 var(--display);letter-spacing:-.01em}
+.brand h1 span{color:var(--em2)}
+.badge{font-size:12px;color:var(--muted);border:1px solid var(--line2);border-radius:99px;padding:6px 12px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:22px}
+.label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.label em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--muted)}
+.drop{position:relative;border:1.5px dashed var(--line2);border-radius:16px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;cursor:pointer;transition:all .2s;background:var(--panel2);padding:20px}
+.drop:hover,.drop.over{border-color:var(--em);background:var(--emsoft)}
+.drop svg{color:var(--em2)}
+.drop b{font:600 18px var(--display)}
+.drop small{color:var(--dim)}
+.drop input{display:none}
+.src{display:none;gap:16px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.src video{width:68px;height:120px;object-fit:cover;border-radius:10px;background:#000}
+.src .meta{flex:1;min-width:0}
+.src .meta b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src .meta span{color:var(--dim);font-size:13px}
+.link{background:none;border:0;color:var(--em2);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:13px}
+.sec{margin-top:24px}
+.swatches{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .15s}
+.sw:hover{transform:scale(1.08)}
+.sw.sel{border-color:var(--text);box-shadow:0 0 0 3px var(--ink) inset}
+.custom{display:flex;align-items:center;gap:8px;margin-left:6px;padding:4px 10px 4px 4px;border:1px solid var(--line);border-radius:999px}
+.custom input[type=color]{width:28px;height:28px;border:0;border-radius:50%;background:none;padding:0;cursor:pointer}
+.custom input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.custom input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
+.custom input[type=text]{width:78px;background:none;border:0;outline:0;font-size:13px;color:var(--muted);text-transform:uppercase}
+.sample{position:relative;margin-top:16px;height:200px;border-radius:16px;overflow:hidden;background:#0d1110;isolation:isolate}
+.sample .bg{position:absolute;inset:0;z-index:-1;background:
+  radial-gradient(60% 55% at 22% 30%,#3c5a4c 0%,transparent 70%),
+  radial-gradient(45% 50% at 80% 70%,#5b4632 0%,transparent 70%),
+  radial-gradient(40% 40% at 70% 20%,#2f3f56 0%,transparent 70%),#121614}
+.sample .stack{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+.sample .l2{display:flex;align-items:center;gap:14px;line-height:1}
+.sample .l1{display:flex;align-items:baseline;gap:10px;line-height:1}
+.sample .thin{font:100 40px "MT Mont",sans-serif;letter-spacing:-.02em;color:#fff}
+.sample .heavy{font:900 44px "MT Pop",sans-serif;letter-spacing:-.04em;color:var(--accent);
+  -webkit-mask-image:linear-gradient(#000 55%,rgba(0,0,0,.62));mask-image:linear-gradient(#000 55%,rgba(0,0,0,.62));transition:color .25s}
+.sample .pill{display:inline-flex;align-items:center;gap:9px;margin:0;padding:9px 18px 9px 14px;border-radius:99px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.42);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);
+  font:800 19px "MT Pop",sans-serif;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.sample .pill svg{width:20px;height:20px;stroke:var(--accent);transition:stroke .25s}
+.sample .serif{font:400 58px/1 "Instrument Serif",serif;color:#fff}
+.sample .serif span{color:var(--accent);transition:color .25s}
+.sample .unused{width:110px;height:5px;border-radius:9px;background:var(--accent);margin-top:6px;box-shadow:0 0 18px color-mix(in srgb,var(--accent) 60%,transparent);transition:background .25s}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+.seg button{border:0;background:none;border-radius:10px;padding:11px 10px;cursor:pointer;text-align:left;color:var(--muted);transition:background .2s,color .2s}
+.seg button b{display:block;font-weight:700;font-size:14px;color:inherit}
+.seg button span{font-size:12px;color:var(--dim)}
+.seg button.on{background:var(--emsoft);color:var(--text);box-shadow:0 0 0 1px var(--em)}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.field span{font-size:13px;color:var(--muted)}
+.field small{font-size:12px;color:var(--dim)}
+.field input,.field select{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:0}
+.field input:focus,.field select:focus{border-color:var(--em)}
+.toggle{display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.toggle input{appearance:none;width:44px;height:26px;border-radius:99px;background:var(--line2);position:relative;cursor:pointer;transition:background .2s;flex:none}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle input:checked{background:var(--em)}
+.toggle input:checked::after{transform:translateX(18px)}
+.toggle span{font-size:14px}
+.sound{display:flex;flex-direction:column;gap:14px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+.vol{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px}
+.vol input[type=range]{flex:1;accent-color:var(--em)}
+.vol input:disabled{opacity:.4}
+.small{font-size:13px;color:var(--muted)}
+.row2{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.go{margin-top:24px;width:100%;height:56px;border:0;border-radius:14px;background:var(--em);color:#fff;font:600 17px var(--display);letter-spacing:.01em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .1s,background .2s,opacity .2s}
+.go:hover{background:var(--em2);transform:translateY(-1px)}
+.go:disabled{opacity:.35;cursor:not-allowed;transform:none;background:var(--em)}
+.hint{margin-top:12px;color:var(--dim);font-size:13px;text-align:center}
+.steps{margin-top:22px;display:none}
+.bar{height:6px;border-radius:99px;background:var(--panel2);overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--em),var(--em2));border-radius:99px;transition:width .5s ease}
+.step{display:flex;align-items:center;gap:12px;padding:7px 0;color:var(--dim);font-size:14px}
+.step .ic{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line2);display:grid;place-items:center;flex:none}
+.step.act{color:var(--text)}
+.step.act .ic{border-color:var(--em2);border-top-color:transparent;animation:spin .9s linear infinite}
+.step.done{color:var(--muted)}
+.step.done .ic{border-color:var(--em);background:var(--em)}
+.step.done .ic::after{content:"";width:8px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.steps{display:none!important}
+.gen{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(14,14,14,.45);backdrop-filter:blur(18px) saturate(120%);-webkit-backdrop-filter:blur(18px) saturate(120%);animation:fadein .3s ease}
+.gen.on{display:flex}
+.gen .box{width:min(440px,100%);text-align:center}
+.gen h2{font:600 30px/1.1 var(--display);margin-bottom:18px;letter-spacing:-.01em}
+.gen .track{height:10px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.gen .track i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--em),var(--em2));transition:width .5s ease;box-shadow:0 0 18px rgba(18,179,116,.55)}
+.gen .pct{margin-top:12px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gen .sub{margin-top:6px;font-size:12px;color:var(--dim);min-height:16px}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.err{display:none;margin-top:16px;padding:12px 14px;border-radius:12px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.35);color:#ffb3b3;font-size:14px}
+.stage{position:sticky;top:24px}
+.phone{aspect-ratio:9/16;width:100%;border-radius:28px;background:#000;border:1px solid var(--line);overflow:hidden;position:relative;display:grid;place-items:center}
+.phone video,.phone canvas{width:100%;height:100%;object-fit:cover;display:none;background:#000}
+.empty{color:var(--dim);text-align:center;padding:30px;font-size:14px}
+.empty .big{font:600 34px/1.05 var(--display);color:var(--muted);margin-bottom:10px}
+.empty .big span{color:var(--em2)}
+.dl{display:none;margin-top:14px;width:100%;height:52px;border-radius:14px;border:0;background:var(--em);color:#fff;font:600 16px var(--display);cursor:pointer;align-items:center;justify-content:center;gap:10px;text-decoration:none}
+.dl:hover{background:var(--em2)}
+.phr{display:none;margin-top:14px}
+.phr ol{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:300px;overflow:auto;padding-right:4px}
+.phr li{display:flex;gap:10px;align-items:baseline;font-size:13px;padding:8px 10px;border-radius:10px;background:var(--panel2)}
+.phr .t{color:var(--dim);font-variant-numeric:tabular-nums;width:38px;flex:none}
+.phr .x{flex:1}
+.tag{font-size:11px;color:var(--muted);border:1px solid var(--line2);border-radius:99px;padding:1px 8px;flex:none}
+.tag.b{color:var(--em2);border-color:rgba(18,179,116,.5)}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.stage{position:static;max-width:420px;margin:0 auto;width:100%}}
+@media (max-width:480px){.wrap{padding:18px 16px 40px}.badge{display:none}.brand h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><div class="mark"><img src="assets/logo.png" alt="Agentia"></div><h1>Textos <span>animados</span></h1></div>
+    <span class="badge">Video vertical 9:16 · Full HD</span>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="card">
+        <div class="label">1 · Video</div>
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept="video/mp4,video/quicktime,video/*">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          <b>Arrastrá tu video acá</b>
+          <small>o hacé clic para elegirlo · MP4 o MOV · se recorta a 9:16</small>
+        </label>
+        <div class="src" id="src">
+          <video id="srcVid" muted loop playsinline></video>
+          <div class="meta"><b id="srcName"></b><span id="srcInfo"></span></div>
+          <button class="link" id="replace">Cambiar</button>
+        </div>
+
+        <div class="sec">
+          <div class="label">2 · Color de acento <em>El blanco siempre es el principal</em></div>
+          <div class="swatches" id="sw">
+            <div class="custom"><input type="color" id="picker" value="#0a8f5c" aria-label="Color personalizado"><input type="text" id="hex" value="#0A8F5C" maxlength="7" spellcheck="false" aria-label="Código de color"></div>
+          </div>
+          <div class="sample">
+            <div class="bg"></div>
+            <div class="stack">
+              <div class="l1"><span class="thin">Textos</span><span class="heavy">dinámicos</span></div>
+              <div class="l2"><div class="pill"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>para tu</div>
+<div class="serif">video<span>.</span></div></div>
+              
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="label">3 · Texto</div>
+          
+          <label class="field"><span>Idioma del video</span>
+            <select id="lang"><option value="es">Español</option><option value="auto">Detectar automáticamente</option><option value="en">Inglés</option><option value="pt">Portugués</option></select>
+          </label>
+          <label class="field"><span>Nombres, lugares o marcas <small>(opcional)</small></span>
+            <input id="names" type="text" placeholder="Ej.: Villa Morra, Agentia, Shopping del Sol" spellcheck="false">
+            <small>Se escriben exactamente así en los textos. Barrios y ciudades de Paraguay ya están incluidos.</small>
+          </label>
+        </div>
+
+        <div class="sec">
+          <div class="label">4 · Efectos de sonido</div>
+          <div class="sound">
+            <div class="row2">
+              <label class="toggle"><input type="checkbox" id="sfxOn"><span>Agregar sonidos a las animaciones</span></label>
+              <button class="link" id="preview">Escuchar</button>
+            </div>
+            <div class="vol"><span>Volumen</span><input type="range" id="sfxVol" min="0" max="1.5" step="0.05" aria-label="Volumen de efectos"></div>
+            <label class="toggle"><input type="checkbox" id="ticks"><span class="small">Clic suave en cada palabra de los subtítulos</span></label>
+          </div>
+        </div>
+
+        <button class="go" id="go" disabled>Generar video</button>
+        <div class="hint" id="hint">Subí un video para empezar.</div>
+
+        <div class="steps" id="steps">
+          <div class="bar"><i id="barFill"></i></div>
+          <div id="stepList"></div>
+        </div>
+        <div class="err" id="err"></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="phone" id="phone">
+        <div class="empty" id="empty"><div class="big">Tu <span>video</span><br>aparece acá</div>Full HD 1080 × 1920</div>
+        <canvas id="canvas" width="1080" height="1920"></canvas>
+        <video id="out" controls playsinline></video>
+      </div>
+      <a class="dl" id="dl" download><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12m0 0-5-5m5 5 5-5"/><path d="M4 20h16"/></svg>Descargar MP4</a>
+      <div class="phr card" id="phr"><div class="label">Frases <em id="phrSrc"></em></div><ol id="phrList"></ol></div>
+    </div>
+  </div>
+</div>
+<div class="gen" id="gen" role="status" aria-live="polite">
+  <div class="box">
+    <h2>Generando…</h2>
+    <div class="track"><i id="genBar"></i></div>
+    <div class="pct" id="genPct">0%</div>
+    <div class="sub" id="genSub">Dejá esta pestaña abierta</div>
+  </div>
+</div>
+<script>window.MT_CONFIG = window.MT_CONFIG || {};</script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

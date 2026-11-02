@@ -6,6 +6,8 @@ export const BASICO_PROPERTY_LIMIT = 6;
 // Lifetime, not monthly: monthly free tries would teach agents to wait
 // instead of upgrade.
 export const BASICO_FREE_ENHANCE_TRIES = 3;
+// Same lifetime logic for Textos Dinámicos (animated-text video tool).
+export const BASICO_FREE_MOTION_TRIES = 2;
 
 export type Plan = {
   id: PlanId;
