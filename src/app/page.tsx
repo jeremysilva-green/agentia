@@ -5,9 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/cn";
-import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
+import { FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
 import { AFFILIATE_SHARE_DEFAULT_PCT } from "@/lib/constants/commission";
 import styles from "./HomePage.module.css";
+import { PlansSection } from "@/components/landing/PlansSection";
 
 // react-compare-slider computes some of its inline styles differently
 // between the server and client render (confirmed via a real hydration
@@ -775,100 +776,7 @@ export default function HomePage() {
       <PromoBanner src="/promo3.jpg" alt="Generá reels al instante" pro />
 
       {/* PRICING */}
-      <section id="planes">
-        <div className={styles.wrap}>
-          <div style={{ textAlign: "center" }}>
-            <div className={cn(styles.eyebrow, styles.rv)}>Planes</div>
-            <h2 className={cn(styles.secTitle, styles.rv, styles.d1)} style={{ margin: "0 auto" }}>
-              Empezá gratis. <span className={styles.em}>Crecé cuando quieras.</span>
-            </h2>
-          </div>
-          <div className={styles.plans}>
-            {PLAN_ORDER.map((planId, i) => {
-              const plan = PLANS[planId];
-              const isFound = planId === "fundador";
-              const isPop = planId === "pro";
-              const isMls = planId === "mls";
-              const basicoFeatureSet = new Set(PLANS.basico.features);
-              const addedFeatures = plan.features.filter((f) => !basicoFeatureSet.has(f));
-              return (
-                <div
-                  key={plan.id}
-                  className={cn(
-                    styles.plan,
-                    isPop && styles.pop,
-                    isFound && styles.found,
-                    isMls && styles.mlsPlan,
-                    styles.rv,
-                    styles[`d${i + 1}` as "d1" | "d2" | "d3"]
-                  )}
-                >
-                  {isPop && <span className={styles.tagx}>Más completo</span>}
-                  {isFound && <span className={styles.tagx}>Cupos limitados</span>}
-                  {isMls && <span className={styles.tagx}>Premium</span>}
-                  <h3 style={isFound || isMls ? { display: "flex", gap: 10, alignItems: "center", position: "relative", zIndex: 1 } : undefined}>
-                    {isFound && <Icon name="crown" />}
-                    {isMls && <Icon name="globe" style={{ color: "#a78bfa" }} />}
-                    {plan.name}
-                  </h3>
-                  <div className={styles.desc} style={isFound ? { position: "relative", zIndex: 1 } : undefined}>
-                    {plan.tagline}
-                  </div>
-                  <div className={styles.price} style={isFound ? { position: "relative", zIndex: 1 } : undefined}>
-                    {plan.price === 0 ? "Gratis" : `Gs. ${plan.price.toLocaleString("es-PY")}`}
-                    {plan.price > 0 && <small> /mes</small>}
-                  </div>
-                  <div className={styles.strike} style={isFound ? { position: "relative", zIndex: 1 } : undefined}>
-                    {isFound && `Gs. ${PLANS.pro.price.toLocaleString("es-PY")}`}
-                  </div>
-                  <ul style={isFound ? { position: "relative", zIndex: 1 } : undefined}>
-                    {planId === "basico" &&
-                      plan.features.slice(0, 8).map((f) => (
-                        <li key={f}>
-                          <Icon name="check" />
-                          {f}
-                        </li>
-                      ))}
-                    {isPop && (
-                      <>
-                        <li className={styles.plus}>
-                          <Icon name="check" />
-                          Todo lo del Básico, más:
-                        </li>
-                        {addedFeatures.map((f) => (
-                          <li key={f}>
-                            <Icon name="check" />
-                            {f}
-                          </li>
-                        ))}
-                      </>
-                    )}
-                    {isFound && (
-                      <>
-                        <li className={styles.plus}>
-                          <Icon name="check" />
-                          Todo lo del Plan Pro
-                        </li>
-                        <li>
-                          <Icon name="check" />
-                          Precio fundador mientras tu suscripción esté activa
-                        </li>
-                        <li>
-                          <Icon name="check" />
-                          Solo para los primeros {FUNDADOR_SEAT_LIMIT} agentes
-                        </li>
-                      </>
-                    )}
-                  </ul>
-                  <Link href="/registro" className={cn(styles.btn, isFound || isMls ? undefined : isPop ? styles.pri : styles.sec)}>
-                    {planId === "basico" ? "Empezá gratis" : isPop ? "Elegir Pro" : isMls ? "Elegir Plan" : "Quiero mi cupo"}
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <PlansSection />
 
       {/* FOUNDER CTA */}
       <section className={styles.final}>

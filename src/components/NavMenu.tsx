@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Menu, MessageCircle, Info, Trophy, ClipboardList, LayoutDashboard, LogIn, UserPlus, Sparkles } from "lucide-react";
+import { Menu, MessageCircle, Info, Trophy, ClipboardList, LayoutDashboard, LogIn, UserPlus, Sparkles, Tag } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 import type { Locale } from "@/lib/i18n/dictionaries";
 
@@ -86,6 +86,14 @@ export function NavMenu({
               </Link>
             </>
           )}
+          <Link
+            href="/planes"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-violet-400 transition-colors hover:bg-white/5 hover:text-violet-300 sm:hidden"
+          >
+            <Tag size={16} />
+            Planes
+          </Link>
           <Link
             href="/que-es-agentia"
             onClick={() => setOpen(false)}

@@ -48,6 +48,13 @@ export async function NavBar() {
               Portal
             </Link>
 
+            <Link
+              href="/planes"
+              className="hidden rounded-md border border-transparent px-2.5 py-1.5 text-base font-medium text-violet-400 transition-colors hover:border-violet-400 hover:text-violet-300 sm:block"
+            >
+              Planes
+            </Link>
+
             {user && role === "agent" && (
               <Link
                 href="/panel"
