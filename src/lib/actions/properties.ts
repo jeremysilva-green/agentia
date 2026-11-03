@@ -28,12 +28,11 @@ const MAKE_INSTAGRAM_WEBHOOK_URL = "https://hook.us2.make.com/mco3oi9a6gqkvqu695
 // this file can't write to it at all. Never throws: a failure here (missing
 // slug, DB error, webhook unreachable) is logged but must never block the
 // property save itself, so every step is wrapped and swallowed internally.
-async function queueInstagramPost(propertyId: string, agentId: string, listingKind: string) {
-  // Proyecto en Pozo / Modelo listings aren't understood by this pipeline's
-  // post image (the property-card route still needs its own kind-aware
-  // price branch regardless of this guard — see route.tsx) and would leak
-  // a Modelo listing's private precio contado into a public Instagram post.
-  if (listingKind !== "standard") return;
+async function queueInstagramPost(propertyId: string, agentId: string) {
+  // Runs for every listing kind (standard, Proyecto en Pozo, Modelo). The
+  // post image is just the cover photo, and Make builds the caption from the
+  // public property page, which for a Modelo only ever shows the public
+  // installment — never the private precio contado.
   // Only the real site posts to Instagram. A listing saved from localhost (or a
   // preview deployment) would send Make a link it can't use — localhost isn't
   // reachable and isn't https, which made the scenario fail and switch itself
@@ -110,13 +109,13 @@ export async function notifyFirstPhotoAdded(propertyId: string) {
 
   const { data: property } = await supabase
     .from("properties")
-    .select("id, listing_kind")
+    .select("id")
     .eq("id", propertyId)
     .eq("agent_id", user.id)
     .maybeSingle();
   if (!property) return;
 
-  await queueInstagramPost(propertyId, user.id, property.listing_kind);
+  await queueInstagramPost(propertyId, user.id);
 }
 
 export type PropertyActionState = { error?: string; fieldErrors?: Record<string, string> } | undefined;

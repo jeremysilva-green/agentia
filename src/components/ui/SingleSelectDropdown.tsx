@@ -19,6 +19,7 @@ export function SingleSelectDropdown({
   optionClassName,
   onChange,
   error,
+  title,
 }: {
   name: string;
   label: string;
@@ -37,6 +38,8 @@ export function SingleSelectDropdown({
   optionClassName?: string;
   onChange?: (value: string) => void;
   error?: string;
+  // Native hover tooltip on the dropdown button.
+  title?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(defaultValue);
@@ -81,6 +84,7 @@ export function SingleSelectDropdown({
 
       <button
         type="button"
+        title={title}
         onClick={toggleOpen}
         className={cn(
           "flex h-10 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-snow px-3 text-sm font-medium text-slate-700 outline-none transition-colors hover:bg-bone/30 focus:border-white focus:ring-2 focus:ring-white/40",

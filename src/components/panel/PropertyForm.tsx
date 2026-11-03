@@ -434,6 +434,7 @@ export function PropertyForm({
                   <SingleSelectDropdown
                     name="referralAttributionDays"
                     label="Ventana de atribución"
+                    title="Periodo de tiempo en que le vas a pagar al referido."
                     showAllOption={false}
                     defaultValue={
                       defaultValues?.referral_attribution_days != null
@@ -849,6 +850,7 @@ export function PropertyForm({
             <SingleSelectDropdown
               name="referralAttributionDays"
               label="Ventana de atribución"
+              title="Periodo de tiempo en que le vas a pagar al referido."
               showAllOption={false}
               defaultValue={
                 defaultValues?.referral_attribution_days != null

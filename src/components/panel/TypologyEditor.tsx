@@ -90,7 +90,7 @@ export function TypologyEditor({ defaultRows = [] }: { defaultRows?: TypologyRow
             size="sm"
             onClick={() => removeRow(i)}
             disabled={rows.length === 1}
-            className="col-span-2 h-10 sm:col-span-3 md:col-span-1"
+            className="col-span-2 h-10 border-red-600! bg-red-600! text-white! hover:bg-red-700! sm:col-span-3 md:col-span-1"
           >
             <Trash2 size={14} />
             <span className="sm:hidden">Eliminar tipología</span>
@@ -102,7 +102,7 @@ export function TypologyEditor({ defaultRows = [] }: { defaultRows?: TypologyRow
         variant="secondary"
         size="sm"
         onClick={() => setRows((prev) => [...prev, { ...emptyRow }])}
-        className="self-start"
+        className="self-start border-emerald-600! bg-emerald-600! text-white! hover:bg-emerald-700!"
       >
         <Plus size={14} />
         Agregar tipología
