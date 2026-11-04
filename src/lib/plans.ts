@@ -35,6 +35,21 @@ const PRO_FEATURES = [
   "Botón de contacto por WhatsApp",
   "Gestión de leads",
   "Sistema de referidos/afiliados",
+  "Servicios con I.A.",
+  "Flyer automático",
+];
+
+// What the Básico pricing card lists. Curated (presentational only): the full
+// PLANS.basico.features below still has every real feature, and Pro's card
+// uses it to decide what counts as "net-new" over Básico.
+export const BASICO_CARD_FEATURES = [
+  "Portfolio del agente",
+  "Página individual para cada propiedad",
+  "Herramientas de marketing",
+  "ChatBot Inteligente",
+  "CRM Automatizado",
+  "Contratos Digitales",
+  "Flyer automático",
 ];
 
 // Agents sign up free on Básico (no card required, up to BASICO_PROPERTY_LIMIT active listings,
@@ -57,6 +72,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "ChatBot Inteligente",
       "CRM Automatizado",
       "Contratos Digitales",
+      "Flyer automático",
       "Sistema de referidos/afiliados",
       "Soporte básico",
     ],

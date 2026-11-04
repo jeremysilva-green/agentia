@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, type CSSProperties } from "react";
 import { cn } from "@/lib/cn";
-import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, FUNDADOR_SEAT_LIMIT, BASICO_CARD_FEATURES } from "@/lib/plans";
 import styles from "@/app/HomePage.module.css";
 
 function Icon({ name, className, style }: { name: string; className?: string; style?: CSSProperties }) {
@@ -94,7 +94,7 @@ export function PlansSection({ standalone = false }: { standalone?: boolean }) {
                   </div>
                   <ul style={isFound ? { position: "relative", zIndex: 1 } : undefined}>
                     {planId === "basico" &&
-                      plan.features.slice(0, 8).map((f) => (
+                      BASICO_CARD_FEATURES.map((f) => (
                         <li key={f}>
                           <Icon name="check" />
                           {f}

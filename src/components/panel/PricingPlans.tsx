@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Check, Loader2, Crown, ArrowRight, Globe } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { PLANS, PLAN_ORDER, type PlanId } from "@/lib/plans";
+import { PLANS, PLAN_ORDER, BASICO_CARD_FEATURES, type PlanId } from "@/lib/plans";
 import { selectPlan } from "@/lib/actions/subscription";
 import { MlsNetworkDiagram } from "@/components/panel/mls/MlsNetworkDiagram";
 
@@ -18,17 +18,8 @@ const INTRO_LINE: Partial<Record<PlanId, string>> = {
 // implied by a lower tier). This mirrors the design exactly: Básico's own
 // list, then only each paid tier's net-new highlights.
 const DISPLAY_FEATURES: Record<PlanId, string[]> = {
-  basico: [
-    "Portfolio del agente",
-    "Página individual para cada propiedad",
-    "Link de propiedad para compartir por WhatsApp",
-    "Herramientas de marketing",
-    "Información y características de la propiedad",
-    "ChatBot Inteligente",
-    "CRM Automatizado",
-    "Contratos Digitales",
-  ],
-  pro: ["Propiedades ilimitadas", "Perfil con branding propio", "Analíticas", "Reportes en PDF", "Video automático", "Gestión de leads"],
+  basico: [...BASICO_CARD_FEATURES],
+  pro: ["Propiedades ilimitadas", "Perfil con branding propio", "Analíticas", "Reportes en PDF", "Video automático", "Servicios con I.A.", "Gestión de leads"],
   fundador: ["Precio fundador mientras tu suscripción esté activa", "Solo para los primeros 100 agentes"],
   mls: [],
 };
