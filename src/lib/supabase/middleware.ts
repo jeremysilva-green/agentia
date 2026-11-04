@@ -1,8 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { PATHNAME_HEADER } from "@/lib/metaPixel";
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // Always overwritten here, so a client can never spoof it. The root layout
+  // reads it to decide whether the Meta Pixel may load on this route.
+  // Rebuilt from request.headers each time so refreshed session cookies (set on
+  // the request in setAll below) are forwarded too.
+  const forwardedHeaders = () => {
+    const headers = new Headers(request.headers);
+    headers.set(PATHNAME_HEADER, request.nextUrl.pathname);
+    return headers;
+  };
+
+  let response = NextResponse.next({ request: { headers: forwardedHeaders() } });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,7 +25,7 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
+          response = NextResponse.next({ request: { headers: forwardedHeaders() } });
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );

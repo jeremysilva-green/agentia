@@ -15,19 +15,23 @@ const sections = [
     body: "Compartimos información con el agente o afiliado correspondiente cuando es necesario para gestionar una consulta o venta (por ejemplo, el nombre y teléfono de un comprador se comparte con el agente de la propiedad consultada). Usamos proveedores de infraestructura (como Supabase para base de datos y almacenamiento, y Vercel para hosting) que procesan datos en nuestro nombre bajo sus propias políticas de seguridad.",
   },
   {
-    title: "4. Ranking de afiliados",
+    title: "4. Medición publicitaria con Meta",
+    body: "Usamos herramientas de Meta, como el Píxel de Meta y la API de Conversiones, para medir el rendimiento de nuestros anuncios en Facebook e Instagram y mostrar publicidad más relevante. Estas herramientas pueden recopilar datos de tu navegador y dispositivo (como las páginas que visitás en Agentia, tu dirección IP, cookies e identificadores del navegador) y enviarlos a Meta. Meta también puede procesar estos eventos a través de sus propios servidores para mejorar la medición. Además, podemos compartir con Meta datos de contacto que nos proporcionás (como correo electrónico o teléfono) convertidos en un código irreversible (hash), para asociar esa actividad con tu cuenta de Meta y medir resultados. Meta trata estos datos según su propia Política de privacidad. Podés limitar el uso de esta información desde la configuración de anuncios de tu cuenta de Meta o bloqueando cookies en tu navegador.",
+  },
+  {
+    title: "5. Ranking de afiliados",
     body: "El Ranking de Afiliados es público y muestra únicamente el nombre del afiliado y la cantidad de ventas cerradas en el mes. Nunca se muestran montos de comisión, datos de contacto ni información sobre compradores.",
   },
   {
-    title: "5. Seguridad",
+    title: "6. Seguridad",
     body: "Tomamos medidas razonables para proteger tu información, incluyendo control de acceso basado en roles y conexiones cifradas. Ningún sistema es 100% seguro, por lo que te recomendamos usar una contraseña única para tu cuenta.",
   },
   {
-    title: "6. Tus derechos",
+    title: "7. Tus derechos",
     body: "Podés acceder, corregir o eliminar tu información de perfil desde tu panel en cualquier momento, o escribiéndonos a través de nuestros canales de contacto.",
   },
   {
-    title: "7. Cambios a esta política",
+    title: "8. Cambios a esta política",
     body: "Podemos actualizar esta política ocasionalmente para reflejar cambios en la plataforma. Publicaremos cualquier cambio importante en esta misma página.",
   },
 ];

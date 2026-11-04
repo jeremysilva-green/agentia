@@ -1,11 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { agentSignupSchema, forgotPasswordSchema, loginSchema, newPasswordSchema, userSignupSchema } from "@/lib/validations/auth";
 import { fieldErrorsFrom } from "@/lib/formErrors";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { SIGNUP_COOKIE } from "@/lib/metaPixel";
 
 export type ActionState = { error?: string; fieldErrors?: Record<string, string>; success?: boolean } | undefined;
 
@@ -20,6 +22,19 @@ function translateAuthError(message: string): string {
   const match = message.match(/you can only request this after (\d+) seconds/i);
   if (match) return `Por seguridad, podés intentarlo de nuevo en ${match[1]} segundos.`;
   return message;
+}
+
+// Sign-up happens on a route where the Meta Pixel is deliberately not loaded,
+// so we leave a short-lived, non-identifying marker (just the account type).
+// The first public page the new account reaches picks it up, fires
+// CompleteRegistration and deletes it — see MetaPixelWatcher.
+async function markSignupForMeta(kind: "agent" | "user") {
+  (await cookies()).set(SIGNUP_COOKIE, kind, {
+    path: "/",
+    maxAge: 600,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 export async function signUpAgent(_prevState: ActionState, formData: FormData): Promise<ActionState> {
@@ -89,6 +104,8 @@ export async function signUpAgent(_prevState: ActionState, formData: FormData): 
     return { error: "No se pudo completar el registro. Intentá de nuevo." };
   }
 
+  await markSignupForMeta("agent");
+
   // Supabase's "Confirm signup" email still goes out as usual (it's been
   // re-worded in the dashboard to read as a welcome/"activate your account"
   // email, not a blocking gate) — but the agent doesn't have to wait for it:
@@ -141,6 +158,8 @@ export async function signUpUser(_prevState: ActionState, formData: FormData): P
         : "No se pudo completar el registro. Intentá de nuevo.",
     };
   }
+
+  await markSignupForMeta("user");
 
   // Same reasoning as signUpAgent: confirm + sign in immediately server-side
   // so the affiliate doesn't have to wait on the welcome email.

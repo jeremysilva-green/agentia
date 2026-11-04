@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
 import Script from "next/script";
+import { headers } from "next/headers";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { MetaPixelWatcher } from "@/components/MetaPixelWatcher";
 import { getSiteUrl } from "@/lib/siteUrl";
+import { META_PIXEL_HOST, META_PIXEL_ID, META_PIXEL_SNIPPET, PATHNAME_HEADER, isMetaBlockedPath } from "@/lib/metaPixel";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -49,18 +52,17 @@ export const metadata: Metadata = {
     "Tu oficina inmobiliaria, potenciada por IA. CRM · Chatbot · Afiliados · WhatsApp. Única con sistema de afiliados en Paraguay.",
 };
 
-const META_PIXEL_ID = "1159351416547695";
-
-// Only the real site reports to Meta — localhost and preview deployments
-// would otherwise pollute the pixel's data with test traffic.
-const META_PIXEL_HOST = "agentia.com.py";
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const metaPixelEnabled = new URL(getSiteUrl()).hostname === META_PIXEL_HOST;
+  // proxy.ts stamps every request with its path. If it is missing we cannot
+  // tell where we are, so nothing is rendered; the client watcher then loads
+  // the pixel only once it sees a public route.
+  const pathname = (await headers()).get(PATHNAME_HEADER);
+  const loadPixelNow = metaPixelEnabled && pathname !== null && !isMetaBlockedPath(pathname);
 
   return (
     <html
@@ -69,19 +71,10 @@ export default function RootLayout({
       style={{ colorScheme: "light" }}
     >
       <body className="h-full flex flex-col bg-white font-sans text-slate-900">
-        {metaPixelEnabled && (
+        {loadPixelNow && (
           <>
             <Script id="meta-pixel" strategy="afterInteractive">
-              {`!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '${META_PIXEL_ID}');
-fbq('track', 'PageView');`}
+              {META_PIXEL_SNIPPET}
             </Script>
             <noscript>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -95,6 +88,7 @@ fbq('track', 'PageView');`}
             </noscript>
           </>
         )}
+        {metaPixelEnabled && <MetaPixelWatcher />}
         <NavBar />
         <OnboardingTour />
         <main className="flex-1">{children}</main>

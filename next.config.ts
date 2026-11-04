@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import path from "path";
+import { META_BLOCKED_PREFIXES } from "./src/lib/metaPixel";
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -41,6 +42,16 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Blocked-from-Meta routes (account, panels, agreements, short links):
+      // anything leaving them carries at most the site origin as referrer, never
+      // the path — which can hold a private code — so a later public page can't
+      // report it to Meta as document.referrer.
+      ...META_BLOCKED_PREFIXES.flatMap((prefix) =>
+        [prefix, `${prefix}/:path*`].map((source) => ({
+          source,
+          headers: [{ key: "Referrer-Policy", value: "strict-origin" }],
+        }))
+      ),
       { source: "/encuesta", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
       { source: "/encuesta.html", headers: [{ key: "X-Robots-Tag", value: "noindex" }] },
     ];
