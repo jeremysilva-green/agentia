@@ -45,6 +45,8 @@ export const SIGNUP_COOKIE = "mt_signup";
 //    clicking into, a blocked route), and nothing whose page URL (dl) is a
 //    blocked route. This drops events instead of using Meta's consent switch:
 //    the pixel *queues* events while consent is revoked and sends them later.
+//  - SubscribedButtonClick (the pixel's automatic click event: button text,
+//    link destinations, form field names) is never sent.
 //  - Query strings and fragments can carry search terms, codes and tokens, so
 //    in every URL found inside any parameter or body — the page URL (dl), the
 //    referrer (rl), the automatic click events' link destinations — only
@@ -53,6 +55,7 @@ export const SIGNUP_COOKIE = "mt_signup";
 const META_URL_FILTER = `
 var BLOCKED=${JSON.stringify(META_BLOCKED_PREFIXES)};
 var KEEP=/^(utm_[a-z0-9_]+|fbclid)$/i;
+var NEVER='SubscribedButtonClick';
 function blockedPath(p){return BLOCKED.some(function(x){return p===x||p.indexOf(x+'/')===0})}
 function clean(u){try{var x=new URL(u);if(blockedPath(x.pathname))return x.origin+'/';var k=[];x.searchParams.forEach(function(v,n){if(KEEP.test(n))k.push([n,v])});x.search='';k.forEach(function(p){x.searchParams.append(p[0],p[1])});x.hash='';return x.toString()}catch(e){return u.split('#')[0].split('?')[0]}}
 function scrub(v){return typeof v==='string'?v.replace(/https?:\\/\\/[^\\s"'<>\\\\]+/g,clean):v}
@@ -63,20 +66,21 @@ function prepUrl(u){
 if(typeof u!=='string'||!isFb(u))return u;
 if(window.__mtBlocked)return null;
 var x=new URL(u,location.href);
-if(pageIsBlocked(x.searchParams.get('dl')))return null;
+if(x.searchParams.get('ev')===NEVER||pageIsBlocked(x.searchParams.get('dl')))return null;
 if(x.search)x.search='?'+scrubQuery(x.search.slice(1));
 return x.toString()}
 function prepBody(b){
 if(window.__mtBlocked)return null;
 if(typeof b==='string'){
 if(/^\\s*[{[]/.test(b))return scrub(b);
-if(pageIsBlocked(new URLSearchParams(b).get('dl')))return null;
+var sp=new URLSearchParams(b);
+if(sp.get('ev')===NEVER||pageIsBlocked(sp.get('dl')))return null;
 return scrubQuery(b)}
 if(typeof URLSearchParams!=='undefined'&&b instanceof URLSearchParams){
-if(pageIsBlocked(b.get('dl')))return null;
+if(b.get('ev')===NEVER||pageIsBlocked(b.get('dl')))return null;
 return new URLSearchParams(scrubQuery(b.toString()))}
 if(typeof FormData!=='undefined'&&b instanceof FormData){
-if(pageIsBlocked(b.get('dl')))return null;
+if(b.get('ev')===NEVER||pageIsBlocked(b.get('dl')))return null;
 var f=new FormData();b.forEach(function(v,n){f.append(n,typeof v==='string'?scrub(v):v)});return f}
 return b}
 var d=Object.getOwnPropertyDescriptor(HTMLImageElement.prototype,'src');

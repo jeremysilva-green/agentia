@@ -14,6 +14,24 @@ declare global {
   }
 }
 
+// Runs `fn` once window.location actually shows `pathname`. The router state
+// (usePathname) and the address bar are updated in separate steps, and the
+// pixel reads window.location itself when it builds an event, so firing before
+// they agree would report the previous page. Returns a cancel function.
+function whenLocationIs(pathname: string, fn: () => void): () => void {
+  let frame = 0;
+  let tries = 0;
+  const check = () => {
+    if (window.location.pathname === pathname || tries++ >= 30) {
+      fn();
+      return;
+    }
+    frame = requestAnimationFrame(check);
+  };
+  check();
+  return () => cancelAnimationFrame(frame);
+}
+
 function startPixel() {
   if (window.__mtPixel) return;
   const script = document.createElement("script");
@@ -103,19 +121,18 @@ export function MetaPixelWatcher() {
     }
     window.__mtBlocked = false;
 
-    if (!window.__mtPixel) {
-      // Not loaded yet (first load was a blocked route, or the server-rendered
-      // script has not run): the snippet sends the first PageView itself.
-      startPixel();
-    } else {
-      if (silenced.current) {
-        silenced.current = false;
-        window.fbq?.("track", "PageView");
-      } else if (!first) {
+    // Only "track" (a standard event), never "trackCustom".
+    return whenLocationIs(pathname, () => {
+      if (!window.__mtPixel) {
+        // Not loaded yet (first load was a blocked route, or the server-rendered
+        // script has not run): the snippet sends the first PageView itself.
+        startPixel();
+      } else if (silenced.current || !first) {
         window.fbq?.("track", "PageView");
       }
-    }
-    fireSignupEvent();
+      silenced.current = false;
+      void fireSignupEvent();
+    });
   }, [pathname]);
 
   return null;
