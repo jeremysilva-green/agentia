@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { Footer } from "@/components/Footer";
@@ -48,11 +49,19 @@ export const metadata: Metadata = {
     "Tu oficina inmobiliaria, potenciada por IA. CRM · Chatbot · Afiliados · WhatsApp. Única con sistema de afiliados en Paraguay.",
 };
 
+const META_PIXEL_ID = "1159351416547695";
+
+// Only the real site reports to Meta — localhost and preview deployments
+// would otherwise pollute the pixel's data with test traffic.
+const META_PIXEL_HOST = "agentia.com.py";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const metaPixelEnabled = new URL(getSiteUrl()).hostname === META_PIXEL_HOST;
+
   return (
     <html
       lang="es"
@@ -60,6 +69,32 @@ export default function RootLayout({
       style={{ colorScheme: "light" }}
     >
       <body className="h-full flex flex-col bg-white font-sans text-slate-900">
+        {metaPixelEnabled && (
+          <>
+            <Script id="meta-pixel" strategy="afterInteractive">
+              {`!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '${META_PIXEL_ID}');
+fbq('track', 'PageView');`}
+            </Script>
+            <noscript>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                height="1"
+                width="1"
+                style={{ display: "none" }}
+                alt=""
+                src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+              />
+            </noscript>
+          </>
+        )}
         <NavBar />
         <OnboardingTour />
         <main className="flex-1">{children}</main>
