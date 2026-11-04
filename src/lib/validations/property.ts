@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { AGENT_COMMISSION_MAX_PCT, AFFILIATE_SHARE_MAX_PCT } from "@/lib/constants/commission";
-import { PROPERTY_TYPE_VALUES } from "@/lib/constants/propertyTypes";
+import { ALL_PROPERTY_TYPE_VALUES, PROJECT_ONLY_PROPERTY_TYPE_VALUES } from "@/lib/constants/propertyTypes";
 import { isLikelyGoogleMapsUrl } from "@/lib/googleMaps";
 import { isLikelyYoutubeUrl } from "@/lib/youtube";
 import { isLikelyInstagramReelUrl } from "@/lib/instagram";
@@ -22,7 +22,7 @@ export const propertySchema = z
     title: z.string().min(4, "El título es muy corto").max(120),
     description: z.string().min(20, "Agregá una descripción más completa"),
     listingType: z.enum(["sale"]),
-    propertyType: z.enum(PROPERTY_TYPE_VALUES).optional(),
+    propertyType: z.enum(ALL_PROPERTY_TYPE_VALUES).optional(),
     price: z.coerce.number().positive("El precio debe ser mayor a 0"),
     currency: z.enum(["PYG", "USD"]).default("PYG"),
     priceIncludesIva: z.coerce.boolean().default(false),
@@ -99,6 +99,17 @@ export const propertySchema = z
     referralAttributionDays: optionalNonNegativeInt,
   })
   .superRefine((data, ctx) => {
+    if (
+      data.propertyType &&
+      (PROJECT_ONLY_PROPERTY_TYPE_VALUES as readonly string[]).includes(data.propertyType) &&
+      data.listingKind !== "proyecto_en_pozo"
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["propertyType"],
+        message: "Ese tipo de propiedad solo se usa en Proyectos en pozo.",
+      });
+    }
     if (data.listingKind === "proyecto_en_pozo") {
       if (!data.developerName) {
         ctx.addIssue({

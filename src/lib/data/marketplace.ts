@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { AgentCardData, PropertyWithImages } from "@/types/domain";
-import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
+import { PROPERTY_TYPE_LABELS, ALL_PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
 import { normalizeText } from "@/lib/text";
 
 export type MarketplaceFilters = {
@@ -41,7 +41,7 @@ export async function getMarketplaceAgents(filters: MarketplaceFilters): Promise
   if (q) {
     const normalizedQuery = normalizeText(q);
 
-    const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
+    const matchingPropertyTypes = ALL_PROPERTY_TYPE_VALUES.filter((type) =>
       normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
     );
     const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>
@@ -179,7 +179,7 @@ export async function getMarketplaceProperties(filters: MarketplaceFilters): Pro
   const q = filters.q?.trim();
   if (q) {
     const normalizedQuery = normalizeText(q);
-    const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
+    const matchingPropertyTypes = ALL_PROPERTY_TYPE_VALUES.filter((type) =>
       normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
     );
     const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>

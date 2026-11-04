@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { TypologyEditor, type TypologyRow } from "@/components/panel/TypologyEditor";
 import { CITY_OPTIONS } from "@/lib/constants/cities";
 import { COVERAGE_QUICK_PICKS } from "@/lib/constants/coverageCities";
-import { LISTABLE_PROPERTY_TYPE_VALUES, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
+import { PROPERTY_TYPES_BY_KIND, PROPERTY_TYPE_LABELS } from "@/lib/constants/propertyTypes";
 import {
   AGENT_COMMISSION_PCT,
   AGENT_COMMISSION_MAX_PCT,
@@ -112,6 +112,7 @@ export function PropertyForm({
   const [kind, setKind] = useState<ListingKind>(
     (defaultValues?.listing_kind as ListingKind | undefined) ?? "standard"
   );
+  const [propertyType, setPropertyType] = useState(defaultValues?.property_type ?? "");
   const [constructionStage, setConstructionStage] = useState(defaultValues?.construction_stage ?? "terminada");
   const [currency, setCurrency] = useState<(typeof CURRENCIES)[number]>(
     defaultValues?.currency === "USD" ? "USD" : "PYG"
@@ -268,6 +269,7 @@ export function PropertyForm({
     </div>
   );
 
+  const allowedTypes = PROPERTY_TYPES_BY_KIND[kind];
   const attributionDefault = kind === "modelo" ? "365" : "180";
   const commissionTriggerOptions = (
     kind === "modelo" ? MODELO_COMMISSION_TRIGGERS : PROYECTO_EN_POZO_COMMISSION_TRIGGERS
@@ -326,13 +328,16 @@ export function PropertyForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
         <SingleSelectDropdown
+          // Remounted per kind so a type that isn't offered there is dropped.
+          key={kind}
           name="propertyType"
           label="Tipo de propiedad"
           showAllOption={false}
-          defaultValue={defaultValues?.property_type ?? ""}
+          defaultValue={(allowedTypes as readonly string[]).includes(propertyType) ? propertyType : ""}
+          onChange={setPropertyType}
           options={[
             { value: "", label: "Sin especificar" },
-            ...LISTABLE_PROPERTY_TYPE_VALUES.map((type) => ({
+            ...allowedTypes.map((type) => ({
               value: type,
               label: PROPERTY_TYPE_LABELS[type].es,
             })),

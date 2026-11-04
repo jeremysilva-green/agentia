@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { PROPERTY_TYPE_LABELS, PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
+import { PROPERTY_TYPE_LABELS, ALL_PROPERTY_TYPE_VALUES, type PropertyType } from "@/lib/constants/propertyTypes";
 import { normalizeText } from "@/lib/text";
 
 const LISTING_TYPE_LABELS: Record<"sale", string> = { sale: "venta" };
@@ -73,7 +73,7 @@ export async function getAgentProperties(
   // description, city, or a property/listing type whose label contains the
   // query — a hit on any one field is enough.
   const normalizedQuery = normalizeText(q);
-  const matchingPropertyTypes = PROPERTY_TYPE_VALUES.filter((type) =>
+  const matchingPropertyTypes = ALL_PROPERTY_TYPE_VALUES.filter((type) =>
     normalizeText(PROPERTY_TYPE_LABELS[type].es).includes(normalizedQuery)
   );
   const matchingListingTypes = (Object.keys(LISTING_TYPE_LABELS) as "sale"[]).filter((type) =>
