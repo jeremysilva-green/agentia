@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   openGraph: { type: "website", siteName: "Agentia", locale: "es_PY", images: [SHARE_IMAGE] },
   twitter: { card: "summary_large_image", images: [SHARE_IMAGE.url] },
-  title: "AGENTIA | Portal Inmobiliario Inteligente",
+  title: "Agentia | Plataforma Inmobiliaria para Asesores en Paraguay",
   // Doubles as the "/" landing page's description — /agentes (the
   // marketplace, formerly at "/") has its own route-level metadata override.
   description:

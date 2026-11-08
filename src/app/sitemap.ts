@@ -7,7 +7,17 @@ const base = "https://agentia.com.py";
 // without every crawl hitting the database.
 export const revalidate = 3600;
 
-const STATIC_PATHS = ["", "/que-es-agentia", "/agentes", "/ranking-afiliados", "/registro", "/terminos", "/privacidad"];
+const STATIC_PATHS = [
+  "",
+  "/que-es-agentia",
+  "/preguntas-frecuentes",
+  "/planes",
+  "/agentes",
+  "/ranking-afiliados",
+  "/registro",
+  "/terminos",
+  "/privacidad",
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({

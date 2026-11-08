@@ -22,6 +22,7 @@ function InstagramIcon({ size }: { size: number }) {
 
 const links = [
   { href: "/que-es-agentia", label: "¿Qué es Agentia?" },
+  { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },
   { href: "/ranking-afiliados", label: "Ranking de Afiliados" },
   { href: "/terminos", label: "Términos y Condiciones" },
   { href: "/privacidad", label: "Privacidad" },
