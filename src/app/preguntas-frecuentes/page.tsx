@@ -6,7 +6,7 @@ import { AFFILIATE_SHARE_DEFAULT_PCT } from "@/lib/constants/commission";
 import { BASICO_FREE_ENHANCE_TRIES, BASICO_PROPERTY_LIMIT, FUNDADOR_SEAT_LIMIT, PLANS } from "@/lib/plans";
 
 export const metadata: Metadata = {
-  title: "Preguntas frecuentes | Agentia",
+  title: "FAQ | Agentia",
   description:
     "Respuestas sobre cómo funciona Agentia para agentes inmobiliarios y afiliados en Paraguay: precios, publicar propiedades gratis y el sistema de afiliados.",
   alternates: { canonical: "/preguntas-frecuentes" },
@@ -63,7 +63,7 @@ export default function PreguntasFrecuentesPage() {
       <section className="relative border-b border-slate-200 bg-white px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-balance font-display text-4xl font-semibold tracking-tight text-prussian sm:text-5xl">
-            Preguntas frecuentes
+            FAQ
           </h1>
           <p className="font-display-light mt-3 text-slate-600">
             Todo lo que querés saber sobre Agentia, la plataforma inmobiliaria de Paraguay.
