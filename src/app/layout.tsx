@@ -46,10 +46,9 @@ export const metadata: Metadata = {
   openGraph: { type: "website", siteName: "Agentia", locale: "es_PY", images: [SHARE_IMAGE] },
   twitter: { card: "summary_large_image", images: [SHARE_IMAGE.url] },
   title: "Agentia | Plataforma Inmobiliaria para Asesores en Paraguay",
-  // Doubles as the "/" landing page's description — /agentes (the
-  // marketplace, formerly at "/") has its own route-level metadata override.
+  // Site-wide default; pages with their own metadata (e.g. /agentes) override it.
   description:
-    "Tu oficina inmobiliaria, potenciada por IA. CRM · Chatbot · Afiliados · WhatsApp. Única con sistema de afiliados en Paraguay.",
+    "Conocé Agentia, la plataforma inmobiliaria de Paraguay que conecta agentes, afiliados y compradores. Gestioná propiedades, clientes y ventas con CRM, inteligencia artificial y automatizaciones.",
 };
 
 export default async function RootLayout({
