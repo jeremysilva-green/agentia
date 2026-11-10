@@ -171,6 +171,12 @@ export async function getMarketplaceProperties(filters: MarketplaceFilters): Pro
   const { data } = await query;
   let properties = (data ?? []) as unknown as MarketplacePropertyRow[];
 
+  // A listing without photos looks broken in the public grid ("Sin foto"), so
+  // it stays off this page until a photo is added. Its agent still sees it on
+  // their own portfolio page and panel (those use other queries). The
+  // Propiedades tab count comes from this array, so it drops them too.
+  properties = properties.filter((p) => p.property_images.length > 0);
+
   if (filters.city) {
     const normalizedCity = normalizeText(filters.city);
     properties = properties.filter((p) => p.city && normalizeText(p.city).includes(normalizedCity));
