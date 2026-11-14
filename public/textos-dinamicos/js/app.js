@@ -6,6 +6,7 @@ import { transcribe, audio16k, loadASR } from './asr.js';
 import { planVideo } from './plan.js';
 import { fixNames } from './names.js';
 import { cleanTranscript } from './text.js';
+import { applyEdits, wordsToText } from './edit.js';
 import { Matte, Faces } from './matte.js';
 import { analyzeVideo } from './analyze.js';
 import { zoomPlan, placeFront, placeBehind } from './layout.js';
@@ -14,8 +15,11 @@ import { loadSfx, collectCues, mixAudio } from './audio.js';
 
 const CFG = Object.assign({ assets: new URL('../', import.meta.url).href }, window.MT_CONFIG || {});
 const $ = s => document.querySelector(s);
-const STAGES = [['read', 'Leyendo el video', 0.03], ['listen', 'Transcribiendo la voz', 0.22], ['shots', 'Analizando las tomas', 0.14],
+const STAGES_FULL = [['read', 'Leyendo el video', 0.03], ['listen', 'Transcribiendo la voz', 0.22], ['shots', 'Analizando las tomas', 0.14],
                 ['plan', 'Eligiendo frases clave', 0.02], ['render', 'Animando y exportando', 0.54], ['sound', 'Mezclando efectos de sonido', 0.05]];
+// re-render after correcting the text: no transcription or analysis, so the bar is spread over the remaining steps
+const STAGES_FIX = [['plan', 'Eligiendo frases clave', 0.02], ['render', 'Animando y exportando', 0.9], ['sound', 'Mezclando efectos de sonido', 0.08]];
+let STAGES = STAGES_FULL;
 const STYLE_NAMES = { editorial: 'Editorial', stack: 'Contraste', thin: 'Fina', pills: 'Viñetas', card: 'Tarjeta', counter: 'Contador', collage: 'Collage', glass: 'Cristal' };
 const SW = ['#0a8f5c', '#f5a623', '#ff5a36', '#ff3d7f', '#a78bfa', '#3b82f6', '#22d3ee', '#4ade80', '#e8ff3d'];
 const store = { get: k => { try { return localStorage.getItem('mt_' + k); } catch (e) { return null; } },
@@ -24,6 +28,7 @@ const store = { get: k => { try { return localStorage.getItem('mt_' + k); } catc
 let file = null, accent = store.get('accent') || '#0a8f5c', mode = 'all', busy = false, cancel = false, outUrl = null;
 let sfxOn = store.get('sfx') !== '0', sfxVol = +(store.get('vol') || 0.8), ticks = store.get('ticks') === '1';
 let assetsReady = null;
+let last = null;          // { file, v, audio, an, words } from the last run, reused when the text is corrected
 
 function loadAssets() {
   if (!assetsReady) assetsReady = Promise.all([
@@ -66,7 +71,7 @@ $('#replace').onclick = () => $('#file').click();
 
 function pick(f) {
   if (busy) return;
-  file = f;
+  file = f; last = null;
   const v = $('#srcVid'); v.src = URL.createObjectURL(f); v.play().catch(() => {});
   v.onloadedmetadata = () => { $('#srcInfo').textContent = `${v.videoWidth}×${v.videoHeight} · ${fmt(v.duration)} · ${(f.size / 1048576).toFixed(1)} MB`; };
   $('#srcName').textContent = f.name;
@@ -77,7 +82,7 @@ function pick(f) {
 const fmt = s => { s = Math.round(s); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 function resetResult() {
   $('#out').style.display = 'none'; $('#out').removeAttribute('src'); $('#canvas').style.display = 'none';
-  $('#empty').style.display = 'block'; $('#dl').style.display = 'none'; $('#phr').style.display = 'none'; $('#err').style.display = 'none';
+  $('#empty').style.display = 'block'; $('#dl').style.display = 'none'; $('#phr').style.display = 'none'; $('#fix').style.display = 'none'; $('#err').style.display = 'none';
 }
 
 // ---------------------------------------------------------------- progress
@@ -98,7 +103,7 @@ function bar(p) { $('#barFill').style.width = (p * 100).toFixed(1) + '%'; $('#ge
 
 // ---------------------------------------------------------------- pipeline
 // Agently gate: the panel page that embeds this tool owns plan/trial checks.
-// It charges a try (free plan) before we start and gets a refund if we fail.
+// It charges a try (free plan) before a video is made and gets it back if that fails.
 function askHost(type) {
   return new Promise(resolve => {
     if (window.parent === window) return resolve({ ok: false, error: 'Abrí esta herramienta desde tu panel de Agently.' });
@@ -113,36 +118,61 @@ function askHost(type) {
   });
 }
 
-$('#go').onclick = async () => {
+$('#go').onclick = () => generate(null);
+$('#applyFix').onclick = () => {
+  if (!last || busy) return;
+  const text = $('#fixText').value.trim();
+  if (!text) return fail('El texto está vacío.');
+  generate(applyEdits(last.words, text));
+};
+$('#resetFix').onclick = () => { if (last) $('#fixText').value = wordsToText(last.auto); };
+
+/** edited: corrected words (reuses the video, transcription and analysis from the last run), or null for a full run */
+async function generate(edited) {
   if (!file || busy) return;
   if (!browserSupported()) return fail('Este navegador no puede crear el video. Usá Chrome, Edge o Safari 17+ en una computadora.');
-  busy = true; $('#go').disabled = true;
-  const gate = await askHost('start');
-  if (!gate.ok) { busy = false; $('#go').disabled = false; return fail(gate.error || 'No tenés acceso a esta herramienta.'); }
-  let charged = true; cancel = false; $('#go').disabled = true; resetResult(); showSteps(); cur = null;
+  const reuse = edited && last && last.file === file;
+  // The video itself costs one try on the free plan; correcting the text of a video already made here does not.
+  let charged = false;
+  if (!reuse) {
+    busy = true; $('#go').disabled = $('#applyFix').disabled = true;
+    const gate = await askHost('start');
+    if (!gate.ok) { busy = false; $('#go').disabled = $('#applyFix').disabled = false; return fail(gate.error || 'No tenés acceso a esta herramienta.'); }
+    charged = true;
+  }
+  STAGES = reuse ? STAGES_FIX : STAGES_FULL;
+  busy = true; cancel = false; $('#go').disabled = $('#applyFix').disabled = true; resetResult(); showSteps(); cur = null;
   $('#genSub').textContent = 'Dejá esta pestaña abierta'; $('#gen').classList.add('on');
   const t0 = performance.now();
   try {
-    stage('read');
-    const [{ sfx, matte, faces }, v] = await Promise.all([loadAssets(), openVideo(file)]);
-    if (v.duration > 300) throw new Error('Usá videos de hasta 5 minutos.');
-    const audio = await decodeAudio(v);
-    if (!audio) throw new Error('El video no tiene audio legible, así que no hay voz para animar.');
+    let v, audio, an, words;
+    const { sfx, matte, faces } = await loadAssets();
+    if (reuse) {
+      ({ v, audio, an } = last); words = edited;
+    } else {
+      stage('read');
+      v = await openVideo(file);
+      if (v.duration > 300) throw new Error('Usá videos de hasta 5 minutos.');
+      audio = await decodeAudio(v);
+      if (!audio) throw new Error('El video no tiene audio legible, así que no hay voz para animar.');
 
-    stage('listen');
-    const lang = $('#lang').value;
-    store.set('lang', lang);
-    let words = (window.MT_TEST && window.MT_TEST.words) || null;
-    if (!words) {
-      const pcm = await audio16k(audio);
-      words = await transcribe(pcm, lang, u => { sub(u); $('#genSub').textContent = u < 0.6 ? 'Descargando el modelo de voz (solo la primera vez)…' : 'Dejá esta pestaña abierta'; });
+      stage('listen');
+      const lang = $('#lang').value;
+      store.set('lang', lang);
+      words = (window.MT_TEST && window.MT_TEST.words) || null;
+      if (!words) {
+        const pcm = await audio16k(audio);
+        words = await transcribe(pcm, lang, u => { sub(u); $('#genSub').textContent = u < 0.6 ? 'Descargando el modelo de voz (solo la primera vez)…' : 'Dejá esta pestaña abierta'; });
+      }
+      if (!words || words.length < 3) throw new Error('No se detectó voz en el video.');
+      const names = $('#names').value.trim(); store.set('names', names);
+      words = fixNames(cleanTranscript(words, lang), names);
+
+      stage('shots');
+      an = await analyzeVideo(v, matte, faces, sub);
     }
-    if (!words || words.length < 3) throw new Error('No se detectó voz en el video.');
-    const names = $('#names').value.trim(); store.set('names', names);
-    words = fixNames(cleanTranscript(words, lang), names);
-
-    stage('shots');
-    const an = await analyzeVideo(v, matte, faces, sub);
+    if (words.length < 1) throw new Error('No quedaron palabras para animar.');
+    last = { file, v, audio, an, words, auto: reuse ? last.auto : words };
 
     stage('plan');
     const plan = planVideo(words, an.cuts, v.duration, mode === 'all');
@@ -156,7 +186,7 @@ $('#go').onclick = async () => {
     blocks.forEach((b, i) => { if (b.kind !== 'behind') { b.top = placeFront(b, an, zplan); plan.events[i].layer = 'front'; } });
     const caps = (plan.captions || []).map(g => { const b = new CaptionGroup(g, acc); b.top = placeFront(b, an, zplan); return b; });
     const all = [...blocks, ...caps];
-    window.MT_DEBUG = { an, plan, blocks: all.map(b => ({ s: b.ev && b.ev.style, kind: b.kind, top: Math.round(b.top), h: Math.round(b.height), tin: b.tin, tout: b.tout })) };
+    window.MT_DEBUG = { an, plan, blocks: all.map(b => ({ s: b.ev && b.ev.style, kind: b.kind, top: Math.round(b.top), h: Math.round(b.height), S: b.S && Math.round(b.S), tin: b.tin, tout: b.tout })) };
 
     stage('render');
     const enc = await createEncoder(true);
@@ -167,17 +197,19 @@ $('#go').onclick = async () => {
     const mixed = await mixAudio(audio, v.duration, collectCues(all, { ticks }), sfx, { enabled: sfxOn, volume: sfxVol });
     await enc.addAudio(mixed);
     const blob = await enc.finish();
+    charged = false;
     stage(null);
     done = 1; bar(1);
     showResult(blob, plan, (performance.now() - t0) / 1000, enc);
-    charged = false;
+    $('#fixText').value = wordsToText(words); $('#fix').style.display = 'block';
   } catch (e) {
     console.error(e); fail(e.message || String(e));
     if (charged) { charged = false; askHost('failed'); }
+    if (last && last.file === file) $('#fix').style.display = 'block';
   } finally {
-    busy = false; $('#go').disabled = false; $('#gen').classList.remove('on');
+    busy = false; $('#go').disabled = $('#applyFix').disabled = false; $('#gen').classList.remove('on');
   }
-};
+}
 
 function showResult(blob, plan, secs, enc) {
   if (outUrl) URL.revokeObjectURL(outUrl);

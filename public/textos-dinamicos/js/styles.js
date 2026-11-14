@@ -16,9 +16,9 @@ class Block {
 
 // 1 ─ Editorial serif: small italic line + big serif word ("¿Querés comprar en" / "China?")
 export class Editorial extends Block {
-  constructor(ev, accent, sizeMax = 300) {
+  constructor(ev, accent, sizeMax = 300, maxW = MAXW) {
     super(ev); this.behindOk = true; this.accent = accent;
-    this.S = fit(ev.big, 'serif', sizeMax, MAXW, -0.01, 110);
+    this.S = fit(ev.big, 'serif', sizeMax, maxW, -0.01, 110);
     this.L = letters(ev.big, 'serif', this.S, -0.01).list;
     const main = ev.accent_big ? accent : WHITE, alt = ev.accent_big ? WHITE : accent;
     this.L.forEach(l => l.color = isPunct(l.ch) ? alt : main);
@@ -233,11 +233,11 @@ export class Card extends Block {
 // 8 ─ Collage (the reference style): light lead-in / bold connector / huge key word / light tail,
 //     overlapping, mixed weights and opacity modes, sparkle on the key word
 export class Collage extends Block {
-  constructor(ev, accent, sizeMax = 250) {
+  constructor(ev, accent, sizeMax = 250, maxW = 840) {
     super(ev); this.behindOk = true; this.accent = accent;
     const tiers = ev.tiers || {};
     this.A = 76; this.B = 80;
-    this.S = Math.min(sizeMax, fit(ev.big, 'pop_bk', sizeMax, 840, -0.03, 110));
+    this.S = Math.min(sizeMax, fit(ev.big, 'pop_bk', sizeMax, maxW, -0.03, 110));
     this.bw = textWidth(ev.big, 'pop_bk', this.S, -0.03);
     const T = this.T = [];
     let y = 0;

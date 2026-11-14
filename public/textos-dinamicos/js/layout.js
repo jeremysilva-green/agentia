@@ -74,7 +74,9 @@ export function placeBehind(events, blocks, an, zplan, accent) {
     const ht = tops[Math.floor(tops.length * 0.1)];
     const chin = Math.max(...sc.map(x => x.chin)), fh = sc.map(x => x.h).sort((a, b) => a - b)[sc.length >> 1];
     const [stop, sbot] = safeBand(an, ev.tin, ev.tout);
-    const make = size => ev.style === 'editorial' ? new Editorial(ev, accent, size) : new Collage(ev, accent, size);
+    // behind the speaker the key word is sized to span the frame edge to edge (short words get huge)
+    const FILLW = W * 0.96, CAP = ev.style === 'editorial' ? 820 : 640;
+    const make = size => ev.style === 'editorial' ? new Editorial(ev, accent, size, FILLW) : new Collage(ev, accent, size, FILLW);
     let placed = false;
     // how much of a word of width ww with baseline y and size S stays visible (not covered by the person)
     const visible = (y, S, ww) => {
@@ -95,7 +97,8 @@ export function placeBehind(events, blocks, an, zplan, accent) {
     };
     // 1) as low as possible (down to the shoulders) while at least ~55% of the key word stays readable;
     //    the lead-in line goes above the head
-    for (let size = ev.style === 'editorial' ? 300 : 250; size >= 160 && !placed; size -= 20) {
+    const full = Math.min(CAP, make(CAP).S);                              // largest size that still fits the frame width
+    for (let size = full; size >= 160 && !placed; size = Math.round(size * 0.93)) {
       const b = make(size);
       const ww = ev.style === 'editorial' ? b.L.reduce((m, l) => Math.max(m, Math.abs(l.cx) + l.w / 2), 0) * 2 : b.bw;
       const above = b.aboveHeight(), aboveBase = ht - 26;
@@ -103,12 +106,13 @@ export function placeBehind(events, blocks, an, zplan, accent) {
       const lowest = Math.min(chin + 0.6 * fh, sbot - 0.25 * b.S);
       const highest = Math.max(ht + 0.25 * b.S, aboveBase + 0.75 * b.S + 10);   // never above the head top region
       for (let y = lowest; y >= highest && !placed; y -= 20) {
+        if (y - 0.75 * b.S < stop) continue;                                // keep the top of the letters inside the frame
         if (visible(y, b.S, ww) < 0.45) continue;
         b.split(y, aboveBase); b.kind = 'behind'; blocks[i] = b; ev.layer = 'behind'; placed = true;
       }
     }
     // 2) fallback: whole block at head level
-    for (let size = ev.style === 'editorial' ? 300 : 250; size >= 150 && !placed; size -= 10) {
+    for (let size = full; size >= 150 && !placed; size = Math.round(size * 0.95)) {
       const b = make(size);
       const sink = ev.style === 'editorial' ? 0.17 : 0.34;
       const top = ht + sink * b.S - b.baselineOffset();
