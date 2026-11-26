@@ -13,7 +13,7 @@ export function CancelSubscriptionButton() {
   function handleCancel() {
     if (
       !confirm(
-        `¿Cancelar tu suscripción? Se detienen los cobros automáticos de inmediato y pasás al plan Básico: solo tus ${BASICO_PROPERTY_LIMIT} propiedades activas más recientes quedan visibles públicamente. El resto se guarda (no se elimina) — podés volver a publicarlas si te suscribís de nuevo. Si más adelante te volvés a suscribir, no vas a tener que volver a cargar tu tarjeta.`
+        `¿Cancelar tu suscripción? Se detienen los cobros automáticos de inmediato y pasás al plan Básico: solo tus ${BASICO_PROPERTY_LIMIT} propiedades activas más recientes quedan visibles públicamente. El resto se guarda (no se elimina) — podés volver a publicarlas si te suscribís de nuevo. Si más adelante te volvés a suscribir, vas a tener que volver a cargar tu tarjeta.`
       )
     ) {
       return;

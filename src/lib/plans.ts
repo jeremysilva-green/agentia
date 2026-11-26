@@ -32,7 +32,7 @@ const PRO_FEATURES = [
   "Analíticas",
   "Reportes en PDF",
   "Herramientas de marketing",
-  "Botón de contacto por WhatsApp",
+  "Video básico",
   "Gestión de leads",
   "Sistema de referidos/afiliados",
   "Servicios con I.A.",
@@ -50,6 +50,7 @@ export const BASICO_CARD_FEATURES = [
   "CRM Automatizado",
   "Contratos Digitales",
   "Flyer automático",
+  "Agendamiento automático",
 ];
 
 // Agents sign up free on Básico (no card required, up to BASICO_PROPERTY_LIMIT active listings,
@@ -73,6 +74,7 @@ export const PLANS: Record<PlanId, Plan> = {
       "CRM Automatizado",
       "Contratos Digitales",
       "Flyer automático",
+      "Agendamiento automático",
       "Sistema de referidos/afiliados",
       "Soporte básico",
     ],

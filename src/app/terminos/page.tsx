@@ -19,19 +19,31 @@ const sections = [
     body: "Los Agentes son responsables de la veracidad de la información y las fotos que publican sobre sus propiedades. AGENTIA se reserva el derecho de remover cualquier publicación que considere engañosa, inexacta o contraria a estos términos.",
   },
   {
-    title: "5. Comisiones",
+    title: "5. Planes y pagos",
+    body: "El plan Básico es gratuito y permite hasta 6 propiedades activas. Los planes pagos (Pro, Fundador y MLS) se cobran por mes, por adelantado, en guaraníes, al precio publicado en la página de Planes al momento de contratarlos. Los pagos se procesan a través de dLocal Go: la tarjeta se ingresa en la página de pago de dLocal Go y AGENTIA no recibe ni guarda sus datos. Al contratar un plan pago autorizás el cobro automático mensual en esa tarjeta hasta que canceles. Si tu plan incluye un período de prueba gratis, el primer cobro se realiza al terminar la prueba. Por cada pago recibís una factura electrónica por correo. Si cambiamos el precio de un plan, te avisaremos antes de que el nuevo precio se aplique a tu próximo cobro.",
+  },
+  {
+    title: "6. Pagos rechazados",
+    body: "Si un cobro mensual es rechazado, tu plan queda vencido: tu perfil y tus propiedades dejan de mostrarse públicamente y, en el Plan MLS, tu membresía del MLS pasa a estado inactivo. No se elimina nada; todo vuelve a estar visible cuando el pago se confirma.",
+  },
+  {
+    title: "7. Cancelación",
+    body: "Podés cancelar tu suscripción en cualquier momento desde Panel → Suscripción. La cancelación tiene efecto inmediato: se detienen los cobros automáticos y tu cuenta pasa al plan Básico, por lo que solo tus 6 propiedades activas más recientes quedan visibles públicamente. El resto se guarda y podés volver a publicarlas si te suscribís de nuevo. No se reembolsan los días restantes del mes ya pagado. Para volver a suscribirte vas a tener que cargar tu tarjeta de nuevo.",
+  },
+  {
+    title: "8. Comisiones",
     body: "Las comisiones de Agentes y Afiliados se calculan según los porcentajes vigentes en la plataforma al momento del cierre de una venta, y se confirman a través del flujo de cierre de trato dentro del panel del Agente.",
   },
   {
-    title: "6. Uso aceptable",
+    title: "9. Uso aceptable",
     body: "No está permitido usar la plataforma para fines fraudulentos, publicar contenido falso o engañoso, ni intentar vulnerar la seguridad del sitio.",
   },
   {
-    title: "7. Limitación de responsabilidad",
+    title: "10. Limitación de responsabilidad",
     body: "AGENTIA no garantiza la exactitud de las publicaciones realizadas por terceros ni es responsable por acuerdos comerciales entre Agentes, Afiliados y Compradores. La plataforma se ofrece \"tal cual\", sin garantías de ningún tipo.",
   },
   {
-    title: "8. Cambios a estos términos",
+    title: "11. Cambios a estos términos",
     body: "Podemos actualizar estos Términos de Servicio ocasionalmente. El uso continuo de la plataforma después de un cambio implica la aceptación de los nuevos términos.",
   },
 ];

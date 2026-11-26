@@ -64,7 +64,7 @@ export default async function SuscripcionPage() {
               </p>
               <p className="text-xs text-[#a9b8b1]">
                 {cardOnFile
-                  ? "Ya tenés una tarjeta guardada — te cobraremos automáticamente cuando termine la prueba."
+                  ? "Tenés el pago automático activo — te cobraremos automáticamente cuando termine la prueba."
                   : "Elegí un plan abajo para guardar una tarjeta y que la renovación sea automática cuando termine la prueba."}
               </p>
             </div>
@@ -99,13 +99,10 @@ export default async function SuscripcionPage() {
             </div>
 
             <div className="border-t border-white/[0.06] pt-5 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-6">
-              <p className="text-[12px] font-bold tracking-[0.12em] text-[var(--muted)] uppercase">Tarjeta guardada</p>
+              <p className="text-[12px] font-bold tracking-[0.12em] text-[var(--muted)] uppercase">Pago automático</p>
               <p className="mt-2.5 flex items-center gap-2 text-[15px] font-semibold text-white">
                 <CreditCard size={20} className="text-[var(--muted)]" />
-                {cardOnFile ? "Sí" : "No"}
-                <span className="rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-0.5 text-xs font-medium text-[#cfcfcf]">
-                  {cardOnFile ? "dLocal Go" : "Sin tarjeta"}
-                </span>
+                {cardOnFile ? "Activo" : "Inactivo"}
               </p>
             </div>
 
