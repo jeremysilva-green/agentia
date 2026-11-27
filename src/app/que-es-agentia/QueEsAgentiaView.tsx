@@ -373,6 +373,17 @@ export function QueEsAgentiaView() {
               Compradores
             </div>
           </div>
+          <div className={cn(styles.heroCta, styles.rv, styles.d4)}>
+            <Link href="/registro/agente" className={styles.btnHero}>
+              <Icon name="briefcase" />
+              Soy agente, quiero registrarme
+              <Icon name="arrow" />
+            </Link>
+            <p className={styles.heroNote}>
+              Empezá gratis con el plan Básico · Sin tarjeta ·{" "}
+              <Link href="/registro/usuario">¿Querés ser afiliado?</Link>
+            </p>
+          </div>
         </div>
       </header>
 
